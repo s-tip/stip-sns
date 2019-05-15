@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% get_available_languages as LANGUAGES %}
+{% get_current_language as CURRENT_LANGUAGE %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block head %}
+{% endblock head %}
+
+{% block main %}
+  <div class="page-header">
+    <h1>{% trans 'User Management' %}</h1>
+  </div>
+  <div class="row" style="margin-top: 2em">
+    <div class="col-md-12">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <table border="1">
+        <thead>
+          <tr>
+            <th style="padding: 5px;">
+              {% trans 'Icon' %}
+            </th>
+            <th style="padding: 5px;">
+              {% trans 'Account Name' %}
+            </th>
+            <th style="padding: 5px;">
+              {% trans 'Role' %}
+            </th>
+            <th style="padding: 5px;">
+              {% trans 'Save' %}
+            </th>
+          </tr>
+        </thead>
+        {% for user in users %}
+        {% if user %}
+          <form class="form-horizontal" method="post" action="{% url 'management_user' %}">{% csrf_token %}
+          <tr>
+            <td style="padding: 5px;">
+              <img src="{{ user.get_picture }}" style="width:40px"/>
+            </td>
+            <td style="padding: 5px;">
+              <label for="{{ field.label }}" class="col-sm-2 control-label">{{user}}</label>
+            </td>
+            <td style="padding: 5px;">
+            	<select name="role_select_{{user.id}}">
+            		<option value="admin" {% ifequal user.role 'admin'%}selected{%endifequal%}>{% trans 'ROLE_CHOICE_admin' %}</option>
+            		<option value="user" {% ifequal user.role 'user'%}selected{%endifequal%}>{% trans 'ROLE_CHOICE_user' %}</option>
+            		<option value="machine" {% ifequal user.role 'machine'%}selected{%endifequal%}>{% trans 'ROLE_CHOICE_machine' %}</option>
+            		<option value="machine_feed_only" {% ifequal user.role 'machine_feed_only'%}selected{%endifequal%}>{% trans 'ROLE_CHOICE_machine_feed_only' %}</option>
+            		<option value="machine_bot" {% ifequal user.role 'machine_bot'%}selected{%endifequal%}>{% trans 'ROLE_CHOICE_machine_bot' %}</option>
+            	</select>
+            </td>
+            <td valign="middle" style="padding: 5px;">
+              <div>
+                <button type="submit" class="btn btn-primary btn-sm">{% trans 'Save' %}</button>
+              </div>
+            </td>
+          </tr>
+          </form>
+      {% endif %}
+      {% endfor %}
+        <tfoot>
+          <tr>
+            <th style="padding: 5px;">
+              {% trans 'Icon' %}
+            </th>
+            <th style="padding: 5px;">
+              {% trans 'Account Name' %}
+            </th>
+            <th style="padding: 5px;">
+              {% trans 'Role' %}
+            </th>
+            <th style="padding: 5px;">
+              {% trans 'Save' %}
+            </th>
+          </tr>
+        </tfoot>
+      </table>
+
+
+    </div>
+  </div>
+{% endblock main %}

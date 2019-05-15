@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% get_available_languages as LANGUAGES %}
+{% get_current_language as CURRENT_LANGUAGE %}
+
+{% block title %}{% trans 'White List Management' %}{% endblock %}
+
+{% block head %}
+  <script src="{% static 'js/white_list.js' %}"></script>
+{% endblock head %}
+
+{% block main %}
+  <div class="page-header">
+    <h1>{% trans 'White List Management' %}</h1>
+  </div>
+  <div class="col-md-12">
+    <h4>{% trans 'Input The Value of Common White List' %}</h4>
+  </div>
+  <form class="form-horizontal" method="post" id="white-list-form" action="{% url 'management_white_list' %}">{% csrf_token %}
+  <div class="col-md-12 form-group">
+  	<textarea class="form-control" id="white-list-textarea" rows="10" name="white_list" style="resize:none">{{white_list}}</textarea>
+  	<br/>
+  	<button type="button" class="btn btn-primary" id="white-list-submit">{% trans 'Save' %}</button>
+  </div>
+  </form>
+{% endblock main %}

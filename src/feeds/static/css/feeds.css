@@ -1,0 +1,298 @@
+ul.stream {
+  margin: 0;
+  padding: 0;
+}
+
+ul.stream li {
+  list-style: none;
+  border-bottom: 1px solid #eeeeee;
+  padding: 12px 0;
+  padding-bottom:0em;
+}
+
+.panel-group{
+	margin-bottom: 12px;	
+}
+
+ul.stream li:last-child {
+  border-bottom: none;
+}
+
+ul.stream li a img.user {
+  width: 60px;
+  border-radius: 100px;
+  float: left;
+}
+
+ul.stream li div.post {
+  margin-left: 60px;
+  padding: 0 0 0 1.2em;
+  overflow-x: auto;
+}
+
+ul.stream li div.post h3 {
+  font-size: 1em;
+  margin: 0;
+  margin-bottom: .2em;
+}
+
+ul.stream li div.post h3 small {
+  margin-left: .3em;
+  font-size: .8em;
+}
+
+ul.stream li div.post p {
+  margin: 0;
+}
+
+ul.stream li div.post div.interaction {
+  padding-top: .2em;
+}
+
+ul.stream li div.post div.interaction a {
+  margin-right: .6em;
+  font-size: .8em;
+}
+
+.stream-update {
+  text-align: center;
+  border-bottom: 1px solid #eeeeee;
+  display: none;
+}
+
+.stream-update a {
+  display: block;
+  padding: .6em 0;
+  background-color: #f5f8fa;
+}
+
+.stream-update a:hover {
+  text-decoration: none;
+  background-color: #e1e8ed;
+}
+
+.compose {
+  display: none;
+  border-bottom: 1px solid #eee;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.compose h2 {
+  font-size: 1.4em;
+}
+
+.comments {
+  margin-top: .6em;
+  display: none;
+}
+
+.comments ol {
+  margin: .8em 0 0;
+  padding: .2em 0;
+  background-color: #f4f4f4;
+  border-radius: 3px;
+  overflow-x: auto;
+}
+
+.comments ol li {
+  list-style: none;
+  padding: 0;
+}
+
+.comments ol li img.user-comment {
+  width: 35px;
+  border-radius: 4px;
+  float: left;
+  margin-left: 10px;
+}
+
+.comments ol li div {
+  margin-left: 45px;
+  padding: 0 .8em;
+  font-size: .9em;
+}
+
+.comments ol li {
+  padding: .6em .6em .6em 0;
+  border-bottom: none;
+}
+
+.comments ol li h4 {
+  margin: 0;
+  margin-left: 45px;
+  padding: 0 0 .2em .8em;
+  font-size: .9em;
+}
+
+.comments ol li h4 small {
+  margin-left: .3em;
+}
+
+.empty {
+  margin: 0 .8em;
+  font-size: .9em;
+}
+
+.load {
+  text-align: center;
+  padding-top: 1em;
+  border-top: 1px solid #eeeeee;
+  display: none;
+  padding: 15px 0;
+}
+
+div.more-link {
+  text-align: center;
+  padding-top: 1em;
+  border-top: 1px solid #eeeeee;
+  padding: 15px 0;
+}
+
+.loadcomment {
+  text-align: center;
+}
+
+.remove-feed {
+  color: #bbbbbb; 
+  font-size: .8em; 
+  padding-top: .2em;
+  float: right;
+  cursor: pointer;
+}
+
+.remove-feed:hover {
+  color: #333333;
+}
+
+.panel-feed {
+  margin-top: 20px;
+}
+
+.panel-feed .panel-body {
+  padding: 0;
+}
+
+.feed-container {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.feed-tlp,.feed-sharing,.feed-referred-url{
+	font-size: .8em;
+}
+
+
+.feed-tlp-red{
+	color: #FF0033;
+}
+
+.feed-tlp-amber{
+	color: #FFC000;
+}
+
+.feed-tlp-green{
+	color: #33FF00;
+}
+
+.feed-tlp-white{
+	color: #000000;
+}
+
+.feed-tlp-undefined{
+	color: #000000;
+}
+
+#label-tlp-red.active:hover{
+	background-color: #FF0033;
+}
+#label-tlp-amber.active:hover{
+	background-color: #FFC000;
+}
+#label-tlp-green.active:hover{
+	background-color: #33FF00;
+}
+#label-tlp-white.active:hover{
+	background-color: #FFFFFF;
+}
+
+#label-tlp-red.active{
+	background-color: #FF0033;
+}
+
+#label-tlp-amber.active{
+	background-color: #FFC000;
+}
+
+#label-tlp-green.active{
+	background-color: #33FF00;
+}
+
+#label-tlp-white.active{
+	background-color: #FFFFFF;
+}
+
+.boxContainer{
+	overflow: hidden;
+}
+
+.box{
+	float: left;
+}
+
+#publication-people-div,#publication-group-div{
+  display: none;
+}
+
+.border-div{
+  border:1px dashed #000;
+  padding:10px;
+  border-radius:10px;	
+}
+
+.no-dashed-border-div{
+  border:1px solid #ccc;
+  padding:10px;
+  border-radius:10px;	
+}
+
+.feed-div{
+	border-left: transparent 5px solid;
+}
+.feed-div-mine{
+	border-left:5px solid #5C5943;
+}
+.feed-div-ci{
+	border-left:5px solid #F1AB3B;
+}
+.feed-div-region{
+	border-left:5px solid #6DD5B9;
+}
+.feed-div-region-ci{
+	border-left:5px solid #E3560E;
+}
+
+#button-cancel{
+	display: none;
+}
+
+tbody tr td{
+	padding: 0px 10px!important;	
+}
+.confirm-item-value, .confirm-item-type, .confirm-item-label{
+	margin-bottom: 0px;	
+}
+
+.compose-title-root-div, .compose-content-root-div{
+	padding-right: 0px;
+	padding-left: 0px;
+}
+
+.compose-title-plus-button, .compose-title-remove-button, .compose-title-language-div,
+.compose-content-plus-button, .compose-content-remove-button, .compose-content-language-div{
+  display: none;
+}
+
+.compose-title-language-select, .compose-content-language-select{
+  width: 120%;	
+}

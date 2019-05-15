@@ -1,0 +1,22 @@
+{% load humanize %}
+{% load i18n %}
+
+{% for comment in feeds %}
+  <li feed-id="{{ comment.pk }}" csrf="{{ csrf_token }}">
+    <a href="{% url 'profile' comment.user.username %}">
+      <img src="{{ comment.user.get_picture }}" class="user-comment">
+    </a>
+    <h4>
+      {% if comment.is_valid_user %}
+      <a href="{% url 'profile' comment.user.username %}">{{comment.screen_name}} {% if comment.screen_affiliation %}@ {{comment.screen_affiliation}}{% endif %}</a>
+      {% else %}
+      <i>{{comment.screen_name}} {% if comment.screen_affiliation %}@ {{comment.screen_affiliation}}{% endif %}</i>
+      {% endif %}
+      {% if comment.screen_instance %}<small class="text feed-tlp">[{{comment.screen_instance}}]</small>{% endif %}
+      <small>{{ comment.date }}</small>
+    </h4>
+    <div>{{ comment.linkfy_post|safe }}</div>
+  </li>
+{% empty %}
+  <li class="empty">{% trans 'Be the first one to comment' %}</li>
+{% endfor %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% get_available_languages as LANGUAGES %}
+{% get_current_language as CURRENT_LANGUAGE %}
+
+{% block title %}Group Settings{% endblock %}
+
+{% block head %}
+<link href="{% static 'css/groups.css' %}?v=1" rel="stylesheet">
+  <script src="{% static 'js/groups.js' %}"></script>
+{% endblock head %}
+
+{% block main %}
+  <div class="page-header">
+    <h1>{% trans 'Group Management' %}</h1>
+  </div>
+  <div class="row" style="margin-top: 2em">
+    <div class="col-md-12">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="form-group">
+        <form class="form-horizontal" method="get" action="{% url 'upsert_group' %}">
+          <button type="submit" class="btn btn-primary">{% trans 'Create New Group' %}</button>
+        </form>
+      </div>
+
+      <h3>{% trans 'Group List' %}</h3>
+      <table border="1">
+        <thead>
+          <tr>
+            <th class="group-list-th">
+              {% trans 'Group En Name' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Local Name' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Description' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Creator' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Member Count' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Change' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Delete' %}
+            </th>
+          </tr>
+        </thead>
+        {% for group in groups %}
+          <form class="form-horizontal" method="get" action="{% url 'upsert_group' %}">
+          <tr>
+            <td class="group-list-td">
+              {{ group.en_name}}
+            </td>
+            <td class="group-list-td">
+              {{ group.local_name }}
+            </td>
+            <td class="group-list-td">
+              {{ group.description | linebreaks}}
+            </td>
+            <td class="group-list-td">
+              {% if group.get_creator_url %}
+              <a href="{{ group.get_creator_url }}">
+                <img src="{{ group.get_creator_picture }}" class="group-list-icon-img"/>{{group.creator}}
+              </a>
+              {% else %}
+                <img src="{{ group.get_creator_picture }}" class="group-list-icon-img"/>{{group.creator}}
+              {% endif %}
+            </td>
+            <td class="group-list-td group-list-member-count-td">
+              {{ group.get_members_count }}
+            </td>
+            <td class="group-list-td group-list-button-td">
+              <div>
+                <button type="submit" class="btn btn-primary btn-sm">{% trans 'Group Change' %}</button>
+                <input type="hidden" name="id_" value="{{group.id}}"/>
+              </div>
+            </td>
+          </form>
+          <form class="form-horizontal" method="get" action="{% url 'delete_group' %}" id="form-delete-group">
+            <td class="group-list-td group-list-button-td">
+              <div>
+                <button type="button" class="btn btn-danger btn-sm button-delete-group" group_id="{{group.id}}">{% trans 'Group Delete' %}</button>
+              </div>
+            </td>
+          </form>
+          </tr>
+      {% endfor %}
+        <tfoot>
+          <tr>
+            <th class="group-list-th">
+              {% trans 'Group En Name' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Local Name' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Description' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Creator' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Member Count' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Change' %}
+            </th>
+            <th class="group-list-th">
+              {% trans 'Group Delete' %}
+            </th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+  <br/><br/>
+{% endblock main %}

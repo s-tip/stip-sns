@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block title %}{{ page_user.get_screen_name }}{% endblock %}
+
+{% block head %}
+  <link href="{% static 'css/profile.css' %}" rel="stylesheet">
+  <link href="{% static 'css/multi-select.css' %}?v=1" rel="stylesheet">
+  <link href="{% static 'css/feeds.css' %}" rel="stylesheet">
+  <script src="{% static 'js/jquery.bullseye-1.0-min.js' %}"></script>
+  <script src="{% static 'js/feeds.js' %}"></script>
+  <script src="{% static 'js/jquery.multi-select.js' %}?v=1"></script>
+  <script src="{% static 'js/jquery.quicksearch.js' %}?v=1"></script>
+{% endblock head %}
+
+{% block main %}
+  <div class="page-header">
+    <h1>{{ page_user.get_screen_name }} <small>({{ page_user.username }})</small></h1>
+  </div>
+  <div class="profile">
+    <div class="row">
+      <div class="col-md-3 user-profile">
+        <img src="{{ page_user.get_picture }}" class="picture">
+        <ul>
+          {% if page_user.affiliation %}
+          <li><span class="glyphicon glyphicon-home"></span> {{ page_user.affiliation }}</li>
+          {% endif %}
+          {% if page_user.job_title %}
+          <li><span class="glyphicon glyphicon-briefcase"></span> {{ page_user.job_title }}</li>
+          {% endif %}
+          {% if page_user.location %}
+          <li><span class="glyphicon glyphicon-map-marker"></span> {{ page_user.location }}</li>
+          {% endif %}
+          {% if page_user.url %}
+          <li><span class="glyphicon glyphicon-globe"></span> <a href="{{ page_user.get_url }}" target="_blank">{{ page_user.get_url }}</a></li>
+          {% endif %}
+          {% if page_user.evaluation %}
+          <li><span class="glyphicon glyphicon-thumbs-up"></span> {{ page_user.evaluation }}</li>
+          {% endif %}
+          {% if page_user.description %}
+          <li><span class="glyphicon glyphicon-comment"></span> {{ page_user.get_description }}</li>
+          {% endif %}
+          {% if page_user.tlp %}
+          <li><span class="glyphicon glyphicon-warning-sign"></span> {{ page_user.get_tlp }}</li>
+          {% endif %}
+          {% if page_user.region %}
+          <li><span class="glyphicon glyphicon-globe"></span> {% trans page_user.region.get_country_name %}</li>
+          <li><span class="glyphicon glyphicon-globe"></span> {% trans page_user.region.administrative_area %}</li>
+          {% endif %}
+          {% if page_user.ci %}
+          <li><span class="glyphicon glyphicon-globe"></span> {{ page_user.get_ci_display }}</li>
+          {% endif %}
+          {% if page_user.role %}
+          <li><span class="glyphicon glyphicon-globe"></span> {{ page_user.get_role_display }}</li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="col-md-9">
+        <h4>{% trans 'Last Feeds by' %} {{ page_user.get_screen_name }}</h4>
+        <div class="stream-update">
+          <a href="#"><span class="new-posts"></span> new posts</a>
+        </div>
+        <ul class="stream">
+          {% for feed in feeds %}
+            {% include 'feeds/partial_feed.html' with feed=feed %}
+          {% endfor %}
+        </ul>
+        <div class="load">
+          <img src="{% static 'img/loading.gif' %}">
+        </div>
+        <div class="more-link">
+        	<a class="more-link">More feeds</a>
+        </div>
+        <form method="get" action="{% url 'load' %}" id="load_feed" autocomplete="off">
+          <input type="hidden" name="feed_source" id="feed_source" value="{{ page_user.pk }}">
+          <input type="hidden" name="from_feed" value="{{ from_feed }}">
+          <input type="hidden" name="last_reload" value="{{ last_reload }}">
+          <input type="hidden" name="page" value="{{ page }}">
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock main %}

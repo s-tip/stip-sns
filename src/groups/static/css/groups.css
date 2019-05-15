@@ -1,0 +1,19 @@
+.group-list-th, .group-list-td{
+	padding: 5px;	
+}
+
+.group-list-th{
+	background-color: #dddddd;	
+}
+
+.group-list-member-count-td{
+	text-align: right;
+}
+
+.group-list-button-td{
+	vertical-align: middle;	
+}
+
+.group-list-icon-img{
+	width: 40px;
+}

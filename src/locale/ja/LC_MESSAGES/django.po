@@ -1,0 +1,2033 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-02-22 16:37+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/activities/templates/activities/last_notifications.html:12
+msgid "You have no unread notification"
+msgstr "未読通知はありません"
+
+#: src/activities/templates/activities/last_notifications.html:14
+msgid "See all"
+msgstr "すべて見る "
+
+#: src/activities/templates/activities/notifications.html:7
+#: src/activities/templates/activities/notifications.html:15
+#: src/templates/base.html:40
+msgid "Notifications"
+msgstr "通知"
+
+#: src/activities/templates/activities/notifications.html:27
+msgid "You have no notification"
+msgstr "通知はありません"
+
+#: src/authentication/templates/authentication/signup.html:12
+#, fuzzy
+#| msgid "Sign up for S-TIP"
+msgid "Sign up for Seamless TIP"
+msgstr "S-TIP に参加する"
+
+# msgid "Sign up for S-TIP"
+# msgstr "S-TIP に参加する"
+#: src/authentication/templates/authentication/signup.html:27
+msgid "Create an account"
+msgstr "アカウントを作成する"
+
+#: src/core/forms.py:13
+msgid "Screen Name"
+msgstr "アカウント表示名"
+
+#: src/core/forms.py:18
+msgid "affiliation"
+msgstr "所属"
+
+#: src/core/forms.py:23
+msgid "job_title"
+msgstr "役職"
+
+#: src/core/forms.py:28 src/core/templates/core/network.html:37
+msgid "URL"
+msgstr ""
+
+#: src/core/forms.py:33
+msgid "location"
+msgstr "位置"
+
+#: src/core/forms.py:38 src/groups/forms.py:25
+msgid "description"
+msgstr "説明"
+
+#: src/core/forms.py:43 src/feeds/templates/feeds/feeds.html:145
+msgid "TLP"
+msgstr ""
+
+#: src/core/forms.py:48 src/core/templates/core/network.html:46
+msgid "Country"
+msgstr "国"
+
+#: src/core/forms.py:53 src/core/templates/core/network.html:47
+msgid "Administrative Area"
+msgstr "行政区分"
+
+#: src/core/forms.py:58 src/core/templates/core/network.html:50
+msgid "Critical Infrastructure"
+msgstr "重要インフラ分野"
+
+#: src/core/forms.py:63 src/feeds/templates/feeds/feeds.html:66
+#: src/feeds/templates/feeds/feeds.html:92
+msgid "Language"
+msgstr "言語"
+
+#: src/core/forms.py:66
+msgid "Scan CSV"
+msgstr "CSV ファイルをスキャン対象とする"
+
+#: src/core/forms.py:70
+msgid "Scan PDF"
+msgstr "PDF ファイルをスキャン対象とする"
+
+#: src/core/forms.py:74
+msgid "Scan Post"
+msgstr "投稿本文をスキャン対象とする"
+
+#: src/core/forms.py:78
+msgid "Scan TXT"
+msgstr "TXT ファイルをスキャン対象とする"
+
+#: src/core/forms.py:82
+#, fuzzy
+#| msgid "Threat Actors Management"
+msgid "Threat Actors"
+msgstr "Threat Actors 管理"
+
+#: src/core/forms.py:86
+msgid "Indicator White List"
+msgstr ""
+
+#: src/core/forms.py:92
+msgid "Timezone"
+msgstr ""
+
+#: src/core/forms.py:106
+msgid "Old password"
+msgstr "今のパスワード"
+
+#: src/core/forms.py:111
+msgid "New password"
+msgstr "新しいパスワード"
+
+#: src/core/forms.py:115
+msgid "Confirm new password"
+msgstr "新しいパスワード(再入力)"
+
+#: src/core/templates/core/cover.html:21 src/core/templates/core/cover.html:39
+msgid "Log in"
+msgstr "ログイン"
+
+#: src/core/templates/core/cover.html:25
+#: src/core/templates/core/network.html:32
+msgid "Username"
+msgstr "アカウント名"
+
+#: src/core/templates/core/cover.html:32
+#: src/core/templates/core/partial_settings_menu.html:5
+msgid "Password"
+msgstr "パスワード"
+
+#: src/core/templates/core/network.html:5
+#: src/core/templates/core/network.html:12
+#: src/search/templates/search/partial_results_menu.html:9
+#: src/search/templates/search/partial_users_results.html:3
+#: src/templates/base.html:45
+msgid "Users"
+msgstr "利用者一覧"
+
+#: src/core/templates/core/network.html:27
+msgid "Affiliation"
+msgstr "所属"
+
+#: src/core/templates/core/network.html:30
+msgid "Job Title"
+msgstr "役職"
+
+#: src/core/templates/core/network.html:34
+msgid "Location"
+msgstr "場所"
+
+#: src/core/templates/core/network.html:40
+msgid "Description"
+msgstr "説明"
+
+#: src/core/templates/core/network.html:43
+msgid "Default TLP"
+msgstr "デフォルト TLP"
+
+#: src/core/templates/core/network.html:53
+#: src/management/templates/management/users.html:37
+#: src/management/templates/management/users.html:81
+msgid "Role"
+msgstr "役割"
+
+#: src/core/templates/core/partial_settings_menu.html:3
+msgid "Profile"
+msgstr "プロファイル"
+
+#: src/core/templates/core/partial_settings_menu.html:4
+msgid "Picture"
+msgstr "アイコン"
+
+#: src/core/templates/core/password.html:4
+#: src/core/templates/core/password.html:8
+#: src/core/templates/core/picture.html:5
+#: src/core/templates/core/picture.html:15
+#: src/core/templates/core/settings.html:15 src/templates/base.html:76
+msgid "Account Settings"
+msgstr "アカウント設定"
+
+#: src/core/templates/core/password.html:23
+msgid "Change Password"
+msgstr "パスワードを変更"
+
+#: src/core/templates/core/password.html:43
+#: src/core/templates/core/settings.html:64
+#: src/groups/templates/groups/upsert.html:70
+#: src/management/templates/management/threat_actors.html:23
+#: src/management/templates/management/users.html:40
+#: src/management/templates/management/users.html:65
+#: src/management/templates/management/users.html:84
+#: src/management/templates/management/white_list.html:24
+msgid "Save"
+msgstr "保存"
+
+#: src/core/templates/core/picture.html:30
+msgid "Change Picture"
+msgstr "アイコンを変更"
+
+#: src/core/templates/core/picture.html:35
+msgid "Upload new picture"
+msgstr "アイコンをアップロード"
+
+#: src/core/templates/core/picture.html:46
+msgid "Crop Picture"
+msgstr ""
+
+#: src/core/templates/core/picture.html:50
+msgid "Crop the profile picture and then click on the"
+msgstr ""
+
+#: src/core/templates/core/picture.html:50
+msgid "Save Picture"
+msgstr "アイコンを保存する"
+
+#: src/core/templates/core/picture.html:50
+msgid "button"
+msgstr "ボタン"
+
+#: src/core/templates/core/picture.html:65
+msgid "Close"
+msgstr "閉じる"
+
+#: src/core/templates/core/picture.html:66
+msgid "Save changes"
+msgstr "変更を保存"
+
+#: src/core/templates/core/profile.html:60
+msgid "Last Feeds by"
+msgstr "最新投稿: "
+
+#: src/core/templates/core/settings.html:30
+msgid "Edit Profile"
+msgstr "プロファイル編集"
+
+#: src/core/views.py:138
+msgid "Your profile was successfully edited."
+msgstr "プロファイル編集の保存に成功しました"
+
+#: src/feeds/templates/feeds/feed.html:7 src/feeds/templates/feeds/feed.html:19
+#: src/feeds/templates/feeds/feeds.html:28
+#: src/search/templates/search/partial_feed_results.html:4
+#: src/search/templates/search/partial_results_menu.html:5
+#: src/templates/base.html:44
+msgid "Feed"
+msgstr "投稿一覧"
+
+#: src/feeds/templates/feeds/feeds.html:22
+msgid "Press N to new"
+msgstr "N で新規投稿"
+
+#: src/feeds/templates/feeds/feeds.html:23
+msgid "New"
+msgstr "新規投稿"
+
+#: src/feeds/templates/feeds/feeds.html:26
+#: src/feeds/templates/feeds/feeds.html:228
+msgid "Cancel"
+msgstr "取り消し"
+
+#: src/feeds/templates/feeds/feeds.html:33
+msgid "Latest posts"
+msgstr "最新投稿"
+
+#: src/feeds/templates/feeds/feeds.html:43
+msgid "Also outputs STIX 2.1 format"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:50
+msgid "Author"
+msgstr "投稿者"
+
+#: src/feeds/templates/feeds/feeds.html:54
+msgid "Anonymous"
+msgstr "匿名投稿"
+
+#: src/feeds/templates/feeds/feeds.html:62
+#: src/search/templates/search/partial_feed_results.html:17
+msgid "Title"
+msgstr "タイトル"
+
+#: src/feeds/templates/feeds/feeds.html:87
+msgid "Content"
+msgstr "本文"
+
+#: src/feeds/templates/feeds/feeds.html:112
+#: src/feeds/templates/feeds/partial_feed.html:165
+msgid "Referred URL"
+msgstr "参照 URL"
+
+#: src/feeds/templates/feeds/feeds.html:120
+msgid "Attachments"
+msgstr "添付ファイル"
+
+#: src/feeds/templates/feeds/feeds.html:166
+#: src/feeds/templates/feeds/partial_feed.html:147
+#: src/feeds/templates/feeds/partial_feed.html:150
+#: src/feeds/templates/feeds/partial_feed.html:160
+msgid "Sharing Range"
+msgstr "共有範囲"
+
+#: src/feeds/templates/feeds/feeds.html:168
+msgid "People"
+msgstr "人"
+
+#: src/feeds/templates/feeds/feeds.html:168
+msgid "System"
+msgstr "システム"
+
+#: src/feeds/templates/feeds/feeds.html:175
+msgid "Select Sharing Accounts"
+msgstr "共有するアカウントを選択してください"
+
+#: src/feeds/templates/feeds/feeds.html:187
+msgid "Group"
+msgstr "グループ"
+
+#: src/feeds/templates/feeds/feeds.html:193
+msgid "Choose Group"
+msgstr "グループを選択してください"
+
+#: src/feeds/templates/feeds/feeds.html:210
+msgid "All Users"
+msgstr "全ユーザ"
+
+#: src/feeds/templates/feeds/feeds.html:224
+msgid "Press Ctrl + Enter to post"
+msgstr "Ctrl + Enter で投稿"
+
+#: src/feeds/templates/feeds/feeds.html:225
+msgid "Post"
+msgstr "投稿する"
+
+#: src/feeds/templates/feeds/feeds.html:253
+msgid "new posts"
+msgstr "新着投稿"
+
+#: src/feeds/templates/feeds/partial_feed.html:54
+msgid "Click to remove this feed"
+msgstr "クリックでフィード削除"
+
+#: src/feeds/templates/feeds/partial_feed.html:124
+msgid "Issue"
+msgstr "課題"
+
+#: src/feeds/templates/feeds/partial_feed.html:132
+msgid "Unlike"
+msgstr "削除"
+
+#: src/feeds/templates/feeds/partial_feed.html:138
+msgid "Like"
+msgstr "いいね"
+
+#: src/feeds/templates/feeds/partial_feed.html:143
+msgid "Comment"
+msgstr "コメント"
+
+#: src/feeds/templates/feeds/partial_feed.html:147
+msgid "CSC Community"
+msgstr "CSC コミュニティ"
+
+#: src/feeds/templates/feeds/partial_feed.html:150
+#, fuzzy
+#| msgid "Group"
+msgid "group"
+msgstr "グループ"
+
+#: src/feeds/templates/feeds/partial_feed.html:182
+msgid "Write a comment..."
+msgstr "コメントをここに記載します (1024文字以内)"
+
+#: src/feeds/templates/feeds/partial_feed_comments.html:21
+msgid "Be the first one to comment"
+msgstr "最初にコメントする"
+
+#: src/groups/forms.py:15
+msgid "en_name"
+msgstr "グループ名 (共通)"
+
+#: src/groups/forms.py:20
+msgid "local_name"
+msgstr "グループ名 (ローカル)"
+
+#: src/groups/templates/groups/groups.html:16 src/templates/base.html:51
+msgid "Group Management"
+msgstr "グループ管理"
+
+# msgid "Sign up for S-TIP"
+# msgstr "S-TIP に参加する"
+#: src/groups/templates/groups/groups.html:31
+msgid "Create New Group"
+msgstr "グループを作成する"
+
+#: src/groups/templates/groups/groups.html:35
+msgid "Group List"
+msgstr "グループリスト"
+
+#: src/groups/templates/groups/groups.html:40
+#: src/groups/templates/groups/groups.html:105
+msgid "Group En Name"
+msgstr "名前 (共通)"
+
+#: src/groups/templates/groups/groups.html:43
+#: src/groups/templates/groups/groups.html:108
+msgid "Group Local Name"
+msgstr "名前 (ローカル)"
+
+#: src/groups/templates/groups/groups.html:46
+#: src/groups/templates/groups/groups.html:111
+msgid "Group Description"
+msgstr "説明"
+
+#: src/groups/templates/groups/groups.html:49
+#: src/groups/templates/groups/groups.html:114
+msgid "Group Creator"
+msgstr "作成者"
+
+#: src/groups/templates/groups/groups.html:52
+#: src/groups/templates/groups/groups.html:117
+msgid "Group Member Count"
+msgstr "参加者数"
+
+#: src/groups/templates/groups/groups.html:55
+#: src/groups/templates/groups/groups.html:88
+#: src/groups/templates/groups/groups.html:120
+msgid "Group Change"
+msgstr "変更"
+
+#: src/groups/templates/groups/groups.html:58
+#: src/groups/templates/groups/groups.html:96
+#: src/groups/templates/groups/groups.html:123
+msgid "Group Delete"
+msgstr "削除"
+
+#: src/groups/templates/groups/upsert.html:18
+msgid "Group Settings"
+msgstr "グループ設定"
+
+#: src/groups/templates/groups/upsert.html:31
+msgid "Back to previous page."
+msgstr "前のページに戻る"
+
+#: src/groups/templates/groups/upsert.html:34
+msgid "Edit Group"
+msgstr "グループを編集"
+
+#: src/groups/templates/groups/upsert.html:57
+msgid "Select Member Accounts"
+msgstr "共有するアカウントを選択してください"
+
+#: src/groups/views.py:48
+msgid "Fill Group Name (Common) Field."
+msgstr ""
+
+#: src/groups/views.py:50
+msgid "Fill Group Name (Local) Field."
+msgstr ""
+
+#: src/groups/views.py:61
+#, fuzzy
+#| msgid "Your profile was successfully edited."
+msgid "Your Group was successfully edited."
+msgstr "プロファイル編集の保存に成功しました"
+
+#: src/groups/views.py:103
+#, fuzzy
+#| msgid "Your profile was successfully edited."
+msgid "Group was successfully deleted."
+msgstr "プロファイル編集の保存に成功しました"
+
+#: src/management/templates/management/threat_actors.html:7
+#: src/management/templates/management/threat_actors.html:14
+#: src/templates/base.html:52
+msgid "Threat Actors Management"
+msgstr "Threat Actors 管理"
+
+#: src/management/templates/management/threat_actors.html:17
+msgid "Input The Name List of Common Threat Actors"
+msgstr ""
+
+#: src/management/templates/management/users.html:14 src/templates/base.html:50
+msgid "User Management"
+msgstr "ユーザ管理"
+
+#: src/management/templates/management/users.html:31
+#: src/management/templates/management/users.html:75
+msgid "Icon"
+msgstr "アイコン"
+
+#: src/management/templates/management/users.html:34
+#: src/management/templates/management/users.html:78
+msgid "Account Name"
+msgstr "アカウント"
+
+#: src/management/templates/management/users.html:56
+msgid "ROLE_CHOICE_admin"
+msgstr "管理者"
+
+#: src/management/templates/management/users.html:57
+msgid "ROLE_CHOICE_user"
+msgstr "ユーザ"
+
+#: src/management/templates/management/users.html:58
+msgid "ROLE_CHOICE_machine"
+msgstr "マシン"
+
+#: src/management/templates/management/users.html:59
+msgid "ROLE_CHOICE_machine_feed_only"
+msgstr "マシン (投稿のみ)"
+
+#: src/management/templates/management/users.html:60
+msgid "ROLE_CHOICE_machine_bot"
+msgstr "BOT"
+
+#: src/management/templates/management/white_list.html:7
+#: src/management/templates/management/white_list.html:15
+#: src/templates/base.html:53
+msgid "White List Management"
+msgstr "White List 管理"
+
+#: src/management/templates/management/white_list.html:18
+msgid "Input The Value of Common White List"
+msgstr ""
+
+#: src/messenger/templates/messenger/inbox.html:4
+#: src/messenger/templates/messenger/inbox.html:6
+msgid "Inbox"
+msgstr ""
+
+#: src/messenger/templates/messenger/includes/partial_conversations.html:22
+msgid "Start a conversation"
+msgstr ""
+
+#: src/messenger/templates/messenger/new.html:5
+#: src/messenger/templates/messenger/new.html:7
+msgid "New message"
+msgstr ""
+
+#: src/search/templates/search/partial_articles_results.html:3
+msgid "Articles"
+msgstr ""
+
+#: src/search/templates/search/partial_articles_results.html:24
+msgid "No article found"
+msgstr ""
+
+#: src/search/templates/search/partial_feed_results.html:23
+msgid "No feed found"
+msgstr "フィードが見つかりませんでした"
+
+#: src/search/templates/search/partial_questions_results.html:4
+msgid "Questions"
+msgstr ""
+
+#: src/search/templates/search/partial_questions_results.html:22
+msgid "No question found"
+msgstr ""
+
+#: src/search/templates/search/partial_users_results.html:19
+msgid "No user found"
+msgstr "ユーザが見つかりませんでした"
+
+#: src/search/templates/search/results.html:17
+#: src/search/templates/search/search.html:22 src/templates/base.html:61
+msgid "Search"
+msgstr "検索"
+
+#: src/search/templates/search/results.html:23
+#: src/search/templates/search/search.html:19
+msgid "Search Feed, Articles, Questions and Users"
+msgstr "フィード、ユーザを検索"
+
+#: src/settings.py:333
+msgid "Aichi"
+msgstr "愛知県"
+
+#: src/settings.py:334
+msgid "Akita"
+msgstr "秋田県"
+
+#: src/settings.py:335
+msgid "Aomori"
+msgstr "青森県"
+
+#: src/settings.py:336
+msgid "Chiba"
+msgstr "千葉県"
+
+#: src/settings.py:337
+msgid "Ehime"
+msgstr "愛媛県"
+
+#: src/settings.py:338
+msgid "Fukui"
+msgstr "福井県"
+
+#: src/settings.py:339
+msgid "Fukuoka"
+msgstr "福岡県"
+
+#: src/settings.py:340
+msgid "Fukushima"
+msgstr "福島県"
+
+#: src/settings.py:341
+msgid "Gifu"
+msgstr "岐阜県"
+
+#: src/settings.py:342
+msgid "Gunma"
+msgstr "群馬県"
+
+#: src/settings.py:343
+msgid "Hiroshima"
+msgstr "広島県"
+
+#: src/settings.py:344
+msgid "Hokkaido"
+msgstr "北海道"
+
+#: src/settings.py:345
+msgid "Hyogo"
+msgstr "兵庫県"
+
+#: src/settings.py:346
+msgid "Ibaraki"
+msgstr "茨城県"
+
+#: src/settings.py:347
+msgid "Ishikawa"
+msgstr "石川県"
+
+#: src/settings.py:348
+msgid "Iwate"
+msgstr "岩手県"
+
+#: src/settings.py:349
+msgid "Kagawa"
+msgstr "香川県"
+
+#: src/settings.py:350
+msgid "Kagoshima"
+msgstr "鹿児島県"
+
+#: src/settings.py:351
+msgid "Kanagawa"
+msgstr "神奈川県"
+
+#: src/settings.py:352
+msgid "Kochi"
+msgstr "高知県"
+
+#: src/settings.py:353
+msgid "Kumamoto"
+msgstr "熊本県"
+
+#: src/settings.py:354
+msgid "Kyoto"
+msgstr "京都府"
+
+#: src/settings.py:355
+msgid "Mie"
+msgstr "三重県"
+
+#: src/settings.py:356
+msgid "Miyagi"
+msgstr "宮城県"
+
+#: src/settings.py:357
+msgid "Miyazaki"
+msgstr "宮崎県"
+
+#: src/settings.py:358
+msgid "Nagano"
+msgstr "長野県"
+
+#: src/settings.py:359
+msgid "Nagasaki"
+msgstr "長崎県"
+
+#: src/settings.py:360
+msgid "Nara"
+msgstr "奈良県"
+
+#: src/settings.py:361
+msgid "Niigata"
+msgstr "新潟県"
+
+#: src/settings.py:362
+msgid "Oita"
+msgstr "大分県"
+
+#: src/settings.py:363
+msgid "Okayama"
+msgstr "岡山県"
+
+#: src/settings.py:364
+msgid "Okinawa"
+msgstr "沖縄県"
+
+#: src/settings.py:365
+msgid "Osaka"
+msgstr "大阪府"
+
+#: src/settings.py:366
+msgid "Saga"
+msgstr "佐賀県"
+
+#: src/settings.py:367
+msgid "Saitama"
+msgstr "埼玉県"
+
+#: src/settings.py:368
+msgid "Shiga"
+msgstr "滋賀県"
+
+#: src/settings.py:369
+msgid "Shimane"
+msgstr "島根県"
+
+#: src/settings.py:370
+msgid "Shizuoka"
+msgstr "静岡県"
+
+#: src/settings.py:371
+msgid "Tochigi"
+msgstr "栃木県"
+
+#: src/settings.py:372
+msgid "Tokushima"
+msgstr "徳島県"
+
+#: src/settings.py:373
+msgid "Tokyo"
+msgstr "東京都"
+
+#: src/settings.py:374
+msgid "Tottori"
+msgstr "鳥取県"
+
+#: src/settings.py:375
+msgid "Toyama"
+msgstr "富山県"
+
+#: src/settings.py:376
+msgid "Wakayama"
+msgstr "和歌山県"
+
+#: src/settings.py:377
+msgid "Yamagata"
+msgstr "山形県"
+
+#: src/settings.py:378
+msgid "Yamaguchi"
+msgstr "山口県"
+
+#: src/settings.py:379
+msgid "Yamanashi"
+msgstr "山梨県"
+
+#: src/settings.py:382
+msgid "Afghanistan"
+msgstr "アフガニスタン"
+
+#: src/settings.py:383
+msgid "Åland Islands"
+msgstr "オーランド諸島"
+
+#: src/settings.py:384
+msgid "Albania"
+msgstr "アルバニア"
+
+#: src/settings.py:385
+msgid "Algeria"
+msgstr "アルジェリア"
+
+#: src/settings.py:386
+msgid "American Samoa"
+msgstr "アメリカ領サモア"
+
+#: src/settings.py:387
+msgid "Andorra"
+msgstr "アンドラ"
+
+#: src/settings.py:388
+msgid "Angola"
+msgstr "アンゴラ"
+
+#: src/settings.py:389
+msgid "Anguilla"
+msgstr "アンギラ"
+
+#: src/settings.py:390
+msgid "Antarctica"
+msgstr "南極"
+
+#: src/settings.py:391
+msgid "Antigua and Barbuda"
+msgstr "アンティグア・バーブーダ"
+
+#: src/settings.py:392
+msgid "Argentina"
+msgstr "アルゼンチン"
+
+#: src/settings.py:393
+msgid "Armenia"
+msgstr "アルメニア"
+
+#: src/settings.py:394
+msgid "Aruba"
+msgstr "アルバ"
+
+#: src/settings.py:395
+msgid "Australia"
+msgstr "オーストラリア"
+
+#: src/settings.py:396
+msgid "Austria"
+msgstr "オーストリア"
+
+#: src/settings.py:397
+msgid "Azerbaijan"
+msgstr "アゼルバイジャン"
+
+#: src/settings.py:398
+msgid "Bahamas"
+msgstr "バハマ"
+
+#: src/settings.py:399
+msgid "Bahrain"
+msgstr "バーレーン"
+
+#: src/settings.py:400
+msgid "Bangladesh"
+msgstr "バングラデシュ"
+
+#: src/settings.py:401
+msgid "Barbados"
+msgstr "バルバドス"
+
+#: src/settings.py:402
+msgid "Belarus"
+msgstr "ベラルーシ"
+
+#: src/settings.py:403
+msgid "Belgium"
+msgstr "ベルギー"
+
+#: src/settings.py:404
+msgid "Belize"
+msgstr "ベリーズ"
+
+#: src/settings.py:405
+msgid "Benin"
+msgstr "ベナン"
+
+#: src/settings.py:406
+msgid "Bermuda"
+msgstr "バミューダ"
+
+#: src/settings.py:407
+msgid "Bhutan"
+msgstr "ブータン"
+
+#: src/settings.py:408
+msgid "Bolivia (Plurinational State of)"
+msgstr "ボリビア多民族国"
+
+#: src/settings.py:409
+msgid "Bonaire, Sint Eustatius and Saba"
+msgstr "ボネール、シント・ユースタティウスおよびサバ"
+
+#: src/settings.py:410
+msgid "Bosnia and Herzegovina"
+msgstr "ボスニア・ヘルツェゴビナ"
+
+#: src/settings.py:411
+msgid "Botswana"
+msgstr "ボツワナ"
+
+#: src/settings.py:412
+msgid "Bouvet Island"
+msgstr "ブーベ島"
+
+#: src/settings.py:413
+msgid "Brazil"
+msgstr "ブラジル"
+
+#: src/settings.py:414
+msgid "British Indian Ocean Territory"
+msgstr "イギリス領インド洋地域"
+
+#: src/settings.py:415
+msgid "Brunei Darussalam"
+msgstr "ブルネイ・ダルサラーム"
+
+#: src/settings.py:416
+msgid "Bulgaria"
+msgstr "ブルガリア"
+
+#: src/settings.py:417
+msgid "Burkina Faso"
+msgstr "ブルキナファソ"
+
+#: src/settings.py:418
+msgid "Burundi"
+msgstr "ブルンジ"
+
+#: src/settings.py:419
+msgid "Cambodia"
+msgstr "カンボジア"
+
+#: src/settings.py:420
+msgid "Cameroon"
+msgstr "カメルーン"
+
+#: src/settings.py:421
+msgid "Canada"
+msgstr "カナダ"
+
+#: src/settings.py:422
+msgid "Cabo Verde"
+msgstr "カーボベルデ"
+
+#: src/settings.py:423
+msgid "Cayman Islands"
+msgstr "ケイマン諸島"
+
+#: src/settings.py:424
+msgid "Central African Republic"
+msgstr "中央アフリカ共和国"
+
+#: src/settings.py:425
+msgid "Chad"
+msgstr "チャド"
+
+#: src/settings.py:426
+msgid "Chile"
+msgstr "チリ"
+
+#: src/settings.py:427
+msgid "China"
+msgstr "中華人民共和国"
+
+#: src/settings.py:428
+msgid "Christmas Island"
+msgstr "クリスマス島"
+
+#: src/settings.py:429
+msgid "Cocos (Keeling) Islands"
+msgstr "ココス（キーリング）諸島"
+
+#: src/settings.py:430
+msgid "Colombia"
+msgstr "コロンビア"
+
+#: src/settings.py:431
+msgid "Comoros"
+msgstr "コモロ"
+
+#: src/settings.py:432
+msgid "Congo"
+msgstr "コンゴ共和国"
+
+#: src/settings.py:433
+msgid "Congo (Democratic Republic of the)"
+msgstr "コンゴ民主共和国"
+
+#: src/settings.py:434
+msgid "Cook Islands"
+msgstr "クック諸島"
+
+#: src/settings.py:435
+msgid "Costa Rica"
+msgstr "コスタリカ"
+
+#: src/settings.py:436
+msgid "Côte d'Ivoire"
+msgstr "コートジボワール"
+
+#: src/settings.py:437
+msgid "Croatia"
+msgstr "クロアチア"
+
+#: src/settings.py:438
+msgid "Cuba"
+msgstr "キューバ"
+
+#: src/settings.py:439
+msgid "Curaçao"
+msgstr "キュラソー"
+
+#: src/settings.py:440
+msgid "Cyprus"
+msgstr "キプロス"
+
+#: src/settings.py:441
+msgid "Czech Republic"
+msgstr "チェコ"
+
+#: src/settings.py:442
+msgid "Denmark"
+msgstr "デンマーク"
+
+#: src/settings.py:443
+msgid "Djibouti"
+msgstr "ジブチ"
+
+#: src/settings.py:444
+msgid "Dominica"
+msgstr "ドミニカ国"
+
+#: src/settings.py:445
+msgid "Dominican Republic"
+msgstr "ドミニカ共和国"
+
+#: src/settings.py:446
+msgid "Ecuador"
+msgstr "エクアドル"
+
+#: src/settings.py:447
+msgid "Egypt"
+msgstr "エジプト"
+
+#: src/settings.py:448
+msgid "El Salvador"
+msgstr "エルサルバドル"
+
+#: src/settings.py:449
+msgid "Equatorial Guinea"
+msgstr "赤道ギニア"
+
+#: src/settings.py:450
+msgid "Eritrea"
+msgstr "エリトリア"
+
+#: src/settings.py:451
+msgid "Estonia"
+msgstr "エストニア"
+
+#: src/settings.py:452
+msgid "Ethiopia"
+msgstr "エチオピア"
+
+#: src/settings.py:453
+msgid "Falkland Islands (Malvinas)"
+msgstr "フォークランド（マルビナス）諸島"
+
+#: src/settings.py:454
+msgid "Faroe Islands"
+msgstr "フェロー諸島"
+
+#: src/settings.py:455
+msgid "Fiji"
+msgstr "フィジー"
+
+#: src/settings.py:456
+msgid "Finland"
+msgstr "フィンランド"
+
+#: src/settings.py:457
+msgid "France"
+msgstr "フランス"
+
+#: src/settings.py:458
+msgid "French Guiana"
+msgstr "フランス領ギアナ"
+
+#: src/settings.py:459
+msgid "French Polynesia"
+msgstr "フランス領ポリネシア"
+
+#: src/settings.py:460
+msgid "French Southern Territories"
+msgstr "フランス領南方・南極地域"
+
+#: src/settings.py:461
+msgid "Gabon"
+msgstr "ガボン"
+
+#: src/settings.py:462
+msgid "Gambia"
+msgstr "ガンビア"
+
+#: src/settings.py:463
+msgid "Georgia"
+msgstr "ジョージア"
+
+#: src/settings.py:464
+msgid "Germany"
+msgstr "ドイツ"
+
+#: src/settings.py:465
+msgid "Ghana"
+msgstr "ガーナ"
+
+#: src/settings.py:466
+msgid "Gibraltar"
+msgstr "ジブラルタル"
+
+#: src/settings.py:467
+msgid "Greece"
+msgstr "ギリシャ"
+
+#: src/settings.py:468
+msgid "Greenland"
+msgstr "グリーンランド"
+
+#: src/settings.py:469
+msgid "Grenada"
+msgstr "グレナダ"
+
+#: src/settings.py:470
+msgid "Guadeloupe"
+msgstr "グアドループ"
+
+#: src/settings.py:471
+msgid "Guam"
+msgstr "グアム"
+
+#: src/settings.py:472
+msgid "Guatemala"
+msgstr "グアテマラ"
+
+#: src/settings.py:473
+msgid "Guernsey"
+msgstr "ガーンジー"
+
+#: src/settings.py:474
+msgid "Guinea"
+msgstr "ギニア"
+
+#: src/settings.py:475
+msgid "Guinea-Bissau"
+msgstr "ギニアビサウ"
+
+#: src/settings.py:476
+msgid "Guyana"
+msgstr "ガイアナ"
+
+#: src/settings.py:477
+msgid "Haiti"
+msgstr "ハイチ"
+
+#: src/settings.py:478
+msgid "Heard Island and McDonald Islands"
+msgstr "ハード島とマクドナルド諸島"
+
+#: src/settings.py:479
+msgid "Holy See"
+msgstr "バチカン市国"
+
+#: src/settings.py:480
+msgid "Honduras"
+msgstr "ホンジュラス"
+
+#: src/settings.py:481
+msgid "Hong Kong"
+msgstr "香港"
+
+#: src/settings.py:482
+msgid "Hungary"
+msgstr "ハンガリー"
+
+#: src/settings.py:483
+msgid "Iceland"
+msgstr "アイスランド"
+
+#: src/settings.py:484
+msgid "India"
+msgstr "インド"
+
+#: src/settings.py:485
+msgid "Indonesia"
+msgstr "インドネシア"
+
+#: src/settings.py:486
+msgid "Iran (Islamic Republic of)"
+msgstr "イラン・イスラム共和国"
+
+#: src/settings.py:487
+msgid "Iraq"
+msgstr "イラク"
+
+#: src/settings.py:488
+msgid "Ireland"
+msgstr "アイルランド"
+
+#: src/settings.py:489
+msgid "Isle of Man"
+msgstr "マン島"
+
+#: src/settings.py:490
+msgid "Israel"
+msgstr "イスラエル"
+
+#: src/settings.py:491
+msgid "Italy"
+msgstr "イタリア"
+
+#: src/settings.py:492
+msgid "Jamaica"
+msgstr "ジャマイカ"
+
+#: src/settings.py:493
+msgid "Japan"
+msgstr "日本"
+
+#: src/settings.py:494
+msgid "Jersey"
+msgstr "ジャージー"
+
+#: src/settings.py:495
+msgid "Jordan"
+msgstr "ヨルダン"
+
+#: src/settings.py:496
+msgid "Kazakhstan"
+msgstr "カザフスタン"
+
+#: src/settings.py:497
+msgid "Kenya"
+msgstr "ケニア"
+
+#: src/settings.py:498
+msgid "Kiribati"
+msgstr "キリバス"
+
+#: src/settings.py:499
+msgid "Korea (Democratic People's Republic of)"
+msgstr "朝鮮民主主義人民共和国"
+
+#: src/settings.py:500
+msgid "Korea (Republic of)"
+msgstr "大韓民国"
+
+#: src/settings.py:501
+msgid "Kuwait"
+msgstr "クウェート"
+
+#: src/settings.py:502
+msgid "Kyrgyzstan"
+msgstr "キルギス"
+
+#: src/settings.py:503
+msgid "Lao People's Democratic Republic"
+msgstr "ラオス人民民主共和国"
+
+#: src/settings.py:504
+msgid "Latvia"
+msgstr "ラトビア"
+
+#: src/settings.py:505
+msgid "Lebanon"
+msgstr "レバノン"
+
+#: src/settings.py:506
+msgid "Lesotho"
+msgstr "レソト"
+
+#: src/settings.py:507
+msgid "Liberia"
+msgstr "リベリア"
+
+#: src/settings.py:508
+msgid "Libya"
+msgstr "リビア"
+
+#: src/settings.py:509
+msgid "Liechtenstein"
+msgstr "リヒテンシュタイン"
+
+#: src/settings.py:510
+msgid "Lithuania"
+msgstr "リトアニア"
+
+#: src/settings.py:511
+msgid "Luxembourg"
+msgstr "ルクセンブルク"
+
+#: src/settings.py:512
+msgid "Macao"
+msgstr "マカオ"
+
+#: src/settings.py:513
+msgid "Macedonia (the former Yugoslav Republic of)"
+msgstr "マケドニア旧ユーゴスラビア共和国"
+
+#: src/settings.py:514
+msgid "Madagascar"
+msgstr "マダガスカル"
+
+#: src/settings.py:515
+msgid "Malawi"
+msgstr "マラウイ"
+
+#: src/settings.py:516
+msgid "Malaysia"
+msgstr "マレーシア"
+
+#: src/settings.py:517
+msgid "Maldives"
+msgstr "モルディブ"
+
+#: src/settings.py:518
+msgid "Mali"
+msgstr "マリ"
+
+#: src/settings.py:519
+msgid "Malta"
+msgstr "マルタ"
+
+#: src/settings.py:520
+msgid "Marshall Islands"
+msgstr "マーシャル諸島"
+
+#: src/settings.py:521
+msgid "Martinique"
+msgstr "マルティニーク"
+
+#: src/settings.py:522
+msgid "Mauritania"
+msgstr "モーリタニア"
+
+#: src/settings.py:523
+msgid "Mauritius"
+msgstr "モーリシャス"
+
+#: src/settings.py:524
+msgid "Mayotte"
+msgstr "マヨット"
+
+#: src/settings.py:525
+msgid "Mexico"
+msgstr "メキシコ"
+
+#: src/settings.py:526
+msgid "Micronesia (Federated States of)"
+msgstr "ミクロネシア連邦"
+
+#: src/settings.py:527
+msgid "Moldova (Republic of)"
+msgstr "モルドバ共和国"
+
+#: src/settings.py:528
+msgid "Monaco"
+msgstr "モナコ"
+
+#: src/settings.py:529
+msgid "Mongolia"
+msgstr "モンゴル"
+
+#: src/settings.py:530
+msgid "Montenegro"
+msgstr "モンテネグロ"
+
+#: src/settings.py:531
+msgid "Montserrat"
+msgstr "モントセラト"
+
+#: src/settings.py:532
+msgid "Morocco"
+msgstr "モロッコ"
+
+#: src/settings.py:533
+msgid "Mozambique"
+msgstr "モザンビーク"
+
+#: src/settings.py:534
+msgid "Myanmar"
+msgstr "ミャンマー"
+
+#: src/settings.py:535
+msgid "Namibia"
+msgstr "ナミビア"
+
+#: src/settings.py:536
+msgid "Nauru"
+msgstr "ナウル"
+
+#: src/settings.py:537
+msgid "Nepal"
+msgstr "ネパール"
+
+#: src/settings.py:538
+msgid "Netherlands"
+msgstr "オランダ"
+
+#: src/settings.py:539
+msgid "New Caledonia"
+msgstr "ニューカレドニア"
+
+#: src/settings.py:540
+msgid "New Zealand"
+msgstr "ニュージーランド"
+
+#: src/settings.py:541
+msgid "Nicaragua"
+msgstr "ニカラグア"
+
+#: src/settings.py:542
+msgid "Niger"
+msgstr "ニジェール"
+
+#: src/settings.py:543
+msgid "Nigeria"
+msgstr "ナイジェリア"
+
+#: src/settings.py:544
+msgid "Niue"
+msgstr "ニウエ"
+
+#: src/settings.py:545
+msgid "Norfolk Island"
+msgstr "ノーフォーク島"
+
+#: src/settings.py:546
+msgid "Northern Mariana Islands"
+msgstr "北マリアナ諸島"
+
+#: src/settings.py:547
+msgid "Norway"
+msgstr "ノルウェー"
+
+#: src/settings.py:548
+msgid "Oman"
+msgstr "オマーン"
+
+#: src/settings.py:549
+msgid "Pakistan"
+msgstr "パキスタン"
+
+#: src/settings.py:550
+msgid "Palau"
+msgstr "パラオ"
+
+#: src/settings.py:551
+msgid "Palestine, State of"
+msgstr "パレスチナ"
+
+#: src/settings.py:552
+msgid "Panama"
+msgstr "パナマ"
+
+#: src/settings.py:553
+msgid "Papua New Guinea"
+msgstr "パプアニューギニア"
+
+#: src/settings.py:554
+msgid "Paraguay"
+msgstr "パラグアイ"
+
+#: src/settings.py:555
+msgid "Peru"
+msgstr "ペルー"
+
+#: src/settings.py:556
+msgid "Philippines"
+msgstr "フィリピン"
+
+#: src/settings.py:557
+msgid "Pitcairn"
+msgstr "ピトケアン"
+
+#: src/settings.py:558
+msgid "Poland"
+msgstr "ポーランド"
+
+#: src/settings.py:559
+msgid "Portugal"
+msgstr "ポルトガル"
+
+#: src/settings.py:560
+msgid "Puerto Rico"
+msgstr "プエルトリコ"
+
+#: src/settings.py:561
+msgid "Qatar"
+msgstr "カタール"
+
+#: src/settings.py:562
+msgid "Réunion"
+msgstr "レユニオン"
+
+#: src/settings.py:563
+msgid "Romania"
+msgstr "ルーマニア"
+
+#: src/settings.py:564
+msgid "Russian Federation"
+msgstr "ロシア連邦"
+
+#: src/settings.py:565
+msgid "Rwanda"
+msgstr "ルワンダ"
+
+#: src/settings.py:566
+msgid "Saint Barthélemy"
+msgstr "サン・バルテルミー"
+
+#: src/settings.py:567
+msgid "Saint Helena, Ascension and Tristan da Cunha"
+msgstr "セントヘレナ・アセンションおよびトリスタンダクーニャ"
+
+#: src/settings.py:568
+msgid "Saint Kitts and Nevis"
+msgstr "セントクリストファー・ネイビス"
+
+#: src/settings.py:569
+msgid "Saint Lucia"
+msgstr "セントルシア"
+
+#: src/settings.py:570
+msgid "Saint Martin (French part)"
+msgstr "サン・マルタン（フランス領）"
+
+#: src/settings.py:571
+msgid "Saint Pierre and Miquelon"
+msgstr "サンピエール島・ミクロン島"
+
+#: src/settings.py:572
+msgid "Saint Vincent and the Grenadines"
+msgstr "セントビンセントおよびグレナディーン諸島"
+
+#: src/settings.py:573
+msgid "Samoa"
+msgstr "サモア"
+
+#: src/settings.py:574
+msgid "San Marino"
+msgstr "サンマリノ"
+
+#: src/settings.py:575
+msgid "Sao Tome and Principe"
+msgstr "サントメ・プリンシペ"
+
+#: src/settings.py:576
+msgid "Saudi Arabia"
+msgstr "サウジアラビア"
+
+#: src/settings.py:577
+msgid "Senegal"
+msgstr "セネガル"
+
+#: src/settings.py:578
+msgid "Serbia"
+msgstr "セルビア"
+
+#: src/settings.py:579
+msgid "Seychelles"
+msgstr "セーシェル"
+
+#: src/settings.py:580
+msgid "Sierra Leone"
+msgstr "シエラレオネ"
+
+#: src/settings.py:581
+msgid "Singapore"
+msgstr "シンガポール"
+
+#: src/settings.py:582
+msgid "Sint Maarten (Dutch part)"
+msgstr "シント・マールテン（オランダ領）"
+
+#: src/settings.py:583
+msgid "Slovakia"
+msgstr "スロバキア"
+
+#: src/settings.py:584
+msgid "Slovenia"
+msgstr "スロベニア"
+
+#: src/settings.py:585
+msgid "Solomon Islands"
+msgstr "ソロモン諸島"
+
+#: src/settings.py:586
+msgid "Somalia"
+msgstr "ソマリア"
+
+#: src/settings.py:587
+msgid "South Africa"
+msgstr "南アフリカ"
+
+#: src/settings.py:588
+msgid "South Georgia and the South Sandwich Islands"
+msgstr "サウスジョージア・サウスサンドウィッチ諸島"
+
+#: src/settings.py:589
+msgid "South Sudan"
+msgstr "南スーダン"
+
+#: src/settings.py:590
+msgid "Spain"
+msgstr "スペイン"
+
+#: src/settings.py:591
+msgid "Sri Lanka"
+msgstr "スリランカ"
+
+#: src/settings.py:592
+msgid "Sudan"
+msgstr "スーダン"
+
+#: src/settings.py:593
+msgid "Suriname"
+msgstr "スリナム"
+
+#: src/settings.py:594
+msgid "Svalbard and Jan Mayen"
+msgstr "スヴァールバル諸島およびヤンマイエン島"
+
+#: src/settings.py:595
+msgid "Swaziland"
+msgstr "スワジランド"
+
+#: src/settings.py:596
+msgid "Sweden"
+msgstr "スウェーデン"
+
+#: src/settings.py:597
+msgid "Switzerland"
+msgstr "スイス"
+
+#: src/settings.py:598
+msgid "Syrian Arab Republic"
+msgstr "シリア・アラブ共和国"
+
+#: src/settings.py:599
+msgid "Taiwan, Province of China"
+msgstr "台湾"
+
+#: src/settings.py:600
+msgid "Tajikistan"
+msgstr "タジキスタン"
+
+#: src/settings.py:601
+msgid "Tanzania, United Republic of"
+msgstr "タンザニア"
+
+#: src/settings.py:602
+msgid "Thailand"
+msgstr "タイ"
+
+#: src/settings.py:603
+msgid "Timor-Leste"
+msgstr "東ティモール"
+
+#: src/settings.py:604
+msgid "Togo"
+msgstr "トーゴ"
+
+#: src/settings.py:605
+msgid "Tokelau"
+msgstr "トケラウ"
+
+#: src/settings.py:606
+msgid "Tonga"
+msgstr "トンガ"
+
+#: src/settings.py:607
+msgid "Trinidad and Tobago"
+msgstr "トリニダード・トバゴ"
+
+#: src/settings.py:608
+msgid "Tunisia"
+msgstr "チュニジア"
+
+#: src/settings.py:609
+msgid "Turkey"
+msgstr "トルコ"
+
+#: src/settings.py:610
+msgid "Turkmenistan"
+msgstr "トルクメニスタン"
+
+#: src/settings.py:611
+msgid "Turks and Caicos Islands"
+msgstr "タークス・カイコス諸島"
+
+#: src/settings.py:612
+msgid "Tuvalu"
+msgstr "ツバル"
+
+#: src/settings.py:613
+msgid "Uganda"
+msgstr "ウガンダ"
+
+#: src/settings.py:614
+msgid "Ukraine"
+msgstr "ウクライナ"
+
+#: src/settings.py:615
+msgid "United Arab Emirates"
+msgstr "アラブ首長国連邦"
+
+#: src/settings.py:616
+msgid "United Kingdom of Great Britain and Northern Ireland"
+msgstr "イギリス"
+
+#: src/settings.py:617
+msgid "United States of America"
+msgstr "アメリカ合衆国"
+
+#: src/settings.py:618
+msgid "United States Minor Outlying Islands"
+msgstr "合衆国領有小離島"
+
+#: src/settings.py:619
+msgid "Uruguay"
+msgstr "ウルグアイ"
+
+#: src/settings.py:620
+msgid "Uzbekistan"
+msgstr "ウズベキスタン"
+
+#: src/settings.py:621
+msgid "Vanuatu"
+msgstr "バヌアツ"
+
+#: src/settings.py:622
+msgid "Venezuela (Bolivarian Republic of)"
+msgstr "ベネズエラ・ボリバル共和国"
+
+#: src/settings.py:623
+msgid "Viet Nam"
+msgstr "ベトナム"
+
+#: src/settings.py:624
+msgid "Virgin Islands (British)"
+msgstr "イギリス領ヴァージン諸島"
+
+#: src/settings.py:625
+msgid "Virgin Islands (U.S.)"
+msgstr "アメリカ領ヴァージン諸島"
+
+#: src/settings.py:626
+msgid "Wallis and Futuna"
+msgstr "ウォリス・フツナ"
+
+#: src/settings.py:627
+msgid "Western Sahara"
+msgstr "西サハラ"
+
+#: src/settings.py:628
+msgid "Yemen"
+msgstr "イエメン"
+
+#: src/settings.py:629
+msgid "Zambia"
+msgstr "ザンビア"
+
+#: src/settings.py:630
+msgid "Zimbabwe"
+msgstr "ジンバブエ"
+
+#: src/templates/base.html:48
+msgid "Management"
+msgstr "管理"
+
+#: src/templates/base.html:78
+msgid "Log out"
+msgstr "ログアウト"
+
+#, fuzzy
+#~| msgid "Feed"
+#~ msgid "Feeds"
+#~ msgstr "投稿一覧"
+
+#~ msgid "SECTOR_GROUP_Chemical Sector"
+#~ msgstr "セクターケミカル　"
+
+#~ msgid "SECTOR_GROUP_Commercial Facilities Sector"
+#~ msgstr "セクターコマーシャル"
+
+#~ msgid "SECTOR_GROUP_Communications Sector"
+#~ msgstr "セクターコミュニケーションズ"
+
+#~ msgid "SECTOR_GROUP_Critical Manufacturing Sector"
+#~ msgstr "セクタークリティカル"
+
+#~ msgid "SECTOR_GROUP_Dams Sector"
+#~ msgstr "セクターダム"
+
+#~ msgid "SECTOR_GROUP_Defense Industrial Base Sector"
+#~ msgstr "セクターディフェンス"
+
+#~ msgid "SECTOR_GROUP_Emergency Services Sector"
+#~ msgstr "セクターエマージェンシ"
+
+#~ msgid "SECTOR_GROUP_Energy Sector"
+#~ msgstr "セクターエナジー"
+
+#~ msgid "SECTOR_GROUP_Financial Services Sector"
+#~ msgstr "セクターファインシャル"
+
+#~ msgid "SECTOR_GROUP_Food and Agriculture Sector"
+#~ msgstr "セクターフード　"
+
+#~ msgid "SECTOR_GROUP_Government Facilities Sector"
+#~ msgstr "セクターガバメント"
+
+#~ msgid "SECTOR_GROUP_Healthcare and Public Health Sector"
+#~ msgstr "セクターヘルスケア"
+
+#~ msgid "SECTOR_GROUP_Information Technology Sector"
+#~ msgstr "セクターインフォメーション"
+
+#~ msgid "SECTOR_GROUP_Nuclear Reactors, Materials, and Waste Sector"
+#~ msgstr "セクターニュークリア"
+
+#~ msgid "SECTOR_GROUP_Other"
+#~ msgstr "セクターその他"
+
+#~ msgid "SECTOR_GROUP_Transportation Systems Sector"
+#~ msgstr "セクタートランスポーテーション"
+
+#~ msgid "SECTOR_GROUP_Water and Wastewater Systems Sector"
+#~ msgstr "セクター水"
+
+#~ msgid "CI_Information and Communication Services"
+#~ msgstr "情報通信"
+
+#~ msgid "CI_Financial Services"
+#~ msgstr "金融"
+
+#~ msgid "CI_Aviation Services"
+#~ msgstr "航空"
+
+#~ msgid "CI_Railway Services"
+#~ msgstr "鉄道"
+
+#~ msgid "CI_Electric Power Supply Services"
+#~ msgstr "電力"
+
+#~ msgid "CI_Gas Supply Services"
+#~ msgstr "ガス"
+
+#~ msgid ""
+#~ "CI_Government and Administrative Services (Including Municipal Government)"
+#~ msgstr "政府・行政サービス（地方公共団体を含む）"
+
+#~ msgid "CI_Medical Services"
+#~ msgstr "医療"
+
+#~ msgid "CI_Water Services"
+#~ msgstr "水道"
+
+#~ msgid "CI_Logistics Services"
+#~ msgstr "物流"
+
+#~ msgid "CI_Chemical Industries"
+#~ msgstr "化学"
+
+#~ msgid "CI_Credit Card Services"
+#~ msgstr "クレジット"
+
+#~ msgid "CI_Petroleum Industries"
+#~ msgstr "石油"
+
+#~ msgid "CI_Other"
+#~ msgstr "その他"
+
+#~ msgid "AttachFile"
+#~ msgstr "添付ファイル"
+
+#~ msgid "Click to remove this comment"
+#~ msgstr "クリックでこのコメントを削除する"
+
+#~ msgid "First Name"
+#~ msgstr "名"
+
+#~ msgid "Last Name"
+#~ msgstr "姓"
+
+#~ msgid "email"
+#~ msgstr "電子メール"
+
+#~ msgid "Sign up for S-TIP"
+#~ msgstr "S-TIP に参加する"
+
+#~ msgid "Group Members Count"
+#~ msgstr "グループ参加者"
+
+#~ msgid "Change"
+#~ msgstr "アイコンを変更"
+
+#~ msgid "SHARING_GROUP_Malware"
+#~ msgstr "マルウェア"
+
+#~ msgid "SHARING_GROUP_Ransomware"
+#~ msgstr "ランサムウェア"
+
+#~ msgid "SHARING_GROUP_DDos"
+#~ msgstr "DDoS"
+
+#~ msgid "SHARING_GROUP_APT"
+#~ msgstr "高度標的型攻撃 (APT)"
+
+#~ msgid "SHARING_GROUP_Vulnerability"
+#~ msgstr "脆弱性"
+
+#~ msgid "SHARING_GROUP_Phishing"
+#~ msgstr "フィッシング"
+
+#~ msgid "SHARING_GROUP_Web Site"
+#~ msgstr "Webサイト"
+
+#~ msgid "SHARING_GROUP_Cyber-attack Warning"
+#~ msgstr "攻撃予告"
+
+#~ msgid "SHARING_GROUP_IoT"
+#~ msgstr "IoT"
+
+#~ msgid "SHARING_GROUP_Security Reports"
+#~ msgstr "セキュリティ報告書"
+
+#~ msgid "SHARING_GROUP_Tokyo Olympics/Paralympics 2020"
+#~ msgstr "東京オリパラ 2020"
+
+#~ msgid "SHARING_GROUP_Rugby World Cup 2019"
+#~ msgstr "ラグビーワールドカップ 2019"
+
+#~ msgid "SHARING_GROUP_Carrier"
+#~ msgstr "通信業界"
+
+#~ msgid "SHARING_GROUP_Financial Services"
+#~ msgstr "金融業界"
+
+#~ msgid "SHARING_GROUP_Defense Industries and MoD"
+#~ msgstr "防衛産業及び防衛省"
+
+#~ msgid "SHARING_GROUP_Hokkaido Region"
+#~ msgstr "北海道地方"
+
+#~ msgid "SHARING_GROUP_Tohoku Region"
+#~ msgstr "東北地方"
+
+#~ msgid "SHARING_GROUP_Kanto Region"
+#~ msgstr "関東地方"
+
+#~ msgid "SHARING_GROUP_Chubu Region"
+#~ msgstr "中部地方"
+
+#~ msgid "SHARING_GROUP_Kansai Region"
+#~ msgstr "関西地方"
+
+#~ msgid "SHARING_GROUP_Chugoku Region"
+#~ msgstr "中国地方"
+
+#~ msgid "SHARING_GROUP_Shikoku Region"
+#~ msgstr "四国地方"
+
+#~ msgid "SHARING_GROUP_Kyushu Region"
+#~ msgstr "九州地方"
+
+#, fuzzy
+#~| msgid "Users"
+#~ msgid "User"
+#~ msgstr "利用者一覧"
+
+#~ msgid "Comments"
+#~ msgstr "コメント"
+
+#~ msgid "Be the first one to comment!"
+#~ msgstr "最初にコメントする"
+
+#, fuzzy
+#~| msgid "People"
+#~ msgid "Lao People"
+#~ msgstr "人"
+
+#~ msgid "Sector"
+#~ msgstr "業種"
+
+#~ msgid "With the CSC Community"
+#~ msgstr "CSC コミュニティ"
+
+#~ msgid "SHARING_GROUP_Commercial Facilities"
+#~ msgstr "コマーシャル"
+
+#~ msgid "SHARING_GROUP_Emergency Services"
+#~ msgstr "エマージェンシー"
+
+#~ msgid "SHARING_GROUP_Food and Agriculture"
+#~ msgstr "フードアンドアグリカルチャ"
+
+#~ msgid "SHARING_GROUP_Government Facilities"
+#~ msgstr "ガバメント"
+
+#~ msgid "SHARING_GROUP_Healthcare and Public Health"
+#~ msgstr "ヘルスケア"
+
+#~ msgid "SHARING_GROUP_Information Technology"
+#~ msgstr "インフォメーション"
+
+#~ msgid "SHARING_GROUP_Nuclear Reactors, Materials, and Waste"
+#~ msgstr "ニュークリア"
+
+#~ msgid "SHARING_GROUP_Transportation Systems"
+#~ msgstr "トランスポーテーション"
+
+#~ msgid "SHARING_GROUP_Water and Wastewater Systems"
+#~ msgstr "水"
+
+#~ msgid "With people"
+#~ msgstr "アカウント毎"
+
+#~ msgid "With a group"
+#~ msgstr "グループ毎"
+
+#~ msgid "Check to post anonymously"
+#~ msgstr "匿名投稿を行うためにはチェックを入れてください"

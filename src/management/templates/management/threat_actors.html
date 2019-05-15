@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% get_available_languages as LANGUAGES %}
+{% get_current_language as CURRENT_LANGUAGE %}
+
+{% block title %}{% trans 'Threat Actors Management' %}{% endblock %}
+{% block head %}
+  <script src="{% static 'js/threat_actors.js' %}"></script>
+{% endblock head %}
+
+{% block main %}
+  <div class="page-header">
+    <h1>{% trans 'Threat Actors Management' %}</h1>
+  </div>
+  <div class="col-md-12">
+    <h4>{% trans 'Input The Name List of Common Threat Actors' %}</h4>
+  </div>
+  <form class="form-horizontal" method="post" id="threat-actors-form" action="{% url 'management_threat_actors' %}">{% csrf_token %}
+  <div class="col-md-12 form-group">
+  	<textarea class="form-control" id="threat-actors-textarea" rows="10" name="threat_actors" style="resize:none">{{threat_actors}}</textarea>
+  	<br/>
+  	<button type="button" class="btn btn-primary" id="threat-actors-submit">{% trans 'Save' %}</button>
+  </div>
+  </form>
+{% endblock main %}

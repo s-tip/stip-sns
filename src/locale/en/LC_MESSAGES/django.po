@@ -1,0 +1,1964 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-28 16:48+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/activities/templates/activities/last_notifications.html:12
+msgid "You have no unread notification"
+msgstr ""
+
+#: src/activities/templates/activities/last_notifications.html:14
+msgid "See all"
+msgstr ""
+
+#: src/activities/templates/activities/notifications.html:7
+#: src/activities/templates/activities/notifications.html:15
+#: src/templates/base.html:35
+msgid "Notifications"
+msgstr ""
+
+#: src/activities/templates/activities/notifications.html:27
+msgid "You have no notification"
+msgstr ""
+
+#: src/authentication/templates/authentication/signup.html:12
+msgid "Sign up for Seamless TIP"
+msgstr ""
+
+#: src/authentication/templates/authentication/signup.html:27
+msgid "Create an account"
+msgstr ""
+
+#: src/core/forms.py:22
+msgid "affiliation"
+msgstr ""
+
+#: src/core/forms.py:27
+msgid "job_title"
+msgstr ""
+
+#: src/core/forms.py:37 src/core/templates/core/network.html:37
+msgid "URL"
+msgstr ""
+
+#: src/core/forms.py:42
+msgid "location"
+msgstr ""
+
+#: src/core/forms.py:47 src/groups/forms.py:25
+msgid "description"
+msgstr "Description"
+
+#: src/core/forms.py:52 src/feeds/templates/feeds/feeds.html:89
+msgid "TLP"
+msgstr ""
+
+#: src/core/forms.py:57 src/core/templates/core/network.html:46
+msgid "Country"
+msgstr ""
+
+#: src/core/forms.py:62 src/core/templates/core/network.html:47
+msgid "Administrative Area"
+msgstr ""
+
+#: src/core/forms.py:67 src/core/templates/core/network.html:50
+msgid "Critical Infrastructure"
+msgstr ""
+
+#: src/core/forms.py:72
+msgid "Language"
+msgstr ""
+
+#: src/core/forms.py:84
+msgid "Old password"
+msgstr ""
+
+#: src/core/forms.py:89
+msgid "New password"
+msgstr ""
+
+#: src/core/forms.py:93
+msgid "Confirm new password"
+msgstr ""
+
+#: src/core/templates/core/cover.html:21 src/core/templates/core/cover.html:39
+msgid "Log in"
+msgstr ""
+
+#: src/core/templates/core/cover.html:25
+#: src/core/templates/core/network.html:32
+msgid "Username"
+msgstr ""
+
+#: src/core/templates/core/cover.html:32
+#: src/core/templates/core/partial_settings_menu.html:5
+msgid "Password"
+msgstr ""
+
+#: src/core/templates/core/network.html:5
+#: src/core/templates/core/network.html:12
+#: src/search/templates/search/partial_results_menu.html:9
+#: src/search/templates/search/partial_users_results.html:3
+#: src/templates/base.html:40
+msgid "Users"
+msgstr ""
+
+#: src/core/templates/core/network.html:27
+msgid "Affiliation"
+msgstr ""
+
+#: src/core/templates/core/network.html:30
+msgid "Job Title"
+msgstr ""
+
+#: src/core/templates/core/network.html:34
+msgid "Location"
+msgstr ""
+
+#: src/core/templates/core/network.html:40
+msgid "Description"
+msgstr ""
+
+#: src/core/templates/core/network.html:43
+msgid "Default TLP"
+msgstr ""
+
+#: src/core/templates/core/network.html:53
+#: src/management/templates/management/users.html:38
+#: src/management/templates/management/users.html:82
+msgid "Role"
+msgstr ""
+
+#: src/core/templates/core/partial_settings_menu.html:3
+msgid "Profile"
+msgstr ""
+
+#: src/core/templates/core/partial_settings_menu.html:4
+msgid "Picture"
+msgstr ""
+
+#: src/core/templates/core/password.html:4
+#: src/core/templates/core/password.html:8
+#: src/core/templates/core/picture.html:5
+#: src/core/templates/core/picture.html:15
+#: src/core/templates/core/settings.html:15 src/templates/base.html:69
+msgid "Account Settings"
+msgstr ""
+
+#: src/core/templates/core/password.html:23
+msgid "Change Password"
+msgstr ""
+
+#: src/core/templates/core/password.html:43
+#: src/core/templates/core/settings.html:64
+#: src/groups/templates/groups/upsert.html:70
+#: src/management/templates/management/users.html:41
+#: src/management/templates/management/users.html:66
+#: src/management/templates/management/users.html:85
+msgid "Save"
+msgstr ""
+
+#: src/core/templates/core/picture.html:30
+msgid "Change Picture"
+msgstr ""
+
+#: src/core/templates/core/picture.html:35
+msgid "Upload new picture"
+msgstr ""
+
+#: src/core/templates/core/picture.html:46
+msgid "Crop Picture"
+msgstr ""
+
+#: src/core/templates/core/picture.html:50
+msgid "Crop the profile picture and then click on the"
+msgstr ""
+
+#: src/core/templates/core/picture.html:50
+msgid "Save Picture"
+msgstr ""
+
+#: src/core/templates/core/picture.html:50
+msgid "button"
+msgstr ""
+
+#: src/core/templates/core/picture.html:65
+msgid "Close"
+msgstr ""
+
+#: src/core/templates/core/picture.html:66
+msgid "Save changes"
+msgstr ""
+
+#: src/core/templates/core/profile.html:60
+msgid "Last Feeds by"
+msgstr ""
+
+#: src/core/templates/core/settings.html:30
+msgid "Edit Profile"
+msgstr ""
+
+#: src/core/views.py:131
+msgid "Your profile was successfully edited."
+msgstr ""
+
+#: src/feeds/models.py:38 src/feeds/models.py:39
+msgid "AttachFile"
+msgstr ""
+
+#: src/feeds/models.py:101 src/feeds/templates/feeds/feed.html:7
+#: src/feeds/templates/feeds/feed.html:19
+#: src/feeds/templates/feeds/feeds.html:26
+#: src/search/templates/search/partial_feed_results.html:4
+#: src/search/templates/search/partial_results_menu.html:5
+#: src/templates/base.html:39
+msgid "Feed"
+msgstr ""
+
+#: src/feeds/models.py:102
+msgid "Feeds"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:20
+msgid "Press N to new"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:21
+msgid "New"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:24
+#: src/feeds/templates/feeds/feeds.html:172
+msgid "Cancel"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:31
+msgid "Latest posts"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:41
+#: src/search/templates/search/partial_feed_results.html:17
+msgid "Title"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:46
+msgid "Author"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:50
+msgid "Anonymous"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:56
+msgid "Content"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:64
+msgid "Attachments"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:110
+#: src/feeds/templates/feeds/partial_feed.html:138
+#: src/feeds/templates/feeds/partial_feed.html:141
+#: src/feeds/templates/feeds/partial_feed.html:152
+msgid "Sharing Range"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:112
+msgid "People"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:112
+msgid "System"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:119
+msgid "Select Sharing Accounts"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:131
+msgid "Group"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:137
+msgid "Choose Group"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:154
+#: src/feeds/templates/feeds/partial_feed.html:138
+msgid "CSC Community"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:168
+msgid "Press Ctrl + Enter to post"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:169
+msgid "Post"
+msgstr ""
+
+#: src/feeds/templates/feeds/feeds.html:180
+msgid "new posts"
+msgstr ""
+
+#: src/feeds/templates/feeds/partial_feed.html:52
+msgid "Click to remove this feed"
+msgstr ""
+
+#: src/feeds/templates/feeds/partial_feed.html:115
+msgid "Issue"
+msgstr ""
+
+#: src/feeds/templates/feeds/partial_feed.html:123
+msgid "Unlike"
+msgstr ""
+
+#: src/feeds/templates/feeds/partial_feed.html:129
+msgid "Like"
+msgstr ""
+
+#: src/feeds/templates/feeds/partial_feed.html:134
+msgid "Comment"
+msgstr ""
+
+#: src/feeds/templates/feeds/partial_feed.html:141
+msgid "group"
+msgstr ""
+
+#: src/feeds/templates/feeds/partial_feed.html:170
+msgid "Write a comment..."
+msgstr "Write a comment here up to 1024 charactres."
+
+#: src/feeds/templates/feeds/partial_feed_comments.html:7
+msgid "Click to remove this comment"
+msgstr ""
+
+#: src/feeds/templates/feeds/partial_feed_comments.html:22
+msgid "Be the first one to comment"
+msgstr ""
+
+#: src/groups/forms.py:15
+msgid "en_name"
+msgstr "Group Name (Common)"
+
+#: src/groups/forms.py:20
+msgid "local_name"
+msgstr "Group Name (Local)"
+
+#: src/groups/templates/groups/groups.html:16 src/templates/base.html:46
+msgid "Group Management"
+msgstr ""
+
+#: src/groups/templates/groups/groups.html:31
+msgid "Create New Group"
+msgstr ""
+
+#: src/groups/templates/groups/groups.html:35
+msgid "Group List"
+msgstr ""
+
+#: src/groups/templates/groups/groups.html:40
+#: src/groups/templates/groups/groups.html:101
+msgid "Group En Name"
+msgstr "Group Name (Common)"
+
+#: src/groups/templates/groups/groups.html:43
+#: src/groups/templates/groups/groups.html:104
+msgid "Group Local Name"
+msgstr "Group Name (Local)"
+
+#: src/groups/templates/groups/groups.html:46
+#: src/groups/templates/groups/groups.html:107
+msgid "Group Description"
+msgstr "Description"
+
+#: src/groups/templates/groups/groups.html:49
+#: src/groups/templates/groups/groups.html:110
+msgid "Group Creator"
+msgstr "Creator"
+
+#: src/groups/templates/groups/groups.html:52
+#: src/groups/templates/groups/groups.html:113
+msgid "Group Member Count"
+msgstr "Member Count"
+
+#: src/groups/templates/groups/groups.html:55
+#: src/groups/templates/groups/groups.html:84
+#: src/groups/templates/groups/groups.html:116
+msgid "Group Change"
+msgstr "Change"
+
+#: src/groups/templates/groups/groups.html:58
+#: src/groups/templates/groups/groups.html:92
+#: src/groups/templates/groups/groups.html:119
+msgid "Group Delete"
+msgstr "Delete"
+
+#: src/groups/templates/groups/upsert.html:18
+msgid "Group Settings"
+msgstr ""
+
+#: src/groups/templates/groups/upsert.html:31
+msgid "Back to previous page."
+msgstr ""
+
+#: src/groups/templates/groups/upsert.html:34
+msgid "Edit Group"
+msgstr ""
+
+#: src/groups/templates/groups/upsert.html:57
+msgid "Select Member Accounts"
+msgstr ""
+
+#: src/groups/views.py:60
+msgid "Your Group was successfully edited."
+msgstr ""
+
+#: src/groups/views.py:104
+msgid "Group was successfully deleted."
+msgstr ""
+
+#: src/management/templates/management/users.html:15 src/templates/base.html:45
+msgid "User Management"
+msgstr ""
+
+#: src/management/templates/management/users.html:32
+#: src/management/templates/management/users.html:76
+msgid "Icon"
+msgstr ""
+
+#: src/management/templates/management/users.html:35
+#: src/management/templates/management/users.html:79
+msgid "Account Name"
+msgstr ""
+
+#: src/management/templates/management/users.html:57 src/settings.py:205
+msgid "ROLE_CHOICE_admin"
+msgstr "admin"
+
+#: src/management/templates/management/users.html:58 src/settings.py:206
+msgid "ROLE_CHOICE_user"
+msgstr "user"
+
+#: src/management/templates/management/users.html:59 src/settings.py:207
+msgid "ROLE_CHOICE_machine"
+msgstr "machine"
+
+#: src/management/templates/management/users.html:60 src/settings.py:208
+msgid "ROLE_CHOICE_machine_feed_only"
+msgstr "machine (feed only)"
+
+#: src/management/templates/management/users.html:61 src/settings.py:209
+msgid "ROLE_CHOICE_machine_bot"
+msgstr "BOT"
+
+#: src/messenger/models.py:20
+msgid "Message"
+msgstr ""
+
+#: src/messenger/models.py:21
+msgid "Messages"
+msgstr ""
+
+#: src/messenger/templates/messenger/inbox.html:4
+#: src/messenger/templates/messenger/inbox.html:6
+msgid "Inbox"
+msgstr ""
+
+#: src/messenger/templates/messenger/includes/partial_conversations.html:22
+msgid "Start a conversation"
+msgstr ""
+
+#: src/messenger/templates/messenger/new.html:5
+#: src/messenger/templates/messenger/new.html:7
+msgid "New message"
+msgstr ""
+
+#: src/search/templates/search/partial_articles_results.html:3
+msgid "Articles"
+msgstr ""
+
+#: src/search/templates/search/partial_articles_results.html:24
+msgid "No article found"
+msgstr ""
+
+#: src/search/templates/search/partial_feed_results.html:23
+msgid "No feed found"
+msgstr ""
+
+#: src/search/templates/search/partial_questions_results.html:4
+msgid "Questions"
+msgstr ""
+
+#: src/search/templates/search/partial_questions_results.html:22
+msgid "No question found"
+msgstr ""
+
+#: src/search/templates/search/partial_users_results.html:19
+msgid "No user found"
+msgstr ""
+
+#: src/search/templates/search/results.html:17
+#: src/search/templates/search/search.html:22 src/templates/base.html:54
+msgid "Search"
+msgstr ""
+
+#: src/search/templates/search/results.html:23
+#: src/search/templates/search/search.html:19
+msgid "Search Feed, Articles, Questions and Users"
+msgstr ""
+
+#: src/settings.py:102
+msgid "English"
+msgstr ""
+
+#: src/settings.py:103
+msgid "Portuguese"
+msgstr ""
+
+#: src/settings.py:104
+msgid "Spanish"
+msgstr ""
+
+#: src/settings.py:105
+msgid "Japanese"
+msgstr ""
+
+#: src/settings.py:106
+msgid "French"
+msgstr ""
+
+#: src/settings.py:107
+msgid "Chinese"
+msgstr ""
+
+#: src/settings.py:213
+msgid "SECTOR_GROUP_Chemical Sector"
+msgstr "Chemical Sector"
+
+#: src/settings.py:214
+msgid "SECTOR_GROUP_Commercial Facilities Sector"
+msgstr "Commercial Facilities Sector"
+
+#: src/settings.py:215
+msgid "SECTOR_GROUP_Communications Sector"
+msgstr "Communications Sector"
+
+#: src/settings.py:216
+msgid "SECTOR_GROUP_Critical Manufacturing Sector"
+msgstr "Critical Manufacturing Sector"
+
+#: src/settings.py:217
+msgid "SECTOR_GROUP_Dams Sector"
+msgstr "Dams Sector"
+
+#: src/settings.py:218
+msgid "SECTOR_GROUP_Defense Industrial Base Sector"
+msgstr "Defense Industrial Base Sector"
+
+#: src/settings.py:219
+msgid "SECTOR_GROUP_Emergency Services Sector"
+msgstr "Emergency Services Sector"
+
+#: src/settings.py:220
+msgid "SECTOR_GROUP_Energy Sector"
+msgstr "Energy Sector"
+
+#: src/settings.py:221
+msgid "SECTOR_GROUP_Financial Services Sector"
+msgstr "Financial Services Sector"
+
+#: src/settings.py:222
+msgid "SECTOR_GROUP_Food and Agriculture Sector"
+msgstr "Food and Agriculture Sector"
+
+#: src/settings.py:223
+msgid "SECTOR_GROUP_Government Facilities Sector"
+msgstr "Government Facilities Sector"
+
+#: src/settings.py:224
+msgid "SECTOR_GROUP_Healthcare and Public Health Sector"
+msgstr "Healthcare and Public Health Sector"
+
+#: src/settings.py:225
+msgid "SECTOR_GROUP_Information Technology Sector"
+msgstr "Information Technology Sector"
+
+#: src/settings.py:226
+msgid "SECTOR_GROUP_Nuclear Reactors, Materials, and Waste Sector"
+msgstr "Nuclear Reactors, Materials, and Waste Sector"
+
+#: src/settings.py:227
+msgid "SECTOR_GROUP_Other"
+msgstr "Other"
+
+#: src/settings.py:228
+msgid "SECTOR_GROUP_Transportation Systems Sector"
+msgstr "Transportation Systems Sector"
+
+#: src/settings.py:229
+msgid "SECTOR_GROUP_Water and Wastewater Systems Sector"
+msgstr "Water and Wastewater Systems Sector"
+
+#: src/settings.py:234
+msgid "CI_Information and Communication Services"
+msgstr "Information and Communication Services"
+
+#: src/settings.py:235
+msgid "CI_Financial Services"
+msgstr "Financial Services"
+
+#: src/settings.py:236
+msgid "CI_Aviation Services"
+msgstr "Aviation Services"
+
+#: src/settings.py:237
+msgid "CI_Railway Services"
+msgstr "Railway Services"
+
+#: src/settings.py:238
+msgid "CI_Electric Power Supply Services"
+msgstr "Electric Power Supply Services"
+
+#: src/settings.py:239
+msgid "CI_Gas Supply Services"
+msgstr "Gas Supply Services"
+
+#: src/settings.py:240
+msgid ""
+"CI_Government and Administrative Services (Including Municipal Government)"
+msgstr ""
+"Government and Administrative Services (Including Municipal Government)"
+
+#: src/settings.py:241
+msgid "CI_Medical Services"
+msgstr "Medical Services"
+
+#: src/settings.py:242
+msgid "CI_Water Services"
+msgstr "Water Services"
+
+#: src/settings.py:243
+msgid "CI_Logistics Services"
+msgstr "Logistics Services"
+
+#: src/settings.py:244
+msgid "CI_Chemical Industries"
+msgstr "Chemical Industries"
+
+#: src/settings.py:245
+msgid "CI_Credit Card Services"
+msgstr "Credit Card Services"
+
+#: src/settings.py:246
+msgid "CI_Petroleum Industries"
+msgstr "Petroleum Industries"
+
+#: src/settings.py:247
+msgid "CI_Other"
+msgstr "Other"
+
+#: src/settings.py:270
+msgid "Aichi"
+msgstr ""
+
+#: src/settings.py:271
+msgid "Akita"
+msgstr ""
+
+#: src/settings.py:272
+msgid "Aomori"
+msgstr ""
+
+#: src/settings.py:273
+msgid "Chiba"
+msgstr ""
+
+#: src/settings.py:274
+msgid "Ehime"
+msgstr ""
+
+#: src/settings.py:275
+msgid "Fukui"
+msgstr ""
+
+#: src/settings.py:276
+msgid "Fukuoka"
+msgstr ""
+
+#: src/settings.py:277
+msgid "Fukushima"
+msgstr ""
+
+#: src/settings.py:278
+msgid "Gifu"
+msgstr ""
+
+#: src/settings.py:279
+msgid "Gunma"
+msgstr ""
+
+#: src/settings.py:280
+msgid "Hiroshima"
+msgstr ""
+
+#: src/settings.py:281
+msgid "Hokkaido"
+msgstr ""
+
+#: src/settings.py:282
+msgid "Hyogo"
+msgstr ""
+
+#: src/settings.py:283
+msgid "Ibaraki"
+msgstr ""
+
+#: src/settings.py:284
+msgid "Ishikawa"
+msgstr ""
+
+#: src/settings.py:285
+msgid "Iwate"
+msgstr ""
+
+#: src/settings.py:286
+msgid "Kagawa"
+msgstr ""
+
+#: src/settings.py:287
+msgid "Kagoshima"
+msgstr ""
+
+#: src/settings.py:288
+msgid "Kanagawa"
+msgstr ""
+
+#: src/settings.py:289
+msgid "Kochi"
+msgstr ""
+
+#: src/settings.py:290
+msgid "Kumamoto"
+msgstr ""
+
+#: src/settings.py:291
+msgid "Kyoto"
+msgstr ""
+
+#: src/settings.py:292
+msgid "Mie"
+msgstr ""
+
+#: src/settings.py:293
+msgid "Miyagi"
+msgstr ""
+
+#: src/settings.py:294
+msgid "Miyazaki"
+msgstr ""
+
+#: src/settings.py:295
+msgid "Nagano"
+msgstr ""
+
+#: src/settings.py:296
+msgid "Nagasaki"
+msgstr ""
+
+#: src/settings.py:297
+msgid "Nara"
+msgstr ""
+
+#: src/settings.py:298
+msgid "Niigata"
+msgstr ""
+
+#: src/settings.py:299
+msgid "Oita"
+msgstr ""
+
+#: src/settings.py:300
+msgid "Okayama"
+msgstr ""
+
+#: src/settings.py:301
+msgid "Okinawa"
+msgstr ""
+
+#: src/settings.py:302
+msgid "Osaka"
+msgstr ""
+
+#: src/settings.py:303
+msgid "Saga"
+msgstr ""
+
+#: src/settings.py:304
+msgid "Saitama"
+msgstr ""
+
+#: src/settings.py:305
+msgid "Shiga"
+msgstr ""
+
+#: src/settings.py:306
+msgid "Shimane"
+msgstr ""
+
+#: src/settings.py:307
+msgid "Shizuoka"
+msgstr ""
+
+#: src/settings.py:308
+msgid "Tochigi"
+msgstr ""
+
+#: src/settings.py:309
+msgid "Tokushima"
+msgstr ""
+
+#: src/settings.py:310
+msgid "Tokyo"
+msgstr ""
+
+#: src/settings.py:311
+msgid "Tottori"
+msgstr ""
+
+#: src/settings.py:312
+msgid "Toyama"
+msgstr ""
+
+#: src/settings.py:313
+msgid "Wakayama"
+msgstr ""
+
+#: src/settings.py:314
+msgid "Yamagata"
+msgstr ""
+
+#: src/settings.py:315
+msgid "Yamaguchi"
+msgstr ""
+
+#: src/settings.py:316
+msgid "Yamanashi"
+msgstr ""
+
+#: src/settings.py:319
+msgid "Afghanistan"
+msgstr ""
+
+#: src/settings.py:320
+msgid "Åland Islands"
+msgstr ""
+
+#: src/settings.py:321
+msgid "Albania"
+msgstr ""
+
+#: src/settings.py:322
+msgid "Algeria"
+msgstr ""
+
+#: src/settings.py:323
+msgid "American Samoa"
+msgstr ""
+
+#: src/settings.py:324
+msgid "Andorra"
+msgstr ""
+
+#: src/settings.py:325
+msgid "Angola"
+msgstr ""
+
+#: src/settings.py:326
+msgid "Anguilla"
+msgstr ""
+
+#: src/settings.py:327
+msgid "Antarctica"
+msgstr ""
+
+#: src/settings.py:328
+msgid "Antigua and Barbuda"
+msgstr ""
+
+#: src/settings.py:329
+msgid "Argentina"
+msgstr ""
+
+#: src/settings.py:330
+msgid "Armenia"
+msgstr ""
+
+#: src/settings.py:331
+msgid "Aruba"
+msgstr ""
+
+#: src/settings.py:332
+msgid "Australia"
+msgstr ""
+
+#: src/settings.py:333
+msgid "Austria"
+msgstr ""
+
+#: src/settings.py:334
+msgid "Azerbaijan"
+msgstr ""
+
+#: src/settings.py:335
+msgid "Bahamas"
+msgstr ""
+
+#: src/settings.py:336
+msgid "Bahrain"
+msgstr ""
+
+#: src/settings.py:337
+msgid "Bangladesh"
+msgstr ""
+
+#: src/settings.py:338
+msgid "Barbados"
+msgstr ""
+
+#: src/settings.py:339
+msgid "Belarus"
+msgstr ""
+
+#: src/settings.py:340
+msgid "Belgium"
+msgstr ""
+
+#: src/settings.py:341
+msgid "Belize"
+msgstr ""
+
+#: src/settings.py:342
+msgid "Benin"
+msgstr ""
+
+#: src/settings.py:343
+msgid "Bermuda"
+msgstr ""
+
+#: src/settings.py:344
+msgid "Bhutan"
+msgstr ""
+
+#: src/settings.py:345
+msgid "Bolivia (Plurinational State of)"
+msgstr ""
+
+#: src/settings.py:346
+msgid "Bonaire, Sint Eustatius and Saba"
+msgstr ""
+
+#: src/settings.py:347
+msgid "Bosnia and Herzegovina"
+msgstr ""
+
+#: src/settings.py:348
+msgid "Botswana"
+msgstr ""
+
+#: src/settings.py:349
+msgid "Bouvet Island"
+msgstr ""
+
+#: src/settings.py:350
+msgid "Brazil"
+msgstr ""
+
+#: src/settings.py:351
+msgid "British Indian Ocean Territory"
+msgstr ""
+
+#: src/settings.py:352
+msgid "Brunei Darussalam"
+msgstr ""
+
+#: src/settings.py:353
+msgid "Bulgaria"
+msgstr ""
+
+#: src/settings.py:354
+msgid "Burkina Faso"
+msgstr ""
+
+#: src/settings.py:355
+msgid "Burundi"
+msgstr ""
+
+#: src/settings.py:356
+msgid "Cambodia"
+msgstr ""
+
+#: src/settings.py:357
+msgid "Cameroon"
+msgstr ""
+
+#: src/settings.py:358
+msgid "Canada"
+msgstr ""
+
+#: src/settings.py:359
+msgid "Cabo Verde"
+msgstr ""
+
+#: src/settings.py:360
+msgid "Cayman Islands"
+msgstr ""
+
+#: src/settings.py:361
+msgid "Central African Republic"
+msgstr ""
+
+#: src/settings.py:362
+msgid "Chad"
+msgstr ""
+
+#: src/settings.py:363
+msgid "Chile"
+msgstr ""
+
+#: src/settings.py:364
+msgid "China"
+msgstr ""
+
+#: src/settings.py:365
+msgid "Christmas Island"
+msgstr ""
+
+#: src/settings.py:366
+msgid "Cocos (Keeling) Islands"
+msgstr ""
+
+#: src/settings.py:367
+msgid "Colombia"
+msgstr ""
+
+#: src/settings.py:368
+msgid "Comoros"
+msgstr ""
+
+#: src/settings.py:369
+msgid "Congo"
+msgstr ""
+
+#: src/settings.py:370
+msgid "Congo (Democratic Republic of the)"
+msgstr ""
+
+#: src/settings.py:371
+msgid "Cook Islands"
+msgstr ""
+
+#: src/settings.py:372
+msgid "Costa Rica"
+msgstr ""
+
+#: src/settings.py:373
+msgid "Côte d'Ivoire"
+msgstr ""
+
+#: src/settings.py:374
+msgid "Croatia"
+msgstr ""
+
+#: src/settings.py:375
+msgid "Cuba"
+msgstr ""
+
+#: src/settings.py:376
+msgid "Curaçao"
+msgstr ""
+
+#: src/settings.py:377
+msgid "Cyprus"
+msgstr ""
+
+#: src/settings.py:378
+msgid "Czech Republic"
+msgstr ""
+
+#: src/settings.py:379
+msgid "Denmark"
+msgstr ""
+
+#: src/settings.py:380
+msgid "Djibouti"
+msgstr ""
+
+#: src/settings.py:381
+msgid "Dominica"
+msgstr ""
+
+#: src/settings.py:382
+msgid "Dominican Republic"
+msgstr ""
+
+#: src/settings.py:383
+msgid "Ecuador"
+msgstr ""
+
+#: src/settings.py:384
+msgid "Egypt"
+msgstr ""
+
+#: src/settings.py:385
+msgid "El Salvador"
+msgstr ""
+
+#: src/settings.py:386
+msgid "Equatorial Guinea"
+msgstr ""
+
+#: src/settings.py:387
+msgid "Eritrea"
+msgstr ""
+
+#: src/settings.py:388
+msgid "Estonia"
+msgstr ""
+
+#: src/settings.py:389
+msgid "Ethiopia"
+msgstr ""
+
+#: src/settings.py:390
+msgid "Falkland Islands (Malvinas)"
+msgstr ""
+
+#: src/settings.py:391
+msgid "Faroe Islands"
+msgstr ""
+
+#: src/settings.py:392
+msgid "Fiji"
+msgstr ""
+
+#: src/settings.py:393
+msgid "Finland"
+msgstr ""
+
+#: src/settings.py:394
+msgid "France"
+msgstr ""
+
+#: src/settings.py:395
+msgid "French Guiana"
+msgstr ""
+
+#: src/settings.py:396
+msgid "French Polynesia"
+msgstr ""
+
+#: src/settings.py:397
+msgid "French Southern Territories"
+msgstr ""
+
+#: src/settings.py:398
+msgid "Gabon"
+msgstr ""
+
+#: src/settings.py:399
+msgid "Gambia"
+msgstr ""
+
+#: src/settings.py:400
+msgid "Georgia"
+msgstr ""
+
+#: src/settings.py:401
+msgid "Germany"
+msgstr ""
+
+#: src/settings.py:402
+msgid "Ghana"
+msgstr ""
+
+#: src/settings.py:403
+msgid "Gibraltar"
+msgstr ""
+
+#: src/settings.py:404
+msgid "Greece"
+msgstr ""
+
+#: src/settings.py:405
+msgid "Greenland"
+msgstr ""
+
+#: src/settings.py:406
+msgid "Grenada"
+msgstr ""
+
+#: src/settings.py:407
+msgid "Guadeloupe"
+msgstr ""
+
+#: src/settings.py:408
+msgid "Guam"
+msgstr ""
+
+#: src/settings.py:409
+msgid "Guatemala"
+msgstr ""
+
+#: src/settings.py:410
+msgid "Guernsey"
+msgstr ""
+
+#: src/settings.py:411
+msgid "Guinea"
+msgstr ""
+
+#: src/settings.py:412
+msgid "Guinea-Bissau"
+msgstr ""
+
+#: src/settings.py:413
+msgid "Guyana"
+msgstr ""
+
+#: src/settings.py:414
+msgid "Haiti"
+msgstr ""
+
+#: src/settings.py:415
+msgid "Heard Island and McDonald Islands"
+msgstr ""
+
+#: src/settings.py:416
+msgid "Holy See"
+msgstr ""
+
+#: src/settings.py:417
+msgid "Honduras"
+msgstr ""
+
+#: src/settings.py:418
+msgid "Hong Kong"
+msgstr ""
+
+#: src/settings.py:419
+msgid "Hungary"
+msgstr ""
+
+#: src/settings.py:420
+msgid "Iceland"
+msgstr ""
+
+#: src/settings.py:421
+msgid "India"
+msgstr ""
+
+#: src/settings.py:422
+msgid "Indonesia"
+msgstr ""
+
+#: src/settings.py:423
+msgid "Iran (Islamic Republic of)"
+msgstr ""
+
+#: src/settings.py:424
+msgid "Iraq"
+msgstr ""
+
+#: src/settings.py:425
+msgid "Ireland"
+msgstr ""
+
+#: src/settings.py:426
+msgid "Isle of Man"
+msgstr ""
+
+#: src/settings.py:427
+msgid "Israel"
+msgstr ""
+
+#: src/settings.py:428
+msgid "Italy"
+msgstr ""
+
+#: src/settings.py:429
+msgid "Jamaica"
+msgstr ""
+
+#: src/settings.py:430
+msgid "Japan"
+msgstr ""
+
+#: src/settings.py:431
+msgid "Jersey"
+msgstr ""
+
+#: src/settings.py:432
+msgid "Jordan"
+msgstr ""
+
+#: src/settings.py:433
+msgid "Kazakhstan"
+msgstr ""
+
+#: src/settings.py:434
+msgid "Kenya"
+msgstr ""
+
+#: src/settings.py:435
+msgid "Kiribati"
+msgstr ""
+
+#: src/settings.py:436
+msgid "Korea (Democratic People's Republic of)"
+msgstr ""
+
+#: src/settings.py:437
+msgid "Korea (Republic of)"
+msgstr ""
+
+#: src/settings.py:438
+msgid "Kuwait"
+msgstr ""
+
+#: src/settings.py:439
+msgid "Kyrgyzstan"
+msgstr ""
+
+#: src/settings.py:440
+msgid "Lao People's Democratic Republic"
+msgstr ""
+
+#: src/settings.py:441
+msgid "Latvia"
+msgstr ""
+
+#: src/settings.py:442
+msgid "Lebanon"
+msgstr ""
+
+#: src/settings.py:443
+msgid "Lesotho"
+msgstr ""
+
+#: src/settings.py:444
+msgid "Liberia"
+msgstr ""
+
+#: src/settings.py:445
+msgid "Libya"
+msgstr ""
+
+#: src/settings.py:446
+msgid "Liechtenstein"
+msgstr ""
+
+#: src/settings.py:447
+msgid "Lithuania"
+msgstr ""
+
+#: src/settings.py:448
+msgid "Luxembourg"
+msgstr ""
+
+#: src/settings.py:449
+msgid "Macao"
+msgstr ""
+
+#: src/settings.py:450
+msgid "Macedonia (the former Yugoslav Republic of)"
+msgstr ""
+
+#: src/settings.py:451
+msgid "Madagascar"
+msgstr ""
+
+#: src/settings.py:452
+msgid "Malawi"
+msgstr ""
+
+#: src/settings.py:453
+msgid "Malaysia"
+msgstr ""
+
+#: src/settings.py:454
+msgid "Maldives"
+msgstr ""
+
+#: src/settings.py:455
+msgid "Mali"
+msgstr ""
+
+#: src/settings.py:456
+msgid "Malta"
+msgstr ""
+
+#: src/settings.py:457
+msgid "Marshall Islands"
+msgstr ""
+
+#: src/settings.py:458
+msgid "Martinique"
+msgstr ""
+
+#: src/settings.py:459
+msgid "Mauritania"
+msgstr ""
+
+#: src/settings.py:460
+msgid "Mauritius"
+msgstr ""
+
+#: src/settings.py:461
+msgid "Mayotte"
+msgstr ""
+
+#: src/settings.py:462
+msgid "Mexico"
+msgstr ""
+
+#: src/settings.py:463
+msgid "Micronesia (Federated States of)"
+msgstr ""
+
+#: src/settings.py:464
+msgid "Moldova (Republic of)"
+msgstr ""
+
+#: src/settings.py:465
+msgid "Monaco"
+msgstr ""
+
+#: src/settings.py:466
+msgid "Mongolia"
+msgstr ""
+
+#: src/settings.py:467
+msgid "Montenegro"
+msgstr ""
+
+#: src/settings.py:468
+msgid "Montserrat"
+msgstr ""
+
+#: src/settings.py:469
+msgid "Morocco"
+msgstr ""
+
+#: src/settings.py:470
+msgid "Mozambique"
+msgstr ""
+
+#: src/settings.py:471
+msgid "Myanmar"
+msgstr ""
+
+#: src/settings.py:472
+msgid "Namibia"
+msgstr ""
+
+#: src/settings.py:473
+msgid "Nauru"
+msgstr ""
+
+#: src/settings.py:474
+msgid "Nepal"
+msgstr ""
+
+#: src/settings.py:475
+msgid "Netherlands"
+msgstr ""
+
+#: src/settings.py:476
+msgid "New Caledonia"
+msgstr ""
+
+#: src/settings.py:477
+msgid "New Zealand"
+msgstr ""
+
+#: src/settings.py:478
+msgid "Nicaragua"
+msgstr ""
+
+#: src/settings.py:479
+msgid "Niger"
+msgstr ""
+
+#: src/settings.py:480
+msgid "Nigeria"
+msgstr ""
+
+#: src/settings.py:481
+msgid "Niue"
+msgstr ""
+
+#: src/settings.py:482
+msgid "Norfolk Island"
+msgstr ""
+
+#: src/settings.py:483
+msgid "Northern Mariana Islands"
+msgstr ""
+
+#: src/settings.py:484
+msgid "Norway"
+msgstr ""
+
+#: src/settings.py:485
+msgid "Oman"
+msgstr ""
+
+#: src/settings.py:486
+msgid "Pakistan"
+msgstr ""
+
+#: src/settings.py:487
+msgid "Palau"
+msgstr ""
+
+#: src/settings.py:488
+msgid "Palestine, State of"
+msgstr ""
+
+#: src/settings.py:489
+msgid "Panama"
+msgstr ""
+
+#: src/settings.py:490
+msgid "Papua New Guinea"
+msgstr ""
+
+#: src/settings.py:491
+msgid "Paraguay"
+msgstr ""
+
+#: src/settings.py:492
+msgid "Peru"
+msgstr ""
+
+#: src/settings.py:493
+msgid "Philippines"
+msgstr ""
+
+#: src/settings.py:494
+msgid "Pitcairn"
+msgstr ""
+
+#: src/settings.py:495
+msgid "Poland"
+msgstr ""
+
+#: src/settings.py:496
+msgid "Portugal"
+msgstr ""
+
+#: src/settings.py:497
+msgid "Puerto Rico"
+msgstr ""
+
+#: src/settings.py:498
+msgid "Qatar"
+msgstr ""
+
+#: src/settings.py:499
+msgid "Réunion"
+msgstr ""
+
+#: src/settings.py:500
+msgid "Romania"
+msgstr ""
+
+#: src/settings.py:501
+msgid "Russian Federation"
+msgstr ""
+
+#: src/settings.py:502
+msgid "Rwanda"
+msgstr ""
+
+#: src/settings.py:503
+msgid "Saint Barthélemy"
+msgstr ""
+
+#: src/settings.py:504
+msgid "Saint Helena, Ascension and Tristan da Cunha"
+msgstr ""
+
+#: src/settings.py:505
+msgid "Saint Kitts and Nevis"
+msgstr ""
+
+#: src/settings.py:506
+msgid "Saint Lucia"
+msgstr ""
+
+#: src/settings.py:507
+msgid "Saint Martin (French part)"
+msgstr ""
+
+#: src/settings.py:508
+msgid "Saint Pierre and Miquelon"
+msgstr ""
+
+#: src/settings.py:509
+msgid "Saint Vincent and the Grenadines"
+msgstr ""
+
+#: src/settings.py:510
+msgid "Samoa"
+msgstr ""
+
+#: src/settings.py:511
+msgid "San Marino"
+msgstr ""
+
+#: src/settings.py:512
+msgid "Sao Tome and Principe"
+msgstr ""
+
+#: src/settings.py:513
+msgid "Saudi Arabia"
+msgstr ""
+
+#: src/settings.py:514
+msgid "Senegal"
+msgstr ""
+
+#: src/settings.py:515
+msgid "Serbia"
+msgstr ""
+
+#: src/settings.py:516
+msgid "Seychelles"
+msgstr ""
+
+#: src/settings.py:517
+msgid "Sierra Leone"
+msgstr ""
+
+#: src/settings.py:518
+msgid "Singapore"
+msgstr ""
+
+#: src/settings.py:519
+msgid "Sint Maarten (Dutch part)"
+msgstr ""
+
+#: src/settings.py:520
+msgid "Slovakia"
+msgstr ""
+
+#: src/settings.py:521
+msgid "Slovenia"
+msgstr ""
+
+#: src/settings.py:522
+msgid "Solomon Islands"
+msgstr ""
+
+#: src/settings.py:523
+msgid "Somalia"
+msgstr ""
+
+#: src/settings.py:524
+msgid "South Africa"
+msgstr ""
+
+#: src/settings.py:525
+msgid "South Georgia and the South Sandwich Islands"
+msgstr ""
+
+#: src/settings.py:526
+msgid "South Sudan"
+msgstr ""
+
+#: src/settings.py:527
+msgid "Spain"
+msgstr ""
+
+#: src/settings.py:528
+msgid "Sri Lanka"
+msgstr ""
+
+#: src/settings.py:529
+msgid "Sudan"
+msgstr ""
+
+#: src/settings.py:530
+msgid "Suriname"
+msgstr ""
+
+#: src/settings.py:531
+msgid "Svalbard and Jan Mayen"
+msgstr ""
+
+#: src/settings.py:532
+msgid "Swaziland"
+msgstr ""
+
+#: src/settings.py:533
+msgid "Sweden"
+msgstr ""
+
+#: src/settings.py:534
+msgid "Switzerland"
+msgstr ""
+
+#: src/settings.py:535
+msgid "Syrian Arab Republic"
+msgstr ""
+
+#: src/settings.py:536
+msgid "Taiwan, Province of China"
+msgstr ""
+
+#: src/settings.py:537
+msgid "Tajikistan"
+msgstr ""
+
+#: src/settings.py:538
+msgid "Tanzania, United Republic of"
+msgstr ""
+
+#: src/settings.py:539
+msgid "Thailand"
+msgstr ""
+
+#: src/settings.py:540
+msgid "Timor-Leste"
+msgstr ""
+
+#: src/settings.py:541
+msgid "Togo"
+msgstr ""
+
+#: src/settings.py:542
+msgid "Tokelau"
+msgstr ""
+
+#: src/settings.py:543
+msgid "Tonga"
+msgstr ""
+
+#: src/settings.py:544
+msgid "Trinidad and Tobago"
+msgstr ""
+
+#: src/settings.py:545
+msgid "Tunisia"
+msgstr ""
+
+#: src/settings.py:546
+msgid "Turkey"
+msgstr ""
+
+#: src/settings.py:547
+msgid "Turkmenistan"
+msgstr ""
+
+#: src/settings.py:548
+msgid "Turks and Caicos Islands"
+msgstr ""
+
+#: src/settings.py:549
+msgid "Tuvalu"
+msgstr ""
+
+#: src/settings.py:550
+msgid "Uganda"
+msgstr ""
+
+#: src/settings.py:551
+msgid "Ukraine"
+msgstr ""
+
+#: src/settings.py:552
+msgid "United Arab Emirates"
+msgstr ""
+
+#: src/settings.py:553
+msgid "United Kingdom of Great Britain and Northern Ireland"
+msgstr ""
+
+#: src/settings.py:554
+msgid "United States of America"
+msgstr ""
+
+#: src/settings.py:555
+msgid "United States Minor Outlying Islands"
+msgstr ""
+
+#: src/settings.py:556
+msgid "Uruguay"
+msgstr ""
+
+#: src/settings.py:557
+msgid "Uzbekistan"
+msgstr ""
+
+#: src/settings.py:558
+msgid "Vanuatu"
+msgstr ""
+
+#: src/settings.py:559
+msgid "Venezuela (Bolivarian Republic of)"
+msgstr ""
+
+#: src/settings.py:560
+msgid "Viet Nam"
+msgstr ""
+
+#: src/settings.py:561
+msgid "Virgin Islands (British)"
+msgstr ""
+
+#: src/settings.py:562
+msgid "Virgin Islands (U.S.)"
+msgstr ""
+
+#: src/settings.py:563
+msgid "Wallis and Futuna"
+msgstr ""
+
+#: src/settings.py:564
+msgid "Western Sahara"
+msgstr ""
+
+#: src/settings.py:565
+msgid "Yemen"
+msgstr ""
+
+#: src/settings.py:566
+msgid "Zambia"
+msgstr ""
+
+#: src/settings.py:567
+msgid "Zimbabwe"
+msgstr ""
+
+#: src/templates/base.html:43
+msgid "Management"
+msgstr ""
+
+#: src/templates/base.html:71
+msgid "Log out"
+msgstr ""
+
+#~ msgid "Group Members Count"
+#~ msgstr "Members count"
+
+#~ msgid "SHARING_GROUP_Malware"
+#~ msgstr "Malware"
+
+#~ msgid "SHARING_GROUP_Ransomware"
+#~ msgstr "Ransomware"
+
+#~ msgid "SHARING_GROUP_DDos"
+#~ msgstr "DDoS"
+
+#~ msgid "SHARING_GROUP_APT"
+#~ msgstr "APT"
+
+#~ msgid "SHARING_GROUP_Vulnerability"
+#~ msgstr "Vulnerability"
+
+#~ msgid "SHARING_GROUP_Phishing"
+#~ msgstr "Phishing"
+
+#~ msgid "SHARING_GROUP_Web Site"
+#~ msgstr "Web Site"
+
+#~ msgid "SHARING_GROUP_Cyber-attack Warning"
+#~ msgstr "Cyber-attack Warning"
+
+#~ msgid "SHARING_GROUP_IoT"
+#~ msgstr "IoT"
+
+#~ msgid "SHARING_GROUP_Security Reports"
+#~ msgstr "Security Reports"
+
+#~ msgid "SHARING_GROUP_Tokyo Olympics/Paralympics 2020"
+#~ msgstr "Tokyo Olympics/Paralympics 2020"
+
+#~ msgid "SHARING_GROUP_Rugby World Cup 2019"
+#~ msgstr "Rugby World Cup 2019"
+
+#~ msgid "SHARING_GROUP_Carrier"
+#~ msgstr "Carrier"
+
+#~ msgid "SHARING_GROUP_Financial Services"
+#~ msgstr "Financial Services"
+
+#~ msgid "SHARING_GROUP_Defense Industries and MoD"
+#~ msgstr "Defense Industries and MoD"
+
+#~ msgid "SHARING_GROUP_Hokkaido Region"
+#~ msgstr "Hokkaido Region"
+
+#~ msgid "SHARING_GROUP_Tohoku Region"
+#~ msgstr "Tohoku Region"
+
+#~ msgid "SHARING_GROUP_Kanto Region"
+#~ msgstr "Kanto Region"
+
+#~ msgid "SHARING_GROUP_Chubu Region"
+#~ msgstr "Chubu Region"
+
+#~ msgid "SHARING_GROUP_Kansai Region"
+#~ msgstr "Kansai Region"
+
+#~ msgid "SHARING_GROUP_Chugoku Region"
+#~ msgstr "Chugoku Region"
+
+#~ msgid "SHARING_GROUP_Shikoku Region"
+#~ msgstr "Shikoku Region"
+
+#~ msgid "SHARING_GROUP_Kyushu Region"
+#~ msgstr "Kyushu Region"
+
+#~ msgid "SHARING_GROUP_Commercial Facilities"
+#~ msgstr "Commercial Facilities"
+
+#~ msgid "SHARING_GROUP_Emergency Services"
+#~ msgstr "Emergency Services"
+
+#~ msgid "SHARING_GROUP_Food and Agriculture"
+#~ msgstr "Food and Agricultur"
+
+#~ msgid "SHARING_GROUP_Government Facilities"
+#~ msgstr "Government Facilities"
+
+#~ msgid "SHARING_GROUP_Healthcare and Public Health"
+#~ msgstr "Healthcare and Public Health"
+
+#~ msgid "SHARING_GROUP_Information Technology"
+#~ msgstr "Information Technology"
+
+#~ msgid "SHARING_GROUP_Nuclear Reactors, Materials, and Waste"
+#~ msgstr "Nuclear Reactors, Materials, and Waste"
+
+#~ msgid "SHARING_GROUP_Transportation Systems"
+#~ msgstr "Transportation Systems"
+
+#~ msgid "SHARING_GROUP_Water and Wastewater Systems"
+#~ msgstr "Water and Wastewater Systems"

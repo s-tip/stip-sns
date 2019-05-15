@@ -1,0 +1,200 @@
+{% load i18n %}
+{% load humanize %}
+{% load feeds_filter %}
+{% load tz %}
+{% localtime off %}
+{% if feed.user == user %}
+	<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-mine" feed-date="{{feed.date|date:"YmdHis.u"}}">
+{% else %}
+	{% if user.ci %}
+		{# ciあり #}
+		{% if user.region.code %}
+			{# ciあり/regionあり #}
+			{% if feed.user.ci == user.ci %}
+				{% if feed.administrative_code == user.administrative_code %}
+					<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-region-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
+				{% else %}
+					<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
+				{% endif %}
+			{% else %}
+				{% if feed.administrative_code == user.region.code %}
+					<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-region" feed-date="{{feed.date|date:"YmdHis.u"}}">
+				{% else %}
+					<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
+				{% endif %}
+			{% endif %}
+		{% else %}
+			{# ciあり/regionなし #}
+			{% if feed.user.ci == user.ci %}
+				<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
+			{% else %}
+				<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
+			{% endif %}
+		{% endif %}
+	{% else %}
+		{# ciなし #}
+		{% if user.region.code %}
+			{# ciなし/regionあり #}
+			{% if feed.administrative_code == user.administrative_code %}
+				<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-region" feed-date="{{feed.date|date:"YmdHis.u"}}">
+			{% else %}
+				<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
+			{% endif %}
+		{% else %}
+			{# ciなし/regionなし #}
+			<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
+		{% endif %}
+	{% endif %}
+{% endif %}
+{% endlocaltime off %}
+  <div class="feed-container" >
+    <a href="{% url 'profile' feed.user.username %}"><img src="{{ feed.user.get_picture }}" class="user"></a>
+    <div class="post">
+      {% if feed.user == user %}
+        <span class="glyphicon glyphicon-remove remove-feed" title="{% trans 'Click to remove this feed' %}"></span>
+      {% endif %}
+      <h3>
+      {% if feed.is_valid_user %}
+      <a href="{% url 'profile' feed.user.username %}">{{feed.screen_name}} {% if feed.screen_affiliation %}@ {{feed.screen_affiliation}}{% endif %}</a>
+      {% else %}
+      <i>{{feed.screen_name}} {% if feed.screen_affiliation %}@ {{feed.screen_affiliation}}{% endif %}</i>
+      {% endif %}
+        {% if feed.screen_instance %}<small class="text feed-tlp">[{{feed.screen_instance}}]</small>{% endif %}
+        {% ifequal feed.tlp  "RED" %}
+        <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-red">RED</small>
+        {% endifequal %}
+        {% ifequal feed.tlp  "AMBER" %}
+        <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-amber">AMBER</small>
+        {% endifequal %}
+        {% ifequal feed.tlp  "GREEN" %}
+        <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-green">GREEN</small>
+        {% endifequal %}
+        {% ifequal feed.tlp  "WHITE" %}
+        <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-white">WHITE</small>
+        {% endifequal %}
+        {% if not feed.tlp %}
+        <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-unedefined">undefined</small>
+        {% endif %}
+        {% timezone user.timezone%}
+	    <small>{{ feed.date }}</small>
+        {% endtimezone  %}
+      </h3>
+      <div class="panel-group" id="accordion-{{feed.filename_pk|get_accordion_pk}}">
+        <div class="panel-heading">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapse-{{feed.filename_pk|get_accordion_pk}}" class="title-link">
+              {{ feed.title |default:'No Title'}}
+            </a>
+        </div>
+        <div id="collapse-{{feed.filename_pk|get_accordion_pk}}" class="panel-collapse collapse">
+          <div class="panel-body" style="border-top:0px;">
+	        {{ feed.post|safe|linebreaks }}
+	      </div>
+          <div class="interaction">
+            <div class="boxContainer">
+   	          {% ifequal feed.tlp "RED" %}
+    	      {% else %}
+              <div class="box">
+                <a class="download-stix">
+                  <span class="glyphicon glyphicon-save"></span>
+                  <span class="text">STIX 1.2</span>
+                </a>
+              </div> <!-- box -->
+              <div class="box">
+                <a class="download-csv">
+                  <span class="glyphicon glyphicon-save"></span>
+                  <span class="text">CSV</span>
+                </a>
+              </div> <!-- box -->
+              <div class="box">
+                <a class="download-pdf">
+                  <span class="glyphicon glyphicon-save"></span>
+                  <span class="text">PDF</span>
+                </a>
+              </div> <!-- box -->
+    	      {% endifequal %}
+              <div class="box">
+                <a href="#" class="share-ctim-gv">
+                  <span class="glyphicon glyphicon-share-alt"></span>
+                  <span class="text">GV</span>
+                </a>
+              </div> <!-- box -->
+              <div class="box">
+                <a href="#" class="share-misp">
+                  <span class="glyphicon glyphicon-share-alt"></span>
+                  <span class="text">MISP</span>
+                </a>
+              </div> <!-- box -->
+              {% if jira %}
+              <div class="box">
+                <a href="#" class="share-ctim-jira" >
+                  <img src="/static/img/jira.png" style="width:11.2px;height:13px;"/>
+                  <span class="text">{% trans 'Issue' %}</span>
+                </a>
+              </div> <!-- box -->
+              {% endif %}
+          </div> <!--  interaction -->
+          <div class="interaction">
+            {% if feed.like %}
+            <a href="#" class="like unlike">
+              <span class="glyphicon glyphicon-thumbs-up"></span>
+              <span class="text">{% trans 'Unlike' %}</span>
+              (<span class="like-count">{{ feed.likes }}</span>)
+            </a>
+            {% else %}
+            <a href="#" class="like">
+              <span class="glyphicon glyphicon-thumbs-up"></span>
+              <span class="text">{% trans 'Like' %}</span>
+              (<span class="like-count">{{ feed.likes }}</span>)
+            </a>
+            {% endif %}
+            <a href="#" class="comment">
+              <span class="glyphicon glyphicon-comment"></span> {% trans 'Comment' %}
+              (<span class="comment-count">{{ feed.comments }}</span>)
+            </a>
+            {% ifequal feed.sharing_range_type 'all' %}
+              <span class="text feed-sharing"><b>{% trans 'Sharing Range' %}:</b> {% trans 'CSC Community' %}</span>
+            {% endifequal %}
+            {% ifequal feed.sharing_range_type 'group' %}
+              <span class="text feed-sharing"><b>{% trans 'Sharing Range' %}:</b> [{% trans 'group' %}] 
+              {% ifequal feed.sharing_group.locale user.language %}
+                {{ feed.sharing_group.local_name }}
+              {% else %}
+                {{ feed.sharing_group.en_name }}
+              {% endifequal %}
+            </span>
+            {% endifequal %}
+            {% ifequal feed.sharing_range_type 'people' %}
+              <span class="text feed-sharing" title="This post is shared with{%if feed.sharing_people.all|length == 1%} {{feed.sharing_people.all.0.get_screen_name}}.{%else%}{% for sharing_user in feed.sharing_people.all %} {% if forloop.last %}and {{sharing_user.get_screen_name}}.{%else%}{{sharing_user.get_screen_name}},{%endif%}{% endfor %}{%endif%}">
+              <b>{% trans 'Sharing Range' %}:</b> {{ feed.sharing_people.all.0.get_screen_name }} {% if feed.sharing_people.all|length > 1 %}, ...{% endif %}</span>
+            {% endifequal %}
+
+            {% if feed.referred_url %}
+              <br>
+              <span class="text feed-referred-url">{% trans 'Referred URL' %}: {{feed.referred_url | get_referred_url_tag| safe}}</span>
+            {% endif %}
+
+            {% if feed.files %}
+            <br>
+            {% for file in feed.files.all %}
+            <a class="attach" file-id="{{file.package_id}}">
+              <span class="glyphicon glyphicon-paperclip"></span>
+              <span class="text">{{ file.file_name }}</span>
+            </a>
+            {% endfor %}
+            {% endif %}
+          </div>
+          <div class="comments">
+            <form role="form" method="post" action="{{ comment }}" onsubmit="return false">
+              {% csrf_token %}
+              <input type="hidden" name="package_id" value="{{ feed.package_id }}">
+              <input type="text" class="form-control input-sm" placeholder="{% trans 'Write a comment...' %}" name="post" maxlength="255">
+            </form>
+            <ol class="clearfix">
+              {% comment %} Place holder to load feed comments {% endcomment %}
+            </ol>
+          </div> <!-- comments -->
+        </div> <!-- collpase -->
+      </div><!--  accrdion -->
+    </div> <!-- post -->
+  </div> <!--  feed-content -->
+</li>

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% get_available_languages as LANGUAGES %}
+{% get_current_language as CURRENT_LANGUAGE %}
+
+{% block title %}Group Settings{% endblock %}
+
+{% block head %}
+  <link href="{% static 'css/multi-select.css' %}?v=1" rel="stylesheet">
+  <script src="{% static 'js/jquery.multi-select.js' %}?v=1"></script>
+  <script src="{% static 'js/upseart.js' %}"></script>
+  <script src="{% static 'js/jquery.quicksearch.js' %}?v=1"></script>
+{% endblock head %}
+
+{% block main %}
+  <div class="page-header">
+    <h1>{% trans 'Group Settings' %}</h1>
+  </div>
+  <div class="row" style="margin-top: 2em">
+    <div class="col-md-12">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <a href='{% url 'management_group' %}'>{% trans 'Back to previous page.' %}</a>
+      <br/><br/>
+
+      <h3 style="margin-top: 0">{% trans 'Edit Group' %}</h3>
+      <form role="form" class="form-horizontal" method="post" id="form-upsert-group" action="{% url 'upsert_group' %}">
+        {% csrf_token %}
+        {% for field in form.hidden_fields %}
+          {{ field }}
+        {% endfor %}
+        {% for field in form.visible_fields %}
+          <div class="form-group{% if field.errors %} has-error{% endif %}">
+            <label for="{{ field.label }}" class="col-sm-2 control-label">{% trans field.label %}</label>
+            <div class="col-sm-10">
+              {{ field }}
+              {% if field.help_text %}
+                <span class="help-block">{{ field.help_text }}</span>
+              {% endif %}
+              {% for error in field.errors %}
+                <label class="control-label">{{ error }}</label>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+        <hr/>
+        <div class="row account-select-style">
+          <div class="account-select-left">
+            <label class="col-sm-2 control-label">{% trans 'Select Member Accounts' %}</label>
+            <div class="col-sm-10">
+              <select multiple class="form-control" id="account-select-box">
+                {% for user in users %}
+                <option value="{{user.id}}">{{user.get_screen_name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div> <!-- row style-select -->
+        <br/>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" class="btn btn-primary" id="button-upsert">{% trans 'Save' %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock main %}
