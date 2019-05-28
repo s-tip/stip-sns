@@ -1,15 +1,16 @@
 # S-TIP SNS
 
-S-TIP SNS uses [bootcamp](https://github.com/vitorfs/bootcamp).
+Social Networking System for [Seamless Threat Intelligence Platform](https://github.com/s-tip/stip-common)
+
+S-TIP SNS uses [bootcamp](https://github.com/vitorfs/bootcamp) internally.
+
+## Bootcamp
 
 Copyright (c) 2018, Vitor Freitas
 
 Released under the MIT license
 
 https://github.com/vitorfs/bootcamp/blob/master/LICENSE
-
-
-## Bootcamp
 
 [![Build Status](https://travis-ci.org/vitorfs/bootcamp.svg?branch=master)](https://travis-ci.org/vitorfs/bootcamp) [![Coverage Status](https://coveralls.io/repos/github/vitorfs/bootcamp/badge.svg?branch=master)](https://coveralls.io/github/vitorfs/bootcamp?branch=master) [![Requirements Status](https://requires.io/github/vitorfs/bootcamp/requirements.svg?branch=master)](https://requires.io/github/vitorfs/bootcamp/requirements/?branch=master)
 
