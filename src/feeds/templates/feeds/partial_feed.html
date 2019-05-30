@@ -93,11 +93,17 @@
             <div class="boxContainer">
    	          {% ifequal feed.tlp "RED" %}
     	      {% else %}
-              <div class="box">
+              <div class="box download-stix-div">
                 <a class="download-stix">
                   <span class="glyphicon glyphicon-save"></span>
-                  <span class="text">STIX 1.2</span>
+                  <span class="text">STIX</span>
                 </a>
+                <ul class="stix-download-menu-ul">
+                	<li class="stix-download-menul-li"><a class="download-stix-12" data-package-id="{{feed.package_id}}">STIX 1.2</a></li>
+                    {% if feed.stix2_package_id %}
+                	<li class="stix-download-menul-li"><a class="download-stix-21" data-package-id="{{feed.stix2_package_id}}">STIX 2.1</a></li>
+                	{% endif %}
+                </ul>
               </div> <!-- box -->
               <div class="box">
                 <a class="download-csv">
@@ -112,11 +118,17 @@
                 </a>
               </div> <!-- box -->
     	      {% endifequal %}
-              <div class="box">
-                <a href="#" class="share-ctim-gv">
+              <div class="box share-ctim-gv-div">
+                <a class="share-ctim-gv">
                   <span class="glyphicon glyphicon-share-alt"></span>
                   <span class="text">GV</span>
                 </a>
+                <ul class="share-ctim-gv-menu-ul">
+                	<li class="share-ctim-gv-menu-li"><a class="share-ctim-gv-12" data-package-id="{{feed.package_id}}">STIX 1.2</a></li>
+                    {% if feed.stix2_package_id %}
+                	<li class="share-ctim-gv-menu-li"><a class="share-ctim-gv-21" data-package-id="{{feed.stix2_package_id}}">STIX 2.1</a></li>
+                	{% endif %}
+                </ul>
               </div> <!-- box -->
               <div class="box">
                 <a href="#" class="share-misp">

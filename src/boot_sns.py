@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-#from daemon.email.smtp import start_mail_thread
+import threading
 from django.apps import AppConfig
 from django.core.management import call_command
 from django.utils.translation import ugettext_lazy
 from stip.common.boot import is_skip_sequence
+from django.conf import settings as django_settings
+#from daemon.email.smtp import start_mail_thread
 
 class StipSnsBoot(AppConfig):
     name = 'boot_sns'
@@ -59,6 +61,10 @@ class StipSnsBoot(AppConfig):
         #country/region の日本語対応
         self.convert_country_and_region_in_japanese()
         
+        #slack WebSocket start
+        from daemon.slack.receive import start_receive_slack_thread
+        start_receive_slack_thread()
+
     def convert_country_and_region_in_japanese(self):
         #日本語化対象
         #日本の都道府県

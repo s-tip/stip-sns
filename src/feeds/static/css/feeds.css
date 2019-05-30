@@ -296,3 +296,22 @@ tbody tr td{
 .compose-title-language-select, .compose-content-language-select{
   width: 120%;	
 }
+
+ul.stream li .stix-download-menu-ul,
+ul.stream li .share-ctim-gv-menu-ul
+{
+  display: none;
+  padding: 0px;
+}
+
+ul.stream li .stix-download-menul-li,
+ul.stream li .share-ctim-gv-menu-li
+{
+  padding-top: 0px;
+}
+
+.download-stix, share-ctim-gv
+{
+  cursor: pointer;
+}
+

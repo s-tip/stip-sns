@@ -18,6 +18,17 @@
     <br/><br/><br/>
   </div>
   <div class="page-header">
+    <h1>{% trans 'Reboot Slack Thread' %}</h1>
+  </div>
+  <div class="row" style="margin-top: 2em">
+    <div class="col-md-9">
+    <form role="form" class="form-horizontal" method="get" id="reboot-slack-thread" action="{% url 'reboot_slack_thread' %}">
+        <button type="submit" class="btn btn-danger">{% trans 'Reboot Slack Thread' %}</button>
+    </form>
+    </div>
+    <br/><br/><br/>
+  </div>
+  <div class="page-header">
     <h1>{% trans 'Edit SNS Config' %}</h1>
   </div>
   <div class="row" style="margin-top: 2em">

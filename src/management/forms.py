@@ -144,6 +144,16 @@ class SNSConfigForm(forms.ModelForm):
         max_length=128,
         label=_('STIX Namespace Name'),
         required=True)
+    slack_bot_token = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Slack Bot Token'),
+        required=False)
+    slack_bot_channel = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Slack Bot Channel'),
+        required=False)
 
 
     class Meta:
@@ -157,5 +167,5 @@ class SNSConfigForm(forms.ModelForm):
                   'proxy_http','proxy_https','gv_l2_url',
                   'jira_host','jira_username','jira_password','jira_project','jira_type',
                   'smtp_port', 'smtp_accept_mail_address',
-                  'stix_ns_url', 'stix_ns_name']
+                  'stix_ns_url', 'stix_ns_name', 'slack_bot_token', 'slack_bot_channel']
 
