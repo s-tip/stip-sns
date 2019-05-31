@@ -163,7 +163,7 @@ class FeedStix(FeedStixCommon):
             ta = CommonExtractor._get_threat_actor_object(ta_value,description,ta_motivations)
             return ta
         except:
-            traceback.print_exc()
+            #traceback.print_exc()
             return None
 
 

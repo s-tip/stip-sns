@@ -4,7 +4,6 @@ import json
 from django.http import (HttpResponseBadRequest, HttpResponse,)
 from ctirs.models import STIPUser
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
 from django.http.response import HttpResponseNotAllowed
 from feeds.views import KEY_ANONYMOUS,KEY_USERNAME,post_common
 
@@ -25,7 +24,7 @@ def post(request):
             #user情報取得
             try:
                 username = request.POST[KEY_USERNAME]
-                user = User.objects.get(username=username)
+                user = STIPUser.objects.get(username=username)
             except:
                 raise Exception('Invalid username(%s)' % (username))
 
@@ -35,7 +34,7 @@ def post(request):
         dump = {
             'status' : 'OK',
             'reason' : 'Successfully',
-            'id' : str(feed.id)
+            'id' : str(feed.package_id)
                 }
         data = json.dumps(dump)
         return HttpResponse(data, content_type='application/json')

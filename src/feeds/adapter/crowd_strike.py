@@ -9,8 +9,12 @@ def get_crowd_strike_request_header():
     custkey = SNSConfig.get_cs_custkey()
     if custid is not None:
         query_http_headers['X-CSIX-CUSTID'] = custid
+    else:
+        raise Exception ('No X-CSIX-CUSTID configuration.')
     if custkey is not None:
         query_http_headers['X-CSIX-CUSTKEY'] = custkey
+    else:
+        raise Exception ('No X-CSIX-CUSTKEY configuration.')
     query_http_headers['Content-Type'] = 'application/json'
     return query_http_headers
 

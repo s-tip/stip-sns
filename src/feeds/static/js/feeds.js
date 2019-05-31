@@ -97,22 +97,28 @@ $(function () {
       $(".compose").addClass("composing");
       
       //compose領域の初期化
-      //checkbox
-      //$("#compose-stix-2").prop("checked",false);
-      //plus, remove button
-      //$(".compose-title-button-plus").css("display","none");
-      //$(".compose-title-button-remove").css("display","none");
-      //$(".compose-content-button-plus").css("display","none");
-      //$(".compose-content-button-remove").css("display","none");
+      //STIX2.1
+      $("#compose-stix-2").prop('checked',false);
+      
+      // compose-title, compose-content を最初の 1つになるまで削除
+      while ($(".compose-title-div").length > 1){
+    	  $(".compose-title-div:last").remove();
+      }
+      while ($(".compose-content-div").length > 1){
+    	  $(".compose-content-div:last").remove();
+      }
+      // 言語設定、 + - アイコン非表示
+      compose_stix2_uncheked();
 
       //title
+      $(".compose-title").val("");
       var screen_name =  $(".compose").attr("screen_name");
       set_title_value(screen_name);
 
       //text
-      //$(".compose textarea").val("");
+      $(".compose textarea").val("");
       //referred-url
-      //$("#referred-url").val("");
+      $("#referred-url").val("");
 
       //TLP
       //一旦すべてクリアする
@@ -708,14 +714,26 @@ $(function () {
 		 $('.compose-content-remove-button').css('display','inline-block');
 
 	  }else{
+		  /*
 		 $('.compose-title-language-div').css('display','none');
 		 $('.compose-title-plus-button').css('display','none');
 		 $('.compose-title-remove-button').css('display','none');
 		 $('.compose-content-language-div').css('display','none');
 		 $('.compose-content-plus-button').css('display','none');
 		 $('.compose-content-remove-button').css('display','none');
+		 */
+		  compose_stix2_uncheked();
 	  }
   });
+  
+  function compose_stix2_uncheked(){
+      $('.compose-title-language-div').css('display','none');
+      $('.compose-title-plus-button').css('display','none');
+      $('.compose-title-remove-button').css('display','none');
+      $('.compose-content-language-div').css('display','none');
+      $('.compose-content-plus-button').css('display','none');
+      $('.compose-content-remove-button').css('display','none');	  
+  };
   
   //title の plus ボタンクリック
   $(document).on("click",".compose-title-plus-button",function () {
@@ -938,26 +956,38 @@ $(function () {
   
   //CTIM-GV クリック
   $(document).on("click",".share-ctim-gv",function () {
-	    var li = $(this).closest("li");
+	  if ($(this).hasClass('selected') == true){
+		  //menu 非表示
+		  $(this).removeClass('selected')
+		  $(this).next('.share-ctim-gv-menu-ul').slideUp('fast');
+		  
+	  }else{
+		  //menu 表示
+		  $(this).addClass('selected');
+		  $(this).next('.share-ctim-gv-menu-ul').slideDown('fast');
+	  }
+  });
+
+  //CTIM-GV の 1.2 or 2.1 クリック
+  $(document).on("click",".share-ctim-gv-12,.share-ctim-gv-21",function () {
 	    $.ajax({
 	        url: '/feeds/get_ctim_gv_url/',
 	        data: {
-	          'package_id': $(li).attr('package-id'),
+	          'package_id': $(this).data('package-id'),
 	        },
 	        type: 'get',
 	        cache: false,
 	        async: false,
 	    }).done(function(url){
-        	//別ウインドウでurlを開く
-        	var childWindow = window.open('about:blank');
-        	childWindow.location.href = url;
-        	childWindow = null;
+      	//別ウインドウでurlを開く
+      	var childWindow = window.open('about:blank');
+      	childWindow.location.href = url;
+      	childWindow = null;
 	    }).fail(function(XMLHttpRequest, textStatus, errorThrown){
 	   		var msg = XMLHttpRequest.statusText+ ': ' + XMLHttpRequest.responseText;
 	   		alert(msg);
 	   	});
   });
-
   
   //MISP クリック
   $(document).on("click",".share-misp",function () {
@@ -1005,28 +1035,52 @@ $(function () {
 
   //STIX downloadクリック
   $(document).on("click",".download-stix",function () {
-	    var li = $(this).closest("li");
-
-	    var f = document.createElement('form');
-	    f.action = '/feeds/download_stix/';
-	    f.method = 'post';
-
-	    var feed_id = document.createElement('input');
-	    feed_id.setAttribute('type','hidden');
-	    feed_id.setAttribute('name','feed_id');
-	    feed_id.setAttribute('value',$(li).attr('feed-id'));
-
-	    var feed_csrf = document.createElement('input');
-	    feed_csrf.setAttribute('type','hidden');
-	    feed_csrf.setAttribute('name','csrfmiddlewaretoken');
-	    feed_csrf.setAttribute('value',$(li).attr('csrf'));
-
-	    f.appendChild(feed_id);
-	    f.appendChild(feed_csrf);
-	    document.body.appendChild(f);
-	    f.submit();
+	  if ($(this).hasClass('selected') == true){
+		  //menu 非表示
+		  $(this).removeClass('selected')
+		  $(this).next('.stix-download-menu-ul').slideUp('fast');
+		  
+	  }else{
+		  //menu 表示
+		  $(this).addClass('selected');
+		  $(this).next('.stix-download-menu-ul').slideDown('fast');
+	  }
   });
-  
+
+  //STIX1.2 downloadクリック
+  $(document).on("click",".download-stix-12",function () {
+	  var li = $(this).closest("li");
+	  var f = document.createElement('form');
+	  f.action = '/feeds/download_stix/';
+	  f.method = 'get';
+
+	  var feed_id = document.createElement('input');
+	  feed_id.setAttribute('type','hidden');
+	  feed_id.setAttribute('name','feed_id');
+	  feed_id.setAttribute('value',$(this).data('package-id').replace(':','--'));
+	  f.appendChild(feed_id);
+	  document.body.appendChild(f);
+	  f.submit();
+
+  });
+
+  //STIX2.1 downloadクリック
+  $(document).on("click",".download-stix-21",function () {
+	  var li = $(this).closest("li");
+	  var f = document.createElement('form');
+	  f.action = '/feeds/download_stix2/';
+	  f.method = 'get';
+
+	  var feed_id = document.createElement('input');
+	  feed_id.setAttribute('type','hidden');
+	  feed_id.setAttribute('name','feed_id');
+	  feed_id.setAttribute('value',$(this).data('package-id').replace(':','--'));
+
+	  f.appendChild(feed_id);
+	  document.body.appendChild(f);
+	  f.submit();
+  });
+
   //CSV downloadクリック
   $(document).on("click",".download-csv",function () {
 	    var li = $(this).closest("li");

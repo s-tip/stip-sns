@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import threading
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render
@@ -7,6 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from ctirs.models import STIPUser, SNSConfig
 from management.forms import SNSConfigForm
 from feeds.mongo import Attck
+from django.conf import settings as django_settings
+from daemon.slack.receive import start_receive_slack_thread
 
 @login_required
 def user(request):
@@ -51,6 +54,16 @@ def modify_attck_information(request):
     return sns_config(request)
 
 @login_required
+def reboot_slack_thread(request):
+    #管理権限以外はエラー (403)
+    if request.user.role != u'admin':
+        return HttpResponseForbidden()
+    #thread 再起動
+    start_receive_slack_thread()
+    #その後は config 画面に遷移
+    return sns_config(request)
+
+@login_required
 def sns_config(request):
     #管理権限以外はエラー (403)
     if request.user.role != u'admin':
@@ -88,6 +101,8 @@ def sns_config(request):
             sns_config.smtp_accept_mail_address = form.cleaned_data.get('smtp_accept_mail_address')
             sns_config.stix_ns_url = form.cleaned_data.get('stix_ns_url')
             sns_config.stix_ns_name = form.cleaned_data.get('stix_ns_name')
+            sns_config.slack_bot_token = form.cleaned_data.get('slack_bot_token')
+            sns_config.slack_bot_channel = form.cleaned_data.get('slack_bot_channel')
             if check_port(sns_config.circl_mongo_port) == False:
                 messages.add_message(request,
                                  messages.WARNING,
@@ -135,6 +150,8 @@ def sns_config(request):
             'smtp_accept_mail_address': sns_config.smtp_accept_mail_address,
             'stix_ns_url': sns_config.stix_ns_url,
             'stix_ns_name': sns_config.stix_ns_name,
+            'slack_bot_token': sns_config.slack_bot_token,
+            'slack_bot_channel': sns_config.slack_bot_channel,
             })
 
     return render(request, 'management/sns_config.html', {'form': form})

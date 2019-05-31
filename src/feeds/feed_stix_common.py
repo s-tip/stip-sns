@@ -134,6 +134,10 @@ class FeedStixCommon(object):
         if feed.referred_url is not None:
             marking_referred_url = self._make_marking_specification_statement(const.STIP_SNS_REFERRED_URL_KEY, feed.referred_url)
             marking.add_marking(marking_referred_url)        
+        #stix2_package_id
+        if feed.stix2_package_id is not None and len(feed.stix2_package_id) != 0:
+            marking_stix2_package_id = self._make_marking_specification_statement(const.STIP_SNS_STIX2_PACKAGE_ID_KEY, feed.stix2_package_id)
+            marking.add_marking(marking_stix2_package_id)        
         return marking
     
     #汎用のTLPmarking_specification作成

@@ -10,7 +10,9 @@ import traceback
 import StringIO
 import datetime
 import threading
+import zipfile
 import ctirs.models.sns.feeds.rs as rs
+import stip.common.const as const
 
 from decorators import ajax_required
 try:
@@ -21,7 +23,6 @@ except ImportError:
 
 from stix.core.stix_package import STIXPackage
 from stix.extensions.marking.ais import AISMarkingStructure  # @UnusedImport
-from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse,HttpResponseServerError
 from django.shortcuts import get_object_or_404, render
@@ -39,7 +40,6 @@ from ctirs.models import Group
 from feeds.extractor.base import Extractor
 from feeds.adapter.crowd_strike import search_indicator,get_report_info
 from feeds.feed_stix2 import get_stix2_bundle
-import stip.common.const as const
 
 FEEDS_NUM_PAGES = 10
 
@@ -52,6 +52,13 @@ KEY_PUBLICATION = 'publication'
 KEY_REFERRED_URL = 'referred_url'
 KEY_GROUP = 'group'
 KEY_PEOPLE = 'people'
+KEY_INDICATORS = 'indicators'
+KEY_TTPS = 'ttps'
+KEY_TAS = 'tas'
+KEY_STIX2 = 'stix2'
+KEY_STIX2_TITLES = 'stix2_titles'
+KEY_STIX2_CONTENTS = 'stix2_contents'
+KEY_ATTACH_CONFIRM = 'attach_confirm'
 
 PUBLICATION_VALUE_GROUP = 'group'
 PUBLICATION_VALUE_PEOPLE = 'people'
@@ -247,8 +254,8 @@ def post_common(request,user):
     is_stix2 = is_stix2_post(request)
     stix2_titles = []
     stix2_contents = []
-    if request.POST.has_key('stix2_titles') == True:
-        stix2_titles = json.loads(request.POST['stix2_titles'])
+    if request.POST.has_key(KEY_STIX2_TITLES) == True:
+        stix2_titles = json.loads(request.POST[KEY_STIX2_TITLES])
         #同一 language が複数に定義されている場合はエラー
         if is_duplicate_languages(stix2_titles) == True:
             raise Exception('Duplicate Same Language Title')
@@ -260,8 +267,8 @@ def post_common(request,user):
                 feed.title = stix2_title[u'title']
                 break
 
-    if request.POST.has_key('stix2_contents') == True:
-        stix2_contents = json.loads(request.POST['stix2_contents'])
+    if request.POST.has_key(KEY_STIX2_CONTENTS) == True:
+        stix2_contents = json.loads(request.POST[KEY_STIX2_CONTENTS])
         #同一 language が複数に定義されている場合はエラー
         if is_duplicate_languages(stix2_contents) == True:
             raise Exception('Duplicate Same Language Content')
@@ -324,20 +331,20 @@ def post_common(request,user):
         feed.files.add(attach_file)
         
     #indicators があるか
-    if request.POST.has_key('indicators') == True:
-        indicators = json.loads(request.POST['indicators'])
+    if request.POST.has_key(KEY_INDICATORS) == True:
+        indicators = json.loads(request.POST[KEY_INDICATORS])
     else:
         indicators = []
 
     #ttps があるか
-    if request.POST.has_key('ttps') == True:
-        ttps = json.loads(request.POST['ttps'])
+    if request.POST.has_key(KEY_TTPS) == True:
+        ttps = json.loads(request.POST[KEY_TTPS])
     else:
         ttps = []
 
     #threat_actors があるか
-    if request.POST.has_key('tas') == True:
-        tas = json.loads(request.POST['tas'])
+    if request.POST.has_key(KEY_TAS) == True:
+        tas = json.loads(request.POST[KEY_TAS])
     else:
         tas = []
 
@@ -351,13 +358,13 @@ def post_common(request,user):
         is_stix2,
         stix2_titles,
         stix2_contents)
-    return
+    return feed
 
 #stix2 の投稿か?
 def is_stix2_post(request):
     stix2 = False
-    if request.POST.has_key('stix2') == True:
-        if request.POST['stix2'] == 'true':
+    if request.POST.has_key(KEY_STIX2) == True:
+        if request.POST[KEY_STIX2] == 'true':
             stix2 = True
     return stix2
 
@@ -377,8 +384,8 @@ def confirm_indicator(request):
         files.append(attach_file)
         
     #attach_confirm があるか
-    if request.POST.has_key('attach_confirm') == True:
-        s = request.POST['attach_confirm']
+    if request.POST.has_key(KEY_ATTACH_CONFIRM) == True:
+        s = request.POST[KEY_ATTACH_CONFIRM]
         if (s.lower() == 'true'):
             attach_confirm = True
         else:
@@ -393,14 +400,14 @@ def confirm_indicator(request):
     posts = []
     if stix2 == True:
         #STIX2.x の場合は post が複数ある
-        if request.POST.has_key('stix2_contents') == True:
-            stix2_contents = json.loads(request.POST['stix2_contents'])
+        if request.POST.has_key(KEY_STIX2_CONTENTS) == True:
+            stix2_contents = json.loads(request.POST[KEY_STIX2_CONTENTS])
             for stix2_content in stix2_contents:
                 posts.append(stix2_content['content'])
     else:
         #STIX1.x の場合は post が 1 つのみ
-        if request.POST.has_key('post') == True:
-            post = request.POST['post']
+        if request.POST.has_key(KEY_POST) == True:
+            post = request.POST[KEY_POST]
         else:
             post = ''
         posts.append(post)
@@ -441,9 +448,9 @@ def confirm_indicator(request):
         except:
             pass
     data = {}
-    data['indicators'] = get_json_from_extractor(confirm_indicators)
-    data['ttps'] = get_json_from_extractor(confirm_ets)
-    data['tas'] = get_json_from_extractor(confirm_tas)
+    data[KEY_INDICATORS] = get_json_from_extractor(confirm_indicators)
+    data[KEY_TTPS] = get_json_from_extractor(confirm_ets)
+    data[KEY_TAS] = get_json_from_extractor(confirm_tas)
     return JsonResponse(data)
 
 #共通設定と個人設定をマージして返却
@@ -776,7 +783,7 @@ def call_jira(request):
 
 @login_required
 def download_stix(request):
-    feed_file_name_id = request.POST['feed_id']
+    feed_file_name_id = request.GET['feed_id']
     #cache の STIX を返却
     stix_file_path = Feed.get_cached_file_path(feed_file_name_id)
     #response作成
@@ -785,6 +792,19 @@ def download_stix(request):
         output = io.StringIO()
         output.write(unicode(fp.read(),'utf-8'))
         response = HttpResponse(output.getvalue(),content_type='application/xml')
+        response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
+    return response
+
+@login_required
+def download_stix2(request):
+    feed_file_name_id = request.POST['feed_id']
+    stix_file_path = rs.get_stix_file_path(request.user,feed_file_name_id)
+    #response作成
+    file_name = '%s.json' % (feed_file_name_id)
+    with open(stix_file_path,'r') as fp:
+        output = io.StringIO()
+        output.write(unicode(fp.read(),'utf-8'))
+        response = HttpResponse(output.getvalue(),content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
     return response
 
@@ -931,7 +951,7 @@ def post_rs_indicator_matching_comment(request,feed,id_,concierge_user):
         traceback.print_exc()
 
 #CrowdStrike に関連 Report を問い合わせ、結果をコメント表示
-def post_crowd_strike_indicator_matching_comment(request,feed,id_,concierge_user,json_indicators):
+def post_crowd_strike_indicator_matching_comment(feed,id_,concierge_user,json_indicators):
     try:
         realted_reports = []
         for json_indicator in json_indicators:
@@ -963,7 +983,8 @@ def post_crowd_strike_indicator_matching_comment(request,feed,id_,concierge_user
         #指定User で投稿
         post_comment(concierge_user,id_,msg,concierge_user)
     except Exception:
-        traceback.print_exc()
+        #traceback.print_exc()
+        pass
 
 #feedを保存する
 def save_post(request,
@@ -975,75 +996,133 @@ def save_post(request,
               is_stix2=False,
               stix2_titles=[],
               stix2_contents=[]):
-    if len(post) > 0:
-        feed.post = post[:10240]
-        #stixファイルを作成する
-        feed_stix = FeedStix(
-            feed=feed,
-            indicators=json_indicators,
-            ttps=ttps,
-            tas=tas
-            )
-        feed.stix_file_path = write_stix_file(feed,feed_stix)
-        #package_id取得
-        feed.package_id = feed_stix.get_stix_package().id_
+    if len(post) == 0:
+        return None
 
-        #添付 ファイルstixを送る
-        for attachment_file in feed_stix.attachment_files:
-            file_name = attachment_file.stix_header.title
-            #一時ファイルにstixの中身を書き出す
-            tmp_file_path = write_like_comment_attach_stix(attachment_file.to_xml())
-            #RS に登録する
-            rs.regist_ctim_rs(feed.user,file_name,tmp_file_path)
-            #登録後にファイルは削除
-            os.remove(tmp_file_path)
-        #添付ファイル STIX を　RS に登録後、投稿 STIX を送る
-        rs.regist_ctim_rs(feed.user,feed.title,feed.stix_file_path)
-            
-        #添付ファイル削除
-        for file_ in feed.files.all():
-            os.remove(file_.file_path)
+    feed.post = post[:10240]
 
-        #STIX 2.x 出力の場合は RS 登録する　
-        if is_stix2 == True:
-            bundle = get_stix2_bundle(json_indicators,
-                              ttps,
-                              tas,
-                              feed.title,
-                              post,
-                              stix2_titles,
-                              stix2_contents,
-                              request.user)
-            _,stix2_file_path =tempfile.mkstemp()
-            with open(stix2_file_path,'w') as fp:
-                fp.write(bundle.serialize(True,ensure_ascii=False).encode('utf-8'))
-            #RS に登録する
-            rs.regist_ctim_rs(feed.user,bundle.id,stix2_file_path)
-            os.remove(stix2_file_path)
+    #STIX 2.x 出力の場合は RS 登録する　
+    if is_stix2 == True:
+        bundle = get_stix2_bundle(json_indicators,
+                          ttps,
+                          tas,
+                          feed.title,
+                          post,
+                          stix2_titles,
+                          stix2_contents,
+                          request.user)
+        feed.stix2_package_id = bundle.id
+        _,stix2_file_path =tempfile.mkstemp()
+        with open(stix2_file_path,'w') as fp:
+            fp.write(bundle.serialize(True,ensure_ascii=False).encode('utf-8'))
+        #RS に登録する
+        rs.regist_ctim_rs(feed.user,bundle.id,stix2_file_path)
+        os.remove(stix2_file_path)
 
-        #indicatorが存在していれば chatbot 起動する
-        indicators = feed_stix.get_stix_package().indicators
-        if indicators is not None and len(indicators) != 0:
-            #chatbot指定があれば起動する
-            if const.SNS_GV_CONCIERGE_ACCOUNT is not None:
-                try:
-                    concierge_user = STIPUser.objects.get(username=const.SNS_GV_CONCIERGE_ACCOUNT)
-                    #非同期で RS から matching 情報を取得しコメントをつける
-                    matching_comment_th = threading.Thread(target=post_rs_indicator_matching_comment,args=(request,feed,feed_stix.get_stix_package().id_,concierge_user))
-                    matching_comment_th.daemon = True
-                    matching_comment_th.start()
-                except Exception:
-                    pass
-            if const.SNS_FALCON_CONCIERGE_ACCOUNT is not None:
-                try:
-                    concierge_user = STIPUser.objects.get(username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
-                    #非同期で CrowdStrike から indicator に該当する report を取得しコメントをつける
-                    crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment,args=(request,feed,feed_stix.get_stix_package().id_,concierge_user,json_indicators))
-                    crowd_strike_report_th.daemon = True
-                    crowd_strike_report_th.start()
-                except Exception:
-                    pass
-    return None
+    #stixファイルを作成する
+    feed_stix = FeedStix(
+        feed=feed,
+        indicators=json_indicators,
+        ttps=ttps,
+        tas=tas
+    )
+        
+    #Slack 投稿用の添付ファイル作成
+    if feed.files.count() > 1:
+        #ファイルが複数
+        #ファイルが添付されている場合は file upload をコメント付きで
+        temp = tempfile.NamedTemporaryFile()
+        with zipfile.ZipFile(temp.name,'w',compression=zipfile.ZIP_DEFLATED) as new_zip:
+            for file_ in feed.files.all():
+                new_zip.write(file_.file_path,arcname = file_.file_name)
+        upploaded_filename = 'uploaded_files.zip'
+    elif feed.files.count() == 1:
+        #ファイルが単数
+        temp = tempfile.NamedTemporaryFile()
+        file_ = feed.files.get()
+        with open(file_.file_path) as fp:
+            temp.write(fp.read())
+            temp.seek(0)
+        upploaded_filename = file_.file_name
+    else:
+        temp = None
+
+    feed.stix_file_path = write_stix_file(feed,feed_stix)
+    #package_id取得
+    feed.package_id = feed_stix.get_stix_package().id_
+
+    #slack 投稿
+    if feed.user.username != const.SNS_SLACK_BOT_ACCOUNT:
+        slack_post = ''
+        slack_post += '[%s]\n' % (feed.title)
+        slack_post += '\n'
+        slack_post += '%s\n' % (feed.post)
+        slack_post += '\n'
+        slack_post += '---------- S-TIP Post Info (TLP: %s) ----------\n' % (feed.tlp)
+        slack_post += '%s: %s\n' % (u'Account',feed.user.username)
+        slack_post += '%s: %s\n' % (u'Package_ID',feed.package_id)
+        slack_post += '%s: %s\n' % (u'Referred URL',feed.referred_url if feed.referred_url is not None else '')
+        slack_post = slack_post.replace('&amp;','%amp;amp;')
+        slack_post = slack_post.replace('&lt;','%amp;lt;')
+        slack_post = slack_post.replace('&gt;','%amp;gt;')
+        
+        #Slack 投稿用の添付ファイル作成
+        from daemon.slack.receive import post_slack_channel, sc
+        if temp is not None :
+            #ファイルが添付されている場合は file uplaod をコメント付きで
+            sc.api_call ('files.upload',
+                     initial_comment = slack_post,
+                     channels = post_slack_channel,
+                     file = open(temp.name,'rb'),
+                     filename = upploaded_filename)
+            #閉じると同時に削除される
+            temp.close()
+        else:
+            sc.api_call('chat.postMessage',
+                    text = slack_post,
+                    channel = post_slack_channel,
+                    as_user = 'true')
+
+    #添付 ファイルstixを送る
+    for attachment_file in feed_stix.attachment_files:
+        file_name = attachment_file.stix_header.title
+        #一時ファイルにstixの中身を書き出す
+        tmp_file_path = write_like_comment_attach_stix(attachment_file.to_xml())
+        #RS に登録する
+        rs.regist_ctim_rs(feed.user,file_name,tmp_file_path)
+        #登録後にファイルは削除
+        os.remove(tmp_file_path)
+    #添付ファイル STIX を　RS に登録後、投稿 STIX を送る
+    rs.regist_ctim_rs(feed.user,feed.title,feed.stix_file_path)
+        
+    #添付ファイル削除
+    for file_ in feed.files.all():
+        os.remove(file_.file_path)
+
+    #indicatorが存在していれば chatbot 起動する
+    indicators = feed_stix.get_stix_package().indicators
+    if indicators is not None and len(indicators) != 0:
+        #chatbot指定があれば起動する
+        if const.SNS_GV_CONCIERGE_ACCOUNT is not None:
+            try:
+                concierge_user = STIPUser.objects.get(username=const.SNS_GV_CONCIERGE_ACCOUNT)
+                #非同期で RS から matching 情報を取得しコメントをつける
+                matching_comment_th = threading.Thread(target=post_rs_indicator_matching_comment,args=(request,feed,feed_stix.get_stix_package().id_,concierge_user))
+                matching_comment_th.daemon = True
+                matching_comment_th.start()
+            except Exception:
+                pass
+        if const.SNS_FALCON_CONCIERGE_ACCOUNT is not None:
+            try:
+                concierge_user = STIPUser.objects.get(username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
+                #非同期で CrowdStrike から indicator に該当する report を取得しコメントをつける
+                crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment,args=(feed,feed_stix.get_stix_package().id_,concierge_user,json_indicators))
+                crowd_strike_report_th.daemon = True
+                crowd_strike_report_th.start()
+            except Exception:
+                pass
+
+    return
 
 #feedの中身からSTIX contentを作成し、ファイル出力する
 #filepathを返却する
