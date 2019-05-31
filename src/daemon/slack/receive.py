@@ -9,10 +9,12 @@ import re
 import tempfile
 import threading
 
+from django.http.request import HttpRequest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from slackclient import SlackClient
 from ctirs.models import System, STIPUser, SNSConfig, AttachFile, Feed
 from stip.common.const import TLP_CHOICES, SNS_SLACK_BOT_ACCOUNT
-from feeds.views import get_merged_conf_list
+from feeds.views import get_merged_conf_list, post_common
 from feeds.extractor.base import Extractor
 from feeds.views import KEY_TLP as STIP_PARAMS_INDEX_TLP
 from feeds.views import KEY_POST as STIP_PARAMS_INDEX_POST
@@ -40,7 +42,6 @@ for choice in TLP_CHOICES:
     TLP_LIST.append(choice[0])
 
 SLACK_POLL_INTERVAL_SEC = 1
-RS_POST_API_URL = 'https://localhost:10002/api/v1/post'
 
 proxies = System.get_requets_proxies()
 sc = None
@@ -67,6 +68,12 @@ def start_receive_slack_thread():
     if len(token) == 0:
         print 'Slack token length is 0.'
         return
+    #Slack ユーザがいなければ作る
+    slack_users = STIPUser.objects.filter(username=SNS_SLACK_BOT_ACCOUNT)
+    if len(slack_users) == 0: 
+        #slack ユーザ作成する
+        slack_user = STIPUser.objects.create_user(SNS_SLACK_BOT_ACCOUNT,SNS_SLACK_BOT_ACCOUNT,SNS_SLACK_BOT_ACCOUNT,is_admin=False)
+        slack_user.save()
     channel = SNSConfig.get_slack_bot_chnnel()
     sc = init_receive_slack(token,channel)
     th = threading.Thread(target=receive_slack,args=[sc])
@@ -106,10 +113,10 @@ def get_user_profile(user_id):
     return sc.api_call('users.info',user=user_id)[u'user'][u'profile']
     
 #slack 投稿データから stip 投稿を行う
-def post_stip_from_slack(receive_data,slack_bot_channel_name):
+def post_stip_from_slack(receive_data,slack_bot_channel_name,slack_user):
     POST_INDEX_TITLE = 0
 
-    if receive_data.has_key(u'subtype') == True:
+    if receive_data.has_key(u'subtype'):
         #投稿以外のメッセージなので対象外
         return
     #user_id から user_info 取得
@@ -120,7 +127,7 @@ def post_stip_from_slack(receive_data,slack_bot_channel_name):
     user_profile = get_user_profile(user_id)
 
     #bot からの発言は対象外
-    if user_profile.has_key('bot_id') == True:
+    if user_profile.has_key('bot_id'):
         return
     
     #S-TIP 投稿データを取得する
@@ -166,7 +173,7 @@ def post_stip_from_slack(receive_data,slack_bot_channel_name):
     try:
         channel_id = receive_data[u'channel']
         resp = sc.api_call('channels.info',channel=channel_id)
-        if resp.has_key(u'channel') == True:
+        if resp.has_key(u'channel'):
             #public channel
             channel_name = resp[u'channel'][u'name']
         else:
@@ -189,48 +196,45 @@ def post_stip_from_slack(receive_data,slack_bot_channel_name):
         return
                                 
     #メッセージ id
-    if receive_data.has_key(u'client_msg_id') == True:
+    if receive_data.has_key(u'client_msg_id'):
         post += ('%s: %s\n' % (u'Message ID',receive_data[u'client_msg_id']))
                                 
-    if receive_data.has_key(u'ts') == True:
+    if receive_data.has_key(u'ts'):
         ts = receive_data[u'ts']
         dt =  datetime.datetime(*time.gmtime(float(ts))[:6],tzinfo=pytz.utc)
         post += ('%s: %s\n' % ('Timestamp',dt.strftime('%Y-%m-%dT%H:%M:%S.%f%z')))
     stip_params[STIP_PARAMS_INDEX_POST] = post
 
     #ここから SNS に投稿する
-    #何ユーザーで登録するか。
-    #FST では直接 rs の /api/v1/post している
-    #ここで Feed を作るようにするのが良い。
-    #ただし、 save_post などは引数に request が張っているため、 web 経由ではないここからには向いていない
-    #request が実際には request.user (STIPUser) しか使われていないのであれば、引数を変えるべき
-    #これを課題とする
-    #(追記) request.user 抜きで処理が勧められるかどうか調査したが、GV の URL が request を元に作成しているため、
-    #GV Concierge のコメントがつけられれないため頓挫。今回は rs 経由での投稿とする
-    
-    #あと、 自分自身がどの port で動作しているかが
-    requests.post(
-        url = RS_POST_API_URL,
-        data = stip_params,
-        files = files_for_stip_post,
-        verify = False)
+    try:
+        request = HttpRequest()
+        request.method = 'POST'
+        request.POST = stip_params
+        request.FILES = files_for_stip_post
+        request.META['SERVER_NAME'] = 'localhost'
+        post_common(request,slack_user)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise e
     return 
 
 def receive_slack(sc):
     #channel 名から先頭の # を外す
     slack_bot_channel_name = SNSConfig.get_slack_bot_chnnel()[1:]
     th = threading.currentThread()
+    slack_user = STIPUser.objects.get(username=SNS_SLACK_BOT_ACCOUNT)
     #thread 停止フラグが立つまで繰り返し
-    while getattr(th,"do_run",True) == True:
+    while getattr(th,"do_run",True):
         receive_data_lists = sc.rtm_read()
         if len(receive_data_lists) > 0:
             for receive_data in receive_data_lists:
                 try:
                     files_for_cti_extractor = None
-                    if receive_data.has_key(u'type') == True:
+                    if receive_data.has_key(u'type'):
                         message_type = receive_data[u'type'] 
                         if message_type == u'message':
-                            post_stip_from_slack(receive_data,slack_bot_channel_name)
+                            post_stip_from_slack(receive_data,slack_bot_channel_name,slack_user)
                         else:
                             #print 'event: %s: skip' % (receive_data[u'type'])
                             pass
@@ -263,7 +267,7 @@ def get_attached_file_from_slack(file_path):
 def get_attached_files(receive_data):
     files_for_stip_post = {}
     files_for_cti_extractor = []
-    if receive_data.has_key(u'files') == True:
+    if receive_data.has_key(u'files'):
         #添付ファイルあり
         files = receive_data[u'files']
         for file_ in files:
@@ -271,7 +275,8 @@ def get_attached_files(receive_data):
             file_path = file_[u'url_private']
             file_name = file_[u'name']
             resp = get_attached_file_from_slack(file_path)
-            files_for_stip_post[file_name] = resp.content
+            uploaded_file = SimpleUploadedFile(file_name,resp.content)
+            files_for_stip_post[file_name] = uploaded_file
             #django_files 情報
             attach_file = AttachFile()
             attach_file.file_name = file_name
@@ -303,7 +308,7 @@ def get_referred_url(s):
             continue
         else:
             return m.group(1)
-    return None
+    return ''
 
 def get_command_stix_id(post):
     try:
@@ -327,9 +332,6 @@ def get_stip_params(slack_post,username):
 
     #投稿はすべて slack bot
     stip_params[STIP_PARAMS_INDEX_USER_NAME] = SNS_SLACK_BOT_ACCOUNT
-
-    #S-TIP 投稿データを取得する
-    post_lines = slack_post.splitlines()
 
     #TLP 抽出
     #S-TIP アカウントがあればその TLP を参照する
@@ -368,7 +370,7 @@ def set_extractor_info(stip_params,attached_files,username):
     confirm_indicators, confirm_ets, confirm_tas = Extractor.get_stix_element(
         files = attached_files,
         posts = [stip_params[STIP_PARAMS_INDEX_POST]],
-        referred_url = stip_params[STIP_PARAMS_INDEX_REFERRED_URL],
+        referred_url = stip_params[STIP_PARAMS_INDEX_REFERRED_URL] if len(stip_params[STIP_PARAMS_INDEX_REFERRED_URL]) != 0 else None,
         ta_list = ta_list,
         white_list = white_list
     )

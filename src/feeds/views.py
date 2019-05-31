@@ -797,7 +797,7 @@ def download_stix(request):
 
 @login_required
 def download_stix2(request):
-    feed_file_name_id = request.GET['feed_id']
+    feed_file_name_id = request.POST['feed_id']
     stix_file_path = rs.get_stix_file_path(request.user,feed_file_name_id)
     #response作成
     file_name = '%s.json' % (feed_file_name_id)
@@ -951,7 +951,7 @@ def post_rs_indicator_matching_comment(request,feed,id_,concierge_user):
         traceback.print_exc()
 
 #CrowdStrike に関連 Report を問い合わせ、結果をコメント表示
-def post_crowd_strike_indicator_matching_comment(request,feed,id_,concierge_user,json_indicators):
+def post_crowd_strike_indicator_matching_comment(feed,id_,concierge_user,json_indicators):
     try:
         realted_reports = []
         for json_indicator in json_indicators:
@@ -983,7 +983,8 @@ def post_crowd_strike_indicator_matching_comment(request,feed,id_,concierge_user
         #指定User で投稿
         post_comment(concierge_user,id_,msg,concierge_user)
     except Exception:
-        traceback.print_exc()
+        #traceback.print_exc()
+        pass
 
 #feedを保存する
 def save_post(request,
@@ -1115,7 +1116,7 @@ def save_post(request,
             try:
                 concierge_user = STIPUser.objects.get(username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
                 #非同期で CrowdStrike から indicator に該当する report を取得しコメントをつける
-                crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment,args=(request,feed,feed_stix.get_stix_package().id_,concierge_user,json_indicators))
+                crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment,args=(feed,feed_stix.get_stix_package().id_,concierge_user,json_indicators))
                 crowd_strike_report_th.daemon = True
                 crowd_strike_report_th.start()
             except Exception:
