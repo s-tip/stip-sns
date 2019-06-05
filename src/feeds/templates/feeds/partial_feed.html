@@ -4,7 +4,7 @@
 {% load tz %}
 {% localtime off %}
 {% if feed.user == user %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-mine" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div-mine" feed-date="{{feed.date|date:"YmdHis.u"}}">
 {% else %}
 	{% if user.ci %}
 		{# ciあり #}
@@ -12,23 +12,23 @@
 			{# ciあり/regionあり #}
 			{% if feed.user.ci == user.ci %}
 				{% if feed.administrative_code == user.administrative_code %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-region-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div-region-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
 				{% else %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
 				{% endif %}
 			{% else %}
 				{% if feed.administrative_code == user.region.code %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-region" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div-region" feed-date="{{feed.date|date:"YmdHis.u"}}">
 				{% else %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
 				{% endif %}
 			{% endif %}
 		{% else %}
 			{# ciあり/regionなし #}
 			{% if feed.user.ci == user.ci %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div-ci" feed-date="{{feed.date|date:"YmdHis.u"}}">
 			{% else %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
 			{% endif %}
 		{% endif %}
 	{% else %}
@@ -36,13 +36,13 @@
 		{% if user.region.code %}
 			{# ciなし/regionあり #}
 			{% if feed.administrative_code == user.administrative_code %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div-region" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div-region" feed-date="{{feed.date|date:"YmdHis.u"}}">
 			{% else %}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
 			{% endif %}
 		{% else %}
 			{# ciなし/regionなし #}
-<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
+<li package-id="{{feed.package_id}}" feed-id="{{ feed.filename_pk }}" csrf="{{ csrf_token }}" class="feed-li feed-div" feed-date="{{feed.date|date:"YmdHis.u"}}">
 		{% endif %}
 	{% endif %}
 {% endif %}
