@@ -17,8 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from ctirs.models import STIPUser as User
 from core.forms import ChangePasswordForm, ProfileForm
-from ctirs.models import Region
-from ctirs.models import Feed
+from ctirs.models import Region, Feed
 from feeds.views import FEEDS_NUM_PAGES, feeds
 
 #Japan
@@ -198,6 +197,9 @@ def password(request,msg=None):
         if form.is_valid():
             new_password = form.cleaned_data.get('new_password')
             user.set_password(new_password)
+            if user.username == 'admin':
+                #build_in account のパスワード変更
+                User.change_build_password(new_password)
             user.is_modified_password = True
             user.save()
             update_session_auth_hash(request, user)
