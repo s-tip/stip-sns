@@ -1068,20 +1068,26 @@ def save_post(request,
         
         #Slack 投稿用の添付ファイル作成
         from daemon.slack.receive import post_slack_channel, sc
-        if temp is not None :
-            #ファイルが添付されている場合は file uplaod をコメント付きで
-            sc.api_call ('files.upload',
-                     initial_comment = slack_post,
-                     channels = post_slack_channel,
-                     file = open(temp.name,'rb'),
-                     filename = upploaded_filename)
-            #閉じると同時に削除される
-            temp.close()
-        else:
-            sc.api_call('chat.postMessage',
-                    text = slack_post,
-                    channel = post_slack_channel,
-                    as_user = 'true')
+        if sc is not None:
+            if temp is not None :
+                try:
+                    #ファイルが添付されている場合は file uplaod をコメント付きで
+                    sc.api_call ('files.upload',
+                         initial_comment = slack_post,
+                         channels = post_slack_channel,
+                         file = open(temp.name,'rb'),
+                         filename = upploaded_filename)
+                finally:
+                    #閉じると同時に削除される
+                    temp.close()
+            else:
+                try:
+                    sc.api_call('chat.postMessage',
+                        text = slack_post,
+                        channel = post_slack_channel,
+                        as_user = 'true')
+                except Exception as _:
+                    pass
 
     #添付 ファイルstixを送る
     for attachment_file in feed_stix.attachment_files:

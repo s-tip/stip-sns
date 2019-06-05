@@ -1360,8 +1360,8 @@ $(function () {
 
   //定期時間ごとに like,comment 情報を更新しているが処理速度低下のため一旦コメントアウトする
   function update_feeds () {
-    var first_feed = $(".stream li:first-child").attr("feed-date");
-    var last_feed = $(".stream li:last-child").attr("feed-date");
+    var first_feed = $(".stream .feed-div:first-child").attr("feed-date");
+    var last_feed = $(".stream .feed-div:last-child").attr("feed-date");
     var feed_source = $("#feed_source").val();
 
     if (first_feed != undefined && last_feed != undefined) {
@@ -1381,12 +1381,12 @@ $(function () {
           });
         },
         complete: function () {
-          window.setTimeout(update_feeds, 30000);
+          window.setTimeout(update_feeds, check_interval);
         }
       });
     }
     else {
-      window.setTimeout(update_feeds, 30000);
+      window.setTimeout(update_feeds, check_interval);
     }
   };
   update_feeds();
