@@ -11,6 +11,7 @@ import StringIO
 import datetime
 import threading
 import zipfile
+import ioc_fanger
 import ctirs.models.sns.feeds.rs as rs
 import stip.common.const as const
 
@@ -1056,7 +1057,7 @@ def save_post(request,
         slack_post = ''
         slack_post += '[%s]\n' % (feed.title)
         slack_post += '\n'
-        slack_post += '%s\n' % (feed.post)
+        slack_post += '%s\n' % (ioc_fanger.defang(feed.post))
         slack_post += '\n'
         slack_post += '---------- S-TIP Post Info (TLP: %s) ----------\n' % (feed.tlp)
         slack_post += '%s: %s\n' % (u'Account',feed.user.username)
