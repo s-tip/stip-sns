@@ -548,8 +548,8 @@ def like(request):
 @login_required
 def attach(request):
     file_id = request.POST['file_id']
-    attach_file_name = Feed.get_attach_file_name(file_id)
-    attach_file_path = Feed.get_attach_file_path(file_id)
+    attach_file_name = Feed.get_attach_file_name(file_id).encode('utf-8')
+    attach_file_path = Feed.get_attach_file_path(file_id).encode('utf-8')
     #response作成
     with open(attach_file_path,'r') as fp:
         response = HttpResponse(fp.read(),content_type='application/octet-stream')
