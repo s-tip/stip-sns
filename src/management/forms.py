@@ -111,9 +111,9 @@ class SNSConfigForm(forms.ModelForm):
         label=_('JIRA Username'),
         required=False)
     jira_password = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         max_length=64,
-        label=_('JIRA Password'),
+        label=_('JIRA Password or API Token'),
         required=False)
     jira_project = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
