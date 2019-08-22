@@ -43,7 +43,7 @@ for choice in TLP_CHOICES:
 
 SLACK_POLL_INTERVAL_SEC = 1
 
-proxies = System.get_requets_proxies()
+proxies = System.get_request_proxies()
 sc = None
 post_slack_channel = None
 slack_token = None

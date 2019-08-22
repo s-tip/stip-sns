@@ -6,7 +6,7 @@ import requests
 import urlparse
 import tempfile
 from feeds.extractor.common import BaseExtractor
-from ctirs.models import AttachFile,SNSConfig
+from ctirs.models import AttachFile, System
 from feeds.extractor.pdf import PDFExtractor
 from feeds.extractor.csv import CSVExtractor
 from feeds.extractor.txt import TxtExtractor
@@ -57,7 +57,7 @@ class WebExtractor(BaseExtractor):
                         'text/csv'          : CSVExtractor._get_element_from_target_file,
                         'text/plain'        : TxtExtractor._get_element_from_target_file }
         try:
-            resp = requests.get(referred_url,verify=False,proxies=SNSConfig.get_proxies())
+            resp = requests.get(referred_url,verify=False,proxies=System.get_request_proxies())
             content_type = resp.headers['content-type']
             file_ = None
             if  'text/html' in content_type:

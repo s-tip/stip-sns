@@ -298,19 +298,23 @@ tbody tr td{
 }
 
 ul.stream li .stix-download-menu-ul,
-ul.stream li .share-ctim-gv-menu-ul
+ul.stream li .share-ctim-gv-menu-ul,
+ul.stream li .response-action-menu-ul
 {
   display: none;
   padding: 0px;
 }
 
-ul.stream li .stix-download-menul-li,
-ul.stream li .share-ctim-gv-menu-li
+ul.stream li .stix-download-menu-li,
+ul.stream li .share-ctim-gv-menu-li,
+ul.stream li .response-action-menu-li
 {
   padding-top: 0px;
+  border-top: 0px;
+  border-bottom: 0px;
 }
 
-.download-stix, share-ctim-gv
+.download-stix, share-ctim-gv, .response-action
 {
   cursor: pointer;
 }
