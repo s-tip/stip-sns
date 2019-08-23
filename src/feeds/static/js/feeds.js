@@ -1011,9 +1011,62 @@ $(function () {
 	   	});
   });
 
-  //JIRA downloadクリック
-  $(document).on("click",".share-ctim-jira",function () {
+  //Sighting クリック
+  $(document).on("click",".sighting-splunk",function () {
 	    var li = $(this).closest("li");
+	    $.ajax({
+	        url: '/feeds/sighting_splunk/',
+	        data: {
+	          'feed_id': $(li).attr('feed-id'),
+	        },
+	        type: 'get',
+	        cache: false,
+	        async: false,
+	    }).done(function(sightings_str){
+			var sighting_splunk_modal_body = $('#sighting-splunk-modal-body');
+			sighting_splunk_modal_body.empty();
+
+			var sightings = JSON.parse(sightings_str);
+			var body_str = '<table class="table stripe hover" id="sighting-splunk-table">';
+			body_str += '<thead><tr><th>Type</th><th>Value</th><th>Count</th><th>First Seen</th><th>Last Seen</th><th>Check</th></tr></thead>'
+			body_str += '<tbody>'
+			sightings.forEach(function(val,index,ar){
+				body_str += '<tr>'
+				body_str += '<td>' + val['type'] + '</td>'
+				body_str += '<td>' + val['value'] + '</td>'
+				body_str += '<td>' + val['count'] + '</td>'
+				body_str += '<td>' + val['first_seen'] + '</td>'
+				body_str += '<td>' + val['last_seen'] + '</td>'
+              	body_str += '<td><a href="' + val['url'] + '" target="_blank">Check</a></td>';
+				body_str += '</tr>'
+			});
+			body_str += '</tbody></table>'
+
+			sighting_splunk_modal_body.append(body_str);
+			$('#splunk-sighting-modal-body').html(body_str);
+
+            var opt = {
+                'columnDefs':[
+                    {'targets':0, 'orderable':true, 'searchable': true}, //type
+                    {'targets':1, 'orderable':true,  'searchable': true}, //value
+					{'targets':2, 'orderable':true,  'searchable': true}, // Count
+					{'targets':3, 'orderable':true,  'searchable': true}, // First Seen
+					{'targets':4, 'orderable':true,  'searchable': true}, // Last Seen
+					{'targets':5, 'orderable':false,  'searchable': false} // Check
+                ],
+                'paging': false
+            }
+			$('#sighting-splunk-table').DataTable(opt);
+    	    $('#splunk-sighting-modal-dialog').modal();
+	    }).fail(function(XMLHttpRequest, textStatus, errorThrown){
+	   		var msg = XMLHttpRequest.statusText+ ': ' + XMLHttpRequest.responseText;
+	   		alert(msg);
+	   	});
+  });
+
+  //JIRA downloadクリック
+  $(document).on("click",".response-action-jira",function () {
+		var li = $(this).closest(".feed-li");
 	    $.ajax({
 	        url: '/feeds/call_jira/',
 	        data: {
@@ -1032,6 +1085,41 @@ $(function () {
 	   		alert(msg);
 	   	});
   });
+
+  //Action downloadクリック
+  $(document).on("click",".response-action",function () {
+	  if ($(this).hasClass('selected') == true){
+		  //menu 非表示
+		  $(this).removeClass('selected')
+		  $(this).next('.response-action-menu-ul').slideUp('fast');
+		  
+	  }else{
+		  //menu 表示
+		  $(this).addClass('selected');
+		  $(this).next('.response-action-menu-ul').slideDown('fast');
+	  }
+  });
+
+	//Phantom 連携クリック
+	$(document).on('click','.response-action-phantom',function(){
+		var li = $(this).closest(".feed-li");
+		$.ajax({
+			url: '/feeds/run_phantom_playbook/',
+            data: {
+              'feed_id': li.attr('feed-id'),
+            },
+			type: 'get',
+			cache: false,
+			async: false,
+		}).done(function(data){
+			var childWindow = window.open('about:blank');
+			childWindow.location.href = data['url'];
+			childWindow = null;
+		}).fail(function(XMLHttpRequest, textStatus, errorThrown){
+			var msg = XMLHttpRequest.statusText+ ': ' + XMLHttpRequest.responseText;
+			alert(msg);
+		});
+	});
 
   //STIX downloadクリック
   $(document).on("click",".download-stix",function () {

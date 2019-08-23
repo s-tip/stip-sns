@@ -32,7 +32,7 @@ from django.template.loader import render_to_string
 from django.http.response import JsonResponse
 
 from ctirs.models import STIPUser
-from ctirs.models import Feed,AttachFile,SNSConfig
+from ctirs.models import Feed,AttachFile,SNSConfig, System
 from feeds.feed_stix import FeedStix
 from feeds.feed_pdf import FeedPDF
 from feeds.feed_stix_like import FeedStixLike
@@ -40,6 +40,8 @@ from feeds.feed_stix_comment import FeedStixComment
 from ctirs.models import Group
 from feeds.extractor.base import Extractor
 from feeds.adapter.crowd_strike import search_indicator,get_report_info
+from feeds.adapter.phantom import call_run_phantom_playbook
+from feeds.adapter.splunk import get_sightings
 from feeds.feed_stix2 import get_stix2_bundle
 
 FEEDS_NUM_PAGES = 10
@@ -722,6 +724,40 @@ def share_misp(request):
 
 @login_required
 @ajax_required
+def sighting_splunk(request):
+    try:
+        feed_file_name_id = request.GET['feed_id']
+        feed_stix = get_feed_stix(feed_file_name_id)
+        indicators = FeedStix.get_indicators(feed_stix.stix_package)
+        #user は STIPUser
+        stip_user = request.user
+        sightings = get_sightings(stip_user, indicators)
+        return HttpResponse(json.dumps(sightings))
+    except Exception as e:
+        traceback.print_exc()
+        return HttpResponseServerError(str(e))
+
+@login_required
+@ajax_required
+def run_phantom_playbook(request):
+    try:
+        feed_file_name_id = request.GET['feed_id']
+        feed_stix = get_feed_stix(feed_file_name_id)
+        indicators = FeedStix.get_indicators(feed_stix.stix_package)
+        #user は STIPUser
+        stip_user = request.user
+        container_id = call_run_phantom_playbook(stip_user,indicators)
+        url = 'https://%s/mission/%s/analyst/timeline' % (stip_user.sns_profile.phantom_host,container_id)
+        rsp = {
+                'url' : url,
+             }
+        return JsonResponse(rsp)
+    except Exception as e:
+        traceback.print_exc()
+        return HttpResponseServerError(str(e))
+
+@login_required
+@ajax_required
 def call_jira(request):
     try:
         #JIRA が import されていない場合は何もしない
@@ -734,8 +770,10 @@ def call_jira(request):
         feed = Feed.get_feeds_from_package_id(request.user,package_id_arg)
 
         #JIRA instance
+        proxies = System.get_request_proxies()
         j = JIRA(
             server=SNSConfig.get_jira_host(),
+            proxies=proxies,
             basic_auth=(SNSConfig.get_jira_username(),SNSConfig.get_jira_password()))
         #issues作成
         issue = j.create_issue(
@@ -955,6 +993,7 @@ def post_rs_indicator_matching_comment(request,feed,id_,concierge_user):
 def post_crowd_strike_indicator_matching_comment(feed,id_,concierge_user,json_indicators):
     try:
         realted_reports = []
+        phantom_indicators = []
         for json_indicator in json_indicators:
             value = json_indicator[u'value']
             results = search_indicator(value)
@@ -962,6 +1001,8 @@ def post_crowd_strike_indicator_matching_comment(feed,id_,concierge_user,json_in
                 if result.has_key('reports') == False:
                     #reports がない場合は skip
                     continue
+                else:
+                    phantom_indicators.append(json_indicator)
                 #report を追加する
                 for report in result['reports']:
                     realted_reports.append(report)
@@ -981,6 +1022,12 @@ def post_crowd_strike_indicator_matching_comment(feed,id_,concierge_user,json_in
             #report id から report title と URL を取得する
             report_title,url = get_report_info(realted_report)
             msg += ('<a href="%s" target="_blank">%s</a><br/>' % (url,report_title))
+
+        if len(phantom_indicators) != 0:
+            #phantom 連携できる indicator あり
+            msg += ('<a class="anchor-phantom-run-playbook" data-id="%s">Run Phantom Playbook</a>' % (id_))
+            for phantom_indicator in phantom_indicators:
+                msg += '<div id="%s" data-type="%s" data-value="%s"></div>' % ('phantom-data-' + id_,phantom_indicator[u'type'],phantom_indicator[u'value'])
         #指定User で投稿
         post_comment(concierge_user,id_,msg,concierge_user)
     except Exception:

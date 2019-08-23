@@ -133,6 +133,21 @@ def settings(request):
             profile.scan_txt = form.cleaned_data.get('scan_txt')
             profile.threat_actors = form.cleaned_data.get('threat_actors')
             profile.indicator_white_list = form.cleaned_data.get('indicator_white_list')
+            profile.phantom_host = form.cleaned_data.get('phantom_host')
+            profile.phantom_source_name = form.cleaned_data.get('phantom_source_name')
+            profile.phantom_playbook_name = form.cleaned_data.get('phantom_playbook_name')
+            phantom_auth_token = form.cleaned_data.get('phantom_auth_token')
+            if len(phantom_auth_token) != 0:
+                profile.phantom_auth_token = form.cleaned_data.get('phantom_auth_token')
+            profile.splunk_host = form.cleaned_data.get('splunk_host')
+            profile.splunk_api_port = form.cleaned_data.get('splunk_api_port')
+            profile.splunk_web_port = form.cleaned_data.get('splunk_web_port')
+            profile.splunk_username = form.cleaned_data.get('splunk_username')
+            splunk_password = form.cleaned_data.get('splunk_password')
+            if len(splunk_password) != 0:
+                profile.splunk_password = splunk_password
+            profile.splunk_scheme = form.cleaned_data.get('splunk_scheme')
+            profile.splunk_query = form.cleaned_data.get('splunk_query')
             stip_user.save()
             profile.save()
             messages.add_message(request,
@@ -168,6 +183,17 @@ def settings(request):
             'threat_actors' : profile.threat_actors,
             'indicator_white_list' : profile.indicator_white_list,
             'timezone' : stip_user.timezone,
+            'phantom_host' : profile.phantom_host,
+            'phantom_source_name' : profile.phantom_source_name,
+            'phantom_playbook_name' : profile.phantom_playbook_name,
+            'phantom_auth_token' : profile.phantom_auth_token,
+            'splunk_host' : profile.splunk_host,
+            'splunk_api_port' : profile.splunk_api_port,
+            'splunk_web_port' : profile.splunk_web_port,
+            'splunk_username' : profile.splunk_username,
+            'splunk_password' : profile.splunk_password,
+            'splunk_scheme' : profile.splunk_scheme,
+            'splunk_query' : profile.splunk_query,
             })
         form.fields['administrative_area'].choices = Region.get_administrative_areas_choices(country)
 

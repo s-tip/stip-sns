@@ -2,6 +2,7 @@
 from stix2 import TAXIICollectionSource, Filter
 from taxii2client import Server, Collection
 from feeds.mongo import Attck
+from ctirs.models import System
 
 
 class ATTCK_Taxii_Server(object):
@@ -29,7 +30,8 @@ class ATTCK_Taxii_Server(object):
     def get_taxii_collection_source(cls):
         #あらかじめ ATT&CK の TAXIICOllectionSourceを取得する
         try:
-            attck_txs = Server ("%s/taxii/" % (cls.ATT_CK_TAXII_SERVER))
+            proxies = System.get_request_proxies()
+            attck_txs = Server ("%s/taxii/" % (cls.ATT_CK_TAXII_SERVER),proxies=proxies)
             api_root = attck_txs.api_roots[0]
             for collection in api_root.collections:
                 if collection.title == cls.COLLCETION_TITLE:

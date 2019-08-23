@@ -89,12 +89,12 @@ def sns_config(request):
             sns_config.cs_custkey = form.cleaned_data.get('cs_custkey')
             sns_config.rs_host = form.cleaned_data.get('rs_host')
             sns_config.rs_community_name = form.cleaned_data.get('rs_community_name')
-            sns_config.proxy_http = form.cleaned_data.get('proxy_http')
-            sns_config.proxy_https = form.cleaned_data.get('proxy_https')
             sns_config.gv_l2_url = form.cleaned_data.get('gv_l2_url')
             sns_config.jira_host = form.cleaned_data.get('jira_host')
             sns_config.jira_username = form.cleaned_data.get('jira_username')
-            sns_config.jira_password = form.cleaned_data.get('jira_password')
+            jira_password = form.cleaned_data.get('jira_password')
+            if len(jira_password) != 0:
+                sns_config.jira_password = jira_password
             sns_config.jira_project = form.cleaned_data.get('jira_project')
             sns_config.jira_type = form.cleaned_data.get('jira_type')
             sns_config.smtp_port = form.cleaned_data.get('smtp_port')
@@ -138,8 +138,6 @@ def sns_config(request):
             'cs_custkey': sns_config.cs_custkey,
             'rs_host': sns_config.rs_host,
             'rs_community_name': sns_config.rs_community_name,
-            'proxy_http': sns_config.proxy_http,
-            'proxy_https': sns_config.proxy_https,
             'gv_l2_url': sns_config.gv_l2_url,
             'jira_host': sns_config.jira_host,
             'jira_username': sns_config.jira_username,

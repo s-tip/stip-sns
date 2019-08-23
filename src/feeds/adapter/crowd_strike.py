@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import requests
-from ctirs.models import SNSConfig
+from ctirs.models import SNSConfig, System
 
 def get_crowd_strike_request_header():
     query_http_headers = {}
@@ -20,7 +20,8 @@ def get_crowd_strike_request_header():
 
 def request(url):
     #指定の url (CrowdStrike API) に request する
-    resp = requests.get(url,headers=get_crowd_strike_request_header())
+    proxies = System.get_request_proxies()
+    resp = requests.get(url,headers=get_crowd_strike_request_header(), proxies=proxies)
     return json.loads(resp.text)
 
 def query_actors(query_value):

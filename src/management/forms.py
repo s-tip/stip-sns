@@ -164,7 +164,7 @@ class SNSConfigForm(forms.ModelForm):
                   'attck_mongo_host', 'attck_mongo_port', 'attck_mongo_database',
                   'cs_custid','cs_custkey',
                   'rs_host','rs_community_name',
-                  'proxy_http','proxy_https','gv_l2_url',
+                  'gv_l2_url',
                   'jira_host','jira_username','jira_password','jira_project','jira_type',
                   'smtp_port', 'smtp_accept_mail_address',
                   'stix_ns_url', 'stix_ns_name', 'slack_bot_token', 'slack_bot_channel']

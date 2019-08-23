@@ -99,9 +99,9 @@
                   <span class="text">STIX</span>
                 </a>
                 <ul class="stix-download-menu-ul">
-                	<li class="stix-download-menul-li"><a class="download-stix-12" data-package-id="{{feed.package_id}}">STIX 1.2</a></li>
+                	<li class="stix-download-menu-li"><a class="download-stix-12" data-package-id="{{feed.package_id}}">STIX 1.2</a></li>
                     {% if feed.stix2_package_id %}
-                	<li class="stix-download-menul-li"><a class="download-stix-21" data-package-id="{{feed.stix2_package_id}}">STIX 2.1</a></li>
+                	<li class="stix-download-menu-li"><a class="download-stix-21" data-package-id="{{feed.stix2_package_id}}">STIX 2.1</a></li>
                 	{% endif %}
                 </ul>
               </div> <!-- box -->
@@ -136,14 +136,36 @@
                   <span class="text">MISP</span>
                 </a>
               </div> <!-- box -->
-              {% if jira %}
               <div class="box">
-                <a href="#" class="share-ctim-jira" >
-                  <img src="/static/img/jira.png" style="width:11.2px;height:13px;"/>
-                  <span class="text">{% trans 'Issue' %}</span>
+                <a href="#" class="sighting-splunk">
+                  <span class="glyphicon glyphicon-eye-open"></span>
+                  <span class="text">Sighting</span>
                 </a>
               </div> <!-- box -->
-              {% endif %}
+              <div class="box response-action-div">
+                <a class="response-action">
+                  <span class="glyphicon glyphicon-play"></span>
+                  <span class="text">Action</span>
+                </a>
+                <ul class="response-action-menu-ul">
+                  {% if jira %}
+                	<li class="response-action-menu-li">
+                    <a class="response-action-jira">
+                      <img src="/static/img/jira.png" style="width:11.2px;height:13px;"/>
+                      <span class="text">{% trans 'Jira' %}</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                  {% if user.sns_profile_id|can_connect_phantom %}
+                	<li class="response-action-menu-li">
+                    <a class="response-action-phantom">
+                      <img src="/static/img/phantom.png" style="width:11.2px;height:11.2px;"/>
+                      <span class="text">{% trans 'Phantom' %}</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div> <!-- box -->
             </div><!--  boxContainer -->
           </div> <!--  interaction -->
           <div class="interaction">

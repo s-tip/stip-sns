@@ -3,7 +3,7 @@ import pytz
 from django import forms
 from ctirs.models import STIPUser as User
 from django.utils.translation import ugettext_lazy as _
-from ctirs.models import Region,Country
+from ctirs.models import Region,Country, Profile
 from stip.common.const import TLP_CHOICES,CRITICAL_INFRASTRUCTURE_CHOICES,LANGUAGES
 
 class ProfileForm(forms.ModelForm):
@@ -91,12 +91,67 @@ class ProfileForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-control'}),
         label = _('Timezone'),
         required=False)
+    phantom_host = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Phantom Host'),
+        required=False)
+    phantom_source_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Phantom Source Name'),
+        required=False)
+    phantom_playbook_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Phantom Playbook Name'),
+        required=False)
+    phantom_auth_token = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Phantom Auth Token'),
+        required=False)
+    splunk_host = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Splunk Host'),
+        required=False)
+    splunk_api_port = forms.IntegerField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label=_('Splunk API Port'),
+        required=False)
+    splunk_web_port = forms.IntegerField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label=_('Splunk Web Port'),
+        required=False)
+    splunk_username = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Splunk Username'),
+        required=False)
+    splunk_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        max_length=128,
+        label=_('Splunk Password'),
+        required=False)
+    splunk_scheme = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        choices= Profile.SPLUNK_SCHEME_CHOICE,
+        label=_('Splunk Scheme'),
+        required=False)
+    splunk_query = forms.CharField(
+        label = _('Splunk Query'),
+        widget=forms.Textarea(attrs={'class':'form-control','style':'resize:none'}),
+        required=False)
+
     class Meta:
         model = User
         fields = ['screen_name','affiliation', 'job_title',
                   'url', 'location', 'description', 'tlp', 'country', 'administrative_area',
                   'ci', 'language', 'scan_csv', 'scan_pdf', 'scan_post', 'scan_txt',
-                  'threat_actors', 'indicator_white_list', 'timezone']
+                  'threat_actors', 'indicator_white_list', 'timezone',
+                  'phantom_host', 'phantom_source_name', 'phantom_playbook_name','phantom_auth_token',
+                  'splunk_host', 'splunk_api_port', 'splunk_web_port', 'splunk_username', 'splunk_password', 'splunk_scheme', 'splunk_query']
 
 
 class ChangePasswordForm(forms.ModelForm):
