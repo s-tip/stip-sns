@@ -150,7 +150,6 @@ RS_MODELS_DIR= RS_SRC_ROOT_DIR + os.sep + 'models'
 RS_SNS_MODELS_DIR= RS_MODELS_DIR + os.sep + 'sns'
 
 STATICFILES_DIRS = (
-    PROJECT_DIR.child('static'),
     os.path.join(COMMON_PROJECT_DIR,'src/static'),
 )
 
