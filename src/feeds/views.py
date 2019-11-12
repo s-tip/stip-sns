@@ -14,6 +14,7 @@ import zipfile
 import ioc_fanger
 import ctirs.models.sns.feeds.rs as rs
 import stip.common.const as const
+import feeds.feed_stix2_sighting as stip_sighting
 
 from decorators import ajax_required
 try:
@@ -728,7 +729,7 @@ def sighting_splunk(request):
     try:
         feed_file_name_id = request.GET['feed_id']
         feed_stix = get_feed_stix(feed_file_name_id)
-        indicators = FeedStix.get_indicators(feed_stix.stix_package)
+        indicators = FeedStix.get_indicators(feed_stix.stix_package,indicator_only=True)
         #user は STIPUser
         stip_user = request.user
         sightings = get_sightings(stip_user, indicators)
@@ -736,6 +737,50 @@ def sighting_splunk(request):
     except Exception as e:
         traceback.print_exc()
         return HttpResponseServerError(str(e))
+
+
+@login_required
+def create_sighting_object(request):
+    try:
+        package_id = request.GET['package_id']
+        feed_id = request.GET['feed_id']
+        value_ = request.GET['value']
+        type_ = request.GET['type']
+        count = int(request.GET['count'])
+        first_seen = request.GET['first_seen']
+        last_seen = request.GET['last_seen']
+        observable_id = request.GET['observable_id']
+
+        stip_user = request.user
+        feed = Feed.get_feeds_from_package_id(stip_user,package_id)
+        stix_file_path = Feed.get_cached_file_path(feed_id)
+        stix2 = stip_sighting.convert_to_stix2_from_stix_file_path(stix_file_path)
+
+        stix2 = stip_sighting.insert_sighting_object(
+            stix2,
+            type_, value_, observable_id,
+            count, first_seen, last_seen,
+            stip_user)
+
+        stix2_str = stix2.serialize(True,ensure_ascii=False).encode('utf-8')
+
+        _,stix2_file_path =tempfile.mkstemp()
+        with open(stix2_file_path,'w') as fp:
+            fp.write(stix2_str)
+        #RS に登録する
+        rs.regist_ctim_rs(feed.user,stix2.id,stix2_file_path)
+        os.remove(stix2_file_path)
+
+        file_name = '%s.json' % (stix2.id)
+        output = io.StringIO()
+        output.write(unicode(stix2_str))
+        response = HttpResponse(output.getvalue(),content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
+        return response
+    except Exception as e:
+        traceback.print_exc()
+        return HttpResponseServerError(str(e))
+
 
 @login_required
 @ajax_required

@@ -206,7 +206,7 @@ class FeedStix(FeedStixCommon):
         #2カラム目が値
         v = ''
         for line in lines:
-            (type_,value) = line
+            (type_,value,_) = line
             s = '%s,%s\n' % (type_,value)
             v += s
         return v
@@ -248,11 +248,11 @@ class FeedStix(FeedStixCommon):
                 if exploit_target.vulnerabilities is not None:
                     for vulnerability in exploit_target.vulnerabilities:
                         if vulnerability.cve_id is not None:
-                            lines.append((CVE_TYPE,vulnerability.cve_id))
+                            lines.append((CVE_TYPE,vulnerability.cve_id,None))
         return lines
 
     @classmethod
-    def get_indicators(cls,stix_package):
+    def get_indicators(cls,stix_package,indicator_only=False):
         #CSVファイルのラベル
         IPV4_TYPE = 'ipv4'.decode(ENCODING)
         DOMAIN_TYPE = 'domain'.decode(ENCODING)
@@ -273,9 +273,10 @@ class FeedStix(FeedStixCommon):
                     observables.extend(FeedStix.flatten_observable_composit(indicator.observable))
                     
         #observables
-        if stix_package.observables is not None:
-            for observable in stix_package.observables:
-                observables.extend(FeedStix.flatten_observable_composit(indicator.observable))
+        if indicator_only == False:
+            if stix_package.observables is not None:
+                for observable in stix_package.observables:
+                    observables.extend(FeedStix.flatten_observable_composit(indicator.observable))
 
         lines = []
         #タイプ別に情報を抽出する
@@ -285,58 +286,58 @@ class FeedStix(FeedStixCommon):
                 if isinstance(prop,cybox.objects.address_object.Address) == True:
                     v = cls._get_value_from_address_object(prop)
                     if v is not None:
-                        lines.append((IPV4_TYPE,v))
+                        lines.append((IPV4_TYPE,v,observable.id_))
                         continue
                 if isinstance(prop,cybox.objects.domain_name_object.DomainName) == True:
                     #Domain名である
-                    lines.append((DOMAIN_TYPE,prop.value.value.decode(ENCODING)))
+                    lines.append((DOMAIN_TYPE,prop.value.value.decode(ENCODING),observable.id_))
                     continue
                 if isinstance(prop,cybox.objects.uri_object.URI) == True:
                     #uriである
-                    lines.append((URI_TYPE,prop.value.value.decode(ENCODING)))
+                    lines.append((URI_TYPE,prop.value.value.decode(ENCODING),observables.id_))
                     continue
                 if isinstance(prop,cybox.objects.file_object.File) == True:
                     #Fileである
                     if prop.file_name is not None:
                         file_name = u'|%s|' % (prop.file_name.value)
-                        lines.append((FILE_NAME_TYPE,file_name))
+                        lines.append((FILE_NAME_TYPE,file_name,observables.id_))
                     if prop.md5 is not None:
                         if isinstance(prop.md5,HexBinary):
                             value = prop.md5.value
                         else:
                             value = prop.md5
-                        lines.append((MD5_TYPE,value.decode(ENCODING)))
+                        lines.append((MD5_TYPE,value.decode(ENCODING),observables.id_))
                     if prop.sha1 is not None:
                         if isinstance(prop.sha1,HexBinary):
                             value = prop.sha1.value
                         else:
                             value = prop.sha1
-                        lines.append((SHA1_TYPE,value.decode(ENCODING)))
+                        lines.append((SHA1_TYPE,value.decode(ENCODING),observables.id_))
                     if prop.sha256 is not None:
                         if isinstance(prop.sha256,HexBinary):
                             value = prop.sha256.value
                         else:
                             value = prop.sha256
-                        lines.append((SHA256_TYPE,value.decode(ENCODING)))
+                        lines.append((SHA256_TYPE,value.decode(ENCODING),observables.id_))
                     if prop.sha512 is not None:
                         if isinstance(prop.sha512,HexBinary):
                             value = prop.sha512.value
                         else:
                             value = prop.sha512
-                        lines.append((SHA512_TYPE,value.decode(ENCODING)))
+                        lines.append((SHA512_TYPE,value.decode(ENCODING),observables.id_))
                     continue
                 if isinstance(prop,cybox.objects.address_object.Address) == True:
                     #Addressである
                     if (prop.category == cybox.objects.address_object.Address.CAT_EMAIL):
-                        lines.append((EMAIL_ADDRESS_TYPE,prop.address_value.value.decode(ENCODING)))
+                        lines.append((EMAIL_ADDRESS_TYPE,prop.address_value.value.decode(ENCODING),observables.id_))
                     continue
                 try:
                     if isinstance(prop,cybox.objects.network_connection_object.NetworkConnection) == True:   
                         #NetworkConnectionである
                         if prop.destination_socket_address is not None:
-                            lines.append((IPV4_TYPE,cls._get_value_from_address_object(prop.destination_socket_address.ip_address)))
+                            lines.append((IPV4_TYPE,cls._get_value_from_address_object(prop.destination_socket_address.ip_address),observables.id_))
                         if prop.source_socket_address is not None:
-                            lines.append((IPV4_TYPE,cls._get_value_from_address_object(prop.source_socket_address.ip_address)))
+                            lines.append((IPV4_TYPE,cls._get_value_from_address_object(prop.source_socket_address.ip_address),observables.id_))
                         continue
                 except AttributeError:
                     pass

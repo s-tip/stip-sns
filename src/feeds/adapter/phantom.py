@@ -115,7 +115,7 @@ def get_cef(fileHash='', destinationAddress='', destinationDnsDomain='',requestU
 def call_run_phantom_playbook(stip_user, indicators):
     artifacts = []
     for indicator in indicators:
-        type_, value = indicator
+        type_, value,_ = indicator
         cef = None
         if type_ == 'ipv4':
             cef = get_cef(destinationAddress=value)

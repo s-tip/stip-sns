@@ -184,7 +184,7 @@ class FeedPDF(object):
 
             #STIXからObservablesとIndicatorsを抽出
             for item in indicators:
-                (type_,value) = item
+                (type_,value,_) = item
                 item = []
                 item.append(type_)
                 #file_nameの場合は値がパイプで囲まれている
