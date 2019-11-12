@@ -83,7 +83,7 @@ def get_splunk_timestamp(dt):
     return s
 
 
-def get_sighting(stip_user, type_, value, earliest_dt=None, latest_dt=None):
+def get_sighting(stip_user, type_, value, id_, earliest_dt=None, latest_dt=None):
     kwargs = {
         'earliest_time': '' if earliest_dt is None else get_splunk_timestamp(earliest_dt),
         'latest_time': '' if latest_dt is None else get_splunk_timestamp(latest_dt),
@@ -97,6 +97,7 @@ def get_sighting(stip_user, type_, value, earliest_dt=None, latest_dt=None):
     sighting[u'url'] = '%s://%s:%d/app/search/search?q=%s' % (sns_profile.splunk_scheme, sns_profile.splunk_host, sns_profile.splunk_web_port, urllib.quote(web_query))
     sighting[u'type'] = type_
     sighting[u'value'] = value
+    sighting[u'observable_id'] = id_
     return sighting
 
 
@@ -104,7 +105,7 @@ def get_sightings(stip_user, indicators):
     ALLOW_QUERY_INDICATOR_TYPES = [u'ipv4', u'domain']
     sightings = []
     for indicator in indicators:
-        type_, value = indicator
+        type_, value,id_ = indicator
         if type_ in ALLOW_QUERY_INDICATOR_TYPES:
-            sightings.append(get_sighting(stip_user, type_, value))
+            sightings.append(get_sighting(stip_user, type_, value,id_))
     return sightings

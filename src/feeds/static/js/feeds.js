@@ -1013,11 +1013,13 @@ $(function () {
 
   //Sighting クリック
   $(document).on("click",".sighting-splunk",function () {
-	    var li = $(this).closest("li");
+		var li = $(this).closest("li");
+		var feed_id = $(li).attr('feed-id');
+		var package_id = $(li).attr('package-id');
 	    $.ajax({
-	        url: '/feeds/sighting_splunk/',
+	        url: '/feeds/sighting_splunk',
 	        data: {
-	          'feed_id': $(li).attr('feed-id'),
+	          'feed_id': feed_id,
 	        },
 	        type: 'get',
 	        cache: false,
@@ -1028,17 +1030,29 @@ $(function () {
 
 			var sightings = JSON.parse(sightings_str);
 			var body_str = '<table class="table stripe hover" id="sighting-splunk-table">';
-			body_str += '<thead><tr><th>Type</th><th>Value</th><th>Count</th><th>First Seen</th><th>Last Seen</th><th>Check</th></tr></thead>'
+			body_str += '<thead><tr><th>Type</th><th>Value</th><th>Count</th><th>First Seen</th><th>Last Seen</th><th>Check</th><th>Sighting Object</th></tr></thead>'
 			body_str += '<tbody>'
 			sightings.forEach(function(val,index,ar){
-				body_str += '<tr>'
-				body_str += '<td>' + val['type'] + '</td>'
-				body_str += '<td>' + val['value'] + '</td>'
-				body_str += '<td>' + val['count'] + '</td>'
-				body_str += '<td>' + val['first_seen'] + '</td>'
-				body_str += '<td>' + val['last_seen'] + '</td>'
-              	body_str += '<td><a href="' + val['url'] + '" target="_blank">Check</a></td>';
-				body_str += '</tr>'
+				var first_seen = val['first_seen'] == 'N/A' ? '' : val['first_seen'] ;
+				var last_seen = val['last_seen'] == 'N/A' ? '' : val['last_seen'] ;
+				var observable_id = val['observable_id'];
+				body_str += '<tr>';
+				body_str += '<td>' + val['type'] + '</td>';
+				body_str += '<td>' + val['value'] + '</td>';
+				body_str += '<td>' + val['count'] + '</td>';
+				body_str += '<td>' + val['first_seen'] + '</td>';
+				body_str += '<td>' + val['last_seen'] + '</td>';
+				body_str += '<td><a href="' + val['url'] + '" target="_blank">Check</a></td>';
+				body_str += '<td><a class="create-sighting-object"';
+				body_str += 'data-observable-id="' + observable_id + '" ';
+				body_str += 'data-package-id="' + package_id + '" ';
+				body_str += 'data-feed-id="' + feed_id + '" ';
+				body_str += 'data-type="' + val['type'] + '" ';
+				body_str += 'data-value="' + val['value'] + '" ';
+				body_str += 'data-first-seen="' + first_seen + '" ';
+				body_str += 'data-last-seen="' + last_seen + '" ';
+				body_str += 'data-count="' + val['count'] + '">Create</a></td>';  
+				body_str += '</tr>';
 			});
 			body_str += '</tbody></table>'
 
@@ -1052,7 +1066,8 @@ $(function () {
 					{'targets':2, 'orderable':true,  'searchable': true}, // Count
 					{'targets':3, 'orderable':true,  'searchable': true}, // First Seen
 					{'targets':4, 'orderable':true,  'searchable': true}, // Last Seen
-					{'targets':5, 'orderable':false,  'searchable': false} // Check
+					{'targets':5, 'orderable':false,  'searchable': false}, // Check
+					{'targets':6, 'orderable':false,  'searchable': false} // Create a Sighting Object
                 ],
                 'paging': false
             }
@@ -1062,7 +1077,58 @@ $(function () {
 	   		var msg = XMLHttpRequest.statusText+ ': ' + XMLHttpRequest.responseText;
 	   		alert(msg);
 	   	});
-  });
+ 	 });
+
+ 	//Create a Sightint Object クリック
+	$(document).on("click",".create-sighting-object",function () {
+		var f = document.createElement('form');
+	 	f.action = '/feeds/create_sighting_object';
+	  	f.method = 'get';
+
+		var package_id = document.createElement('input');
+		package_id.setAttribute('type','hidden');
+		package_id.setAttribute('name','package_id');
+		package_id.setAttribute('value',$(this).data('package-id'));
+		f.appendChild(package_id);
+		var feed_id = document.createElement('input');
+		feed_id.setAttribute('type','hidden');
+		feed_id.setAttribute('name','feed_id');
+		feed_id.setAttribute('value',$(this).data('feed-id'));
+		f.appendChild(feed_id);
+		var type = document.createElement('input');
+		type.setAttribute('type','hidden');
+		type.setAttribute('name','type');
+		type.setAttribute('value',$(this).data('type'));
+		f.appendChild(type);
+		var value = document.createElement('input');
+		value.setAttribute('type','hidden');
+		value.setAttribute('name','value');
+		value.setAttribute('value',$(this).data('value'));
+		f.appendChild(value);
+		var first_seen = document.createElement('input');
+		first_seen.setAttribute('type','hidden');
+		first_seen.setAttribute('name','first_seen');
+		first_seen.setAttribute('value',$(this).data('first-seen'));
+		f.appendChild(first_seen);
+		var last_seen = document.createElement('input');
+		last_seen.setAttribute('type','hidden');
+		last_seen.setAttribute('name','last_seen');
+		last_seen.setAttribute('value',$(this).data('last-seen'));
+		f.appendChild(last_seen);
+		var count = document.createElement('input');
+		count.setAttribute('type','hidden');
+		count.setAttribute('name','count');
+		count.setAttribute('value',$(this).data('count'));
+		f.appendChild(count);
+		var observable_id = document.createElement('input');
+		observable_id.setAttribute('type','hidden');
+		observable_id.setAttribute('name','observable_id');
+		observable_id.setAttribute('value',$(this).data('observable-id'));
+		f.appendChild(observable_id);
+		document.body.appendChild(f);
+		f.submit();
+		return;
+	});
 
   //JIRA downloadクリック
   $(document).on("click",".response-action-jira",function () {
