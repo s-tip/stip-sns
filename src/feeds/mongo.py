@@ -7,7 +7,7 @@ import json
 from mongoengine import connect,fields
 from mongoengine.document import Document
 from mongoengine.errors import DoesNotExist
-from ctirs.models import SNSConfig
+from ctirs.models import SNSConfig, System
 
 CIRCL_API_URL_PREFIX = 'http://cve.circl.lu/api/cve/'
 
@@ -125,7 +125,7 @@ class Cve(Document):
         #cve.circl.lu から取得する
         url = '%s%s' % (CIRCL_API_URL_PREFIX,cve)
         try:
-            resp = requests.get(url)
+            resp = requests.get(url,proxies=System.get_request_proxies())
             if resp.text == 'null':
                 #データが返却されていない
                 return None
