@@ -294,55 +294,56 @@ class FeedStix(FeedStixCommon):
                     continue
                 if isinstance(prop,cybox.objects.uri_object.URI) == True:
                     #uriである
-                    lines.append((URI_TYPE,prop.value.value.decode(ENCODING),observables.id_))
+                    lines.append((URI_TYPE,prop.value.value.decode(ENCODING),observable.id_))
                     continue
                 if isinstance(prop,cybox.objects.file_object.File) == True:
                     #Fileである
                     if prop.file_name is not None:
                         file_name = u'|%s|' % (prop.file_name.value)
-                        lines.append((FILE_NAME_TYPE,file_name,observables.id_))
+                        lines.append((FILE_NAME_TYPE,file_name,observable.id_))
                     if prop.md5 is not None:
                         if isinstance(prop.md5,HexBinary):
                             value = prop.md5.value
                         else:
                             value = prop.md5
-                        lines.append((MD5_TYPE,value.decode(ENCODING),observables.id_))
+                        lines.append((MD5_TYPE,value.decode(ENCODING),observable.id_))
                     if prop.sha1 is not None:
                         if isinstance(prop.sha1,HexBinary):
                             value = prop.sha1.value
                         else:
                             value = prop.sha1
-                        lines.append((SHA1_TYPE,value.decode(ENCODING),observables.id_))
+                        lines.append((SHA1_TYPE,value.decode(ENCODING),observable.id_))
                     if prop.sha256 is not None:
                         if isinstance(prop.sha256,HexBinary):
                             value = prop.sha256.value
                         else:
                             value = prop.sha256
-                        lines.append((SHA256_TYPE,value.decode(ENCODING),observables.id_))
+                        lines.append((SHA256_TYPE,value.decode(ENCODING),observable.id_))
                     if prop.sha512 is not None:
                         if isinstance(prop.sha512,HexBinary):
                             value = prop.sha512.value
                         else:
                             value = prop.sha512
-                        lines.append((SHA512_TYPE,value.decode(ENCODING),observables.id_))
+                        lines.append((SHA512_TYPE,value.decode(ENCODING),observable.id_))
                     continue
                 if isinstance(prop,cybox.objects.address_object.Address) == True:
                     #Addressである
                     if (prop.category == cybox.objects.address_object.Address.CAT_EMAIL):
-                        lines.append((EMAIL_ADDRESS_TYPE,prop.address_value.value.decode(ENCODING),observables.id_))
+                        lines.append((EMAIL_ADDRESS_TYPE,prop.address_value.value.decode(ENCODING),observable.id_))
                     continue
                 try:
                     if isinstance(prop,cybox.objects.network_connection_object.NetworkConnection) == True:   
                         #NetworkConnectionである
                         if prop.destination_socket_address is not None:
-                            lines.append((IPV4_TYPE,cls._get_value_from_address_object(prop.destination_socket_address.ip_address),observables.id_))
+                            lines.append((IPV4_TYPE,cls._get_value_from_address_object(prop.destination_socket_address.ip_address),observable.id_))
                         if prop.source_socket_address is not None:
-                            lines.append((IPV4_TYPE,cls._get_value_from_address_object(prop.source_socket_address.ip_address),observables.id_))
+                            lines.append((IPV4_TYPE,cls._get_value_from_address_object(prop.source_socket_address.ip_address),observable.id_))
                         continue
                 except AttributeError:
                     pass
             except:
                 #失敗時は無視する
+                traceback.print_exc()
                 pass
         return lines
         
