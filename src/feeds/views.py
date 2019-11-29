@@ -7,7 +7,7 @@ import hashlib
 import tempfile
 import codecs
 import traceback
-import StringIO
+import io
 import datetime
 import threading
 import zipfile
@@ -225,7 +225,7 @@ def check_via_poll(request):
 def is_duplicate_languages(values):
     languages = []
     for value in values:
-        language = value[u'language']
+        language = value['language']
         if language in languages:
             return True
         languages.append(language)
@@ -239,18 +239,18 @@ def post_common(request,user):
     feed.files.clear()
     feed.sharing_people.clear()
     #POSTデータ格納
-    if request.POST.has_key(KEY_POST) == False:
+    if KEY_POST not in request.POST:
         raise Exception('No Post.')
     post = request.POST[KEY_POST]
     post = post.strip()
     if len(post) == 0:
         raise Exception('No Content.')
     #Title格納
-    if request.POST.has_key(KEY_TITLE) == False:
+    if (KEY_TITLE not in request.POST:
         raise Exception('No Title.')
     feed.title = request.POST[KEY_TITLE]
     #TLP格納
-    if request.POST.has_key(KEY_TLP) == False:
+    if (KEY_TLP not in request.POST:
         raise Exception('No TLP.')
     feed.tlp = request.POST[KEY_TLP]
 
@@ -258,47 +258,47 @@ def post_common(request,user):
     is_stix2 = is_stix2_post(request)
     stix2_titles = []
     stix2_contents = []
-    if request.POST.has_key(KEY_STIX2_TITLES) == True:
+    if KEY_STIX2_TITLES in request.POST:
         stix2_titles = json.loads(request.POST[KEY_STIX2_TITLES])
         #同一 language が複数に定義されている場合はエラー
         if is_duplicate_languages(stix2_titles) == True:
             raise Exception('Duplicate Same Language Title')
         #stix2_titles から stix 1.x に格納する title を決める
         #default は 先頭
-        feed.title = stix2_titles[0][u'title']
+        feed.title = stix2_titles[0]['title']
         for stix2_title in stix2_titles:
-            if stix2_title[u'language'] == request.user.language:
-                feed.title = stix2_title[u'title']
+            if stix2_title['language'] == request.user.language:
+                feed.title = stix2_title['title']
                 break
 
-    if request.POST.has_key(KEY_STIX2_CONTENTS) == True:
+    if KEY_STIX2_CONTENTS in request.POST:
         stix2_contents = json.loads(request.POST[KEY_STIX2_CONTENTS])
         #同一 language が複数に定義されている場合はエラー
         if is_duplicate_languages(stix2_contents) == True:
             raise Exception('Duplicate Same Language Content')
         #stix2_contents から stix 1.x に格納する post を決める
         #default は 先頭
-        post = stix2_contents[0][u'content']
+        post = stix2_contents[0]['content']
         for stix2_content in stix2_contents:
-            if stix2_content[u'language'] == request.user.language:
-                post = stix2_content[u'content']
+            if stix2_content['language'] == request.user.language:
+                post = stix2_content['content']
                 break
 
     #anonymous投稿か？
-    if request.POST.has_key(KEY_ANONYMOUS) == True:
+    if KEY_ANONYMOUS in request.POST:
         #投稿ユーザーはアノニマス
         feed.user = STIPUser.get_anonymous_user()
     else:
         feed.user = user
 
     #publication取得
-    if request.POST.has_key(KEY_PUBLICATION) == True:
+    if KEY_PUBLICATION in request.POST:
         publication = request.POST[KEY_PUBLICATION] 
     else:
         publication = PUBLICATION_VALUE_ALL
 
     #referred_url 取得
-    if request.POST.has_key(KEY_REFERRED_URL) == True:
+    if KEY_REFERRED_URL in request.POST:
         referred_url = request.POST[KEY_REFERRED_URL] 
         if len(referred_url) == 0:
             referred_url = None
@@ -335,19 +335,19 @@ def post_common(request,user):
         feed.files.add(attach_file)
         
     #indicators があるか
-    if request.POST.has_key(KEY_INDICATORS) == True:
+    if KEY_INDICATORS in request.POST:
         indicators = json.loads(request.POST[KEY_INDICATORS])
     else:
         indicators = []
 
     #ttps があるか
-    if request.POST.has_key(KEY_TTPS) == True:
+    if KEY_TTPS in request.POST:
         ttps = json.loads(request.POST[KEY_TTPS])
     else:
         ttps = []
 
     #threat_actors があるか
-    if request.POST.has_key(KEY_TAS) == True:
+    if KEY_TAS in request.POST:
         tas = json.loads(request.POST[KEY_TAS])
     else:
         tas = []
@@ -367,7 +367,7 @@ def post_common(request,user):
 #stix2 の投稿か?
 def is_stix2_post(request):
     stix2 = False
-    if request.POST.has_key(KEY_STIX2) == True:
+    if KEY_STIX2 in request.POST:
         if request.POST[KEY_STIX2] == 'true':
             stix2 = True
     return stix2
@@ -388,7 +388,7 @@ def confirm_indicator(request):
         files.append(attach_file)
         
     #attach_confirm があるか
-    if request.POST.has_key(KEY_ATTACH_CONFIRM) == True:
+    if KEY_ATTACH_CONFIRM in request.POST:
         s = request.POST[KEY_ATTACH_CONFIRM]
         if (s.lower() == 'true'):
             attach_confirm = True
@@ -404,20 +404,20 @@ def confirm_indicator(request):
     posts = []
     if stix2 == True:
         #STIX2.x の場合は post が複数ある
-        if request.POST.has_key(KEY_STIX2_CONTENTS) == True:
+        if KEY_STIX2_CONTENTS in request.POST:
             stix2_contents = json.loads(request.POST[KEY_STIX2_CONTENTS])
             for stix2_content in stix2_contents:
                 posts.append(stix2_content['content'])
     else:
         #STIX1.x の場合は post が 1 つのみ
-        if request.POST.has_key(KEY_POST) == True:
+        if KEY_POST in request.POST:
             post = request.POST[KEY_POST]
         else:
             post = ''
         posts.append(post)
 
     #referred_url取得
-    if request.POST.has_key(KEY_REFERRED_URL) == True:
+    if KEY_REFERRED_URL in request.POST:
         referred_url = request.POST[KEY_REFERRED_URL] 
         if len(referred_url) == 0:
             referred_url = None
@@ -491,7 +491,7 @@ def get_json_from_extractor(datas):
         title = data[2]
         file_name = data[3]
         checked = data[4]
-        if d.has_key(file_name) == False:
+        if file_name not in d:
             d[file_name] = [(type_,value_,title,checked)]
         else:
             d[file_name].append((type_,value_,title,checked))
@@ -613,7 +613,7 @@ def notify_also_commented(package_id,feed_user,comment_user):
     comments = rs.get_comment_from_rs(comment_user,package_id)
     users = []
     for comment in comments:
-        uploader_id = long(comment['uploader'])
+        uploader_id = int(comment['uploader'])
         #uploader -> かつてのコメントユーザー
         #comment -> 最新のコメントを入力したユーザー
         #feed_user -> root 投稿ユーザー
@@ -719,7 +719,7 @@ def share_misp(request):
         stip_user = request.user
         #RS に misp 共有要求
         resp = rs.share_misp(stip_user, package_id)
-        return HttpResponse(resp[u'url'])
+        return HttpResponse(resp['url'])
     except Exception as e:
         return HttpResponseServerError(str(e))
 
@@ -773,7 +773,7 @@ def create_sighting_object(request):
 
         file_name = '%s.json' % (stix2.id)
         output = io.StringIO()
-        output.write(unicode(stix2_str))
+        output.write(str(stix2_str))
         response = HttpResponse(output.getvalue(),content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
         return response
@@ -842,14 +842,14 @@ def call_jira(request):
         #CSV添付
         #CSVの中身を取得する
         content = get_csv_content(feed_file_name_id)
-        csv_attachment = StringIO.StringIO()
+        csv_attachment = io.StringIO()
         csv_attachment.write(content)
         csv_file_name = '%s.csv' % (package_id)
         j.add_attachment(issue=issue,attachment=csv_attachment,filename=csv_file_name)
 
         #PDF添付
         feed_pdf = FeedPDF(feed,stix_package)
-        pdf_attachment = StringIO.StringIO()
+        pdf_attachment = io.StringIO()
         feed_pdf.make_pdf_content(pdf_attachment,feed)
         pdf_file_name = '%s.pdf' % (package_id)
         j.add_attachment(issue=issue,attachment=pdf_attachment,filename=pdf_file_name)
@@ -874,7 +874,7 @@ def download_stix(request):
     file_name = '%s.xml' % (feed_file_name_id)
     with open(stix_file_path,'r') as fp:
         output = io.StringIO()
-        output.write(unicode(fp.read(),'utf-8'))
+        output.write(str(fp.read(),'utf-8'))
         response = HttpResponse(output.getvalue(),content_type='application/xml')
         response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
     return response
@@ -887,7 +887,7 @@ def download_stix2(request):
     file_name = '%s.json' % (feed_file_name_id)
     with open(stix_file_path,'r') as fp:
         output = io.StringIO()
-        output.write(unicode(fp.read(),'utf-8'))
+        output.write(str(fp.read(),'utf-8'))
         response = HttpResponse(output.getvalue(),content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
     return response
@@ -1040,10 +1040,10 @@ def post_crowd_strike_indicator_matching_comment(feed,id_,concierge_user,json_in
         realted_reports = []
         phantom_indicators = []
         for json_indicator in json_indicators:
-            value = json_indicator[u'value']
+            value = json_indicator['value']
             results = search_indicator(value)
             for result in results:
-                if result.has_key('reports') == False:
+                if 'reports' not in result:
                     #reports がない場合は skip
                     continue
                 else:
@@ -1072,7 +1072,7 @@ def post_crowd_strike_indicator_matching_comment(feed,id_,concierge_user,json_in
             #phantom 連携できる indicator あり
             msg += ('<a class="anchor-phantom-run-playbook" data-id="%s">Run Phantom Playbook</a>' % (id_))
             for phantom_indicator in phantom_indicators:
-                msg += '<div id="%s" data-type="%s" data-value="%s"></div>' % ('phantom-data-' + id_,phantom_indicator[u'type'],phantom_indicator[u'value'])
+                msg += '<div id="%s" data-type="%s" data-value="%s"></div>' % ('phantom-data-' + id_,phantom_indicator['type'],phantom_indicator['value'])
         #指定User で投稿
         post_comment(concierge_user,id_,msg,concierge_user)
     except Exception:
@@ -1152,9 +1152,9 @@ def save_post(request,
         slack_post += '%s\n' % (ioc_fanger.defang(feed.post))
         slack_post += '\n'
         slack_post += '---------- S-TIP Post Info (TLP: %s) ----------\n' % (feed.tlp)
-        slack_post += '%s: %s\n' % (u'Account',feed.user.username)
-        slack_post += '%s: %s\n' % (u'Package_ID',feed.package_id)
-        slack_post += '%s: %s\n' % (u'Referred URL',feed.referred_url if feed.referred_url is not None else '')
+        slack_post += '%s: %s\n' % ('Account',feed.user.username)
+        slack_post += '%s: %s\n' % ('Package_ID',feed.package_id)
+        slack_post += '%s: %s\n' % ('Referred URL',feed.referred_url if feed.referred_url is not None else '')
         slack_post = slack_post.replace('&amp;','%amp;amp;')
         slack_post = slack_post.replace('&lt;','%amp;lt;')
         slack_post = slack_post.replace('&gt;','%amp;gt;')

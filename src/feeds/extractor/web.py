@@ -3,7 +3,7 @@ import io
 import os
 import bs4
 import requests
-import urlparse
+import urllib.parse
 import tempfile
 from feeds.extractor.common import BaseExtractor
 from ctirs.models import AttachFile, System
@@ -37,7 +37,7 @@ class WebExtractor(BaseExtractor):
         file_ = AttachFile()
         #URL の最後をファイル名とする
         try:
-            up = urlparse.urlparse(referred_url)
+            up = urllib.parse.urlparse(referred_url)
             file_name = up.path.split('/')[-1]
         except:
             file_name = 'undefined'
@@ -65,9 +65,9 @@ class WebExtractor(BaseExtractor):
                 return WebExtractor._get_element_from_post(bs.body.text,referred_url,ta_list=ta_list,white_list=white_list)
             else:
                 #content_type が extractros の何かにマッチすればその処理を行う
-                for extractor_key in extractors.keys():
+                for extractor_key in list(extractors.keys()):
                     if extractor_key in content_type:
-                        print extractor_key
+                        print(extractor_key)
                         #一時ファイルを作成
                         file_ = WebExtractor._get_temp_file(referred_url, resp.content)
                         try:

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import urlparse
+import urllib.parse
 import traceback
 from django import template
 from ctirs.models import Profile
@@ -30,7 +30,7 @@ def get_accordion_pk(v):
 
 @register.filter(name='get_referred_url_tag')
 def get_referred_url_tag(referred_url):
-    url_parse = urlparse.urlparse(referred_url)
+    url_parse = urllib.parse.urlparse(referred_url)
     if len(url_parse.scheme) == 0:
         url = referred_url
     else:

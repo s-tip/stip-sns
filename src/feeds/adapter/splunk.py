@@ -2,7 +2,7 @@
 import sys
 import ssl
 import pytz
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import datetime
 import splunklib.client as client
 import splunklib.results as r
@@ -58,15 +58,15 @@ def get_connect(sns_profile):
 def get_oneshot_query_count(con, query, timezone, **kwargs):
     results = con.jobs.oneshot(query, **kwargs)
     reader = r.ResultsReader(results)
-    result = reader.next()
+    result = next(reader)
     sighting = {}
-    sighting[u'count'] = int(result[u'count'])
-    if sighting[u'count'] == 0:
-        sighting[u'first_seen'] = 'N/A'
-        sighting[u'last_seen'] = 'N/A'
+    sighting['count'] = int(result['count'])
+    if sighting['count'] == 0:
+        sighting['first_seen'] = 'N/A'
+        sighting['last_seen'] = 'N/A'
     else:
-        sighting[u'first_seen'] = get_datetime_from_epoch(result['earliest_time(_time)'], timezone)
-        sighting[u'last_seen'] = get_datetime_from_epoch(result['latest_time(_time)'], timezone)
+        sighting['first_seen'] = get_datetime_from_epoch(result['earliest_time(_time)'], timezone)
+        sighting['last_seen'] = get_datetime_from_epoch(result['latest_time(_time)'], timezone)
     return sighting
 
 
@@ -91,18 +91,18 @@ def get_sighting(stip_user, type_, value, id_, earliest_dt=None, latest_dt=None)
 
     sns_profile = stip_user.sns_profile
     con = get_connect(sns_profile)
-    web_query = sns_profile.splunk_query.replace(u'%s', value)
+    web_query = sns_profile.splunk_query.replace('%s', value)
     api_query = web_query + STATS_QUERY
     sighting = get_oneshot_query_count(con, api_query, stip_user.timezone, **kwargs)
-    sighting[u'url'] = '%s://%s:%d/app/search/search?q=%s' % (sns_profile.splunk_scheme, sns_profile.splunk_host, sns_profile.splunk_web_port, urllib.quote(web_query))
-    sighting[u'type'] = type_
-    sighting[u'value'] = value
-    sighting[u'observable_id'] = id_
+    sighting['url'] = '%s://%s:%d/app/search/search?q=%s' % (sns_profile.splunk_scheme, sns_profile.splunk_host, sns_profile.splunk_web_port, urllib.parse.quote(web_query))
+    sighting['type'] = type_
+    sighting['value'] = value
+    sighting['observable_id'] = id_
     return sighting
 
 
 def get_sightings(stip_user, indicators):
-    ALLOW_QUERY_INDICATOR_TYPES = [u'ipv4', u'domain']
+    ALLOW_QUERY_INDICATOR_TYPES = ['ipv4', 'domain']
     sightings = []
     for indicator in indicators:
         type_, value,id_ = indicator

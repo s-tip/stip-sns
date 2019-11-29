@@ -13,11 +13,11 @@ from daemon.slack.receive import start_receive_slack_thread
 
 @login_required
 def user(request):
-    ROLE_SELECT_KEY = u'role_select_'
+    ROLE_SELECT_KEY = 'role_select_'
     ROLE_SELECT_KEY_LENGTH = len('role_select_')
     user = request.user
     #管理権限以外はエラー (403)
-    if user.role != u'admin':
+    if user.role != 'admin':
         return HttpResponseForbidden()
     
     #POST の場合はロール変更
@@ -46,7 +46,7 @@ def check_port(port):
 @login_required
 def modify_attck_information(request):
     #管理権限以外はエラー (403)
-    if request.user.role != u'admin':
+    if request.user.role != 'admin':
         return HttpResponseForbidden()
     #ATTCK 洗い替えと保存
     Attck.modify_save_attck_information()
@@ -56,7 +56,7 @@ def modify_attck_information(request):
 @login_required
 def reboot_slack_thread(request):
     #管理権限以外はエラー (403)
-    if request.user.role != u'admin':
+    if request.user.role != 'admin':
         return HttpResponseForbidden()
     #thread 再起動
     start_receive_slack_thread()
@@ -66,7 +66,7 @@ def reboot_slack_thread(request):
 @login_required
 def sns_config(request):
     #管理権限以外はエラー (403)
-    if request.user.role != u'admin':
+    if request.user.role != 'admin':
         return HttpResponseForbidden()
     sns_config = SNSConfig.objects.get()
     if request.method == 'POST':

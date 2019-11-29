@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from cStringIO import StringIO
+from io import StringIO
 from feeds.extractor.common import FileExtractor
 
 class TxtExtractor(FileExtractor):

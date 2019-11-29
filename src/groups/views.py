@@ -12,7 +12,7 @@ from ctirs.models import STIPUser
 def group(request):
     user = request.user
     #管理権限以外はエラー (403)
-    if user.role != u'admin':
+    if user.role != 'admin':
         return HttpResponseForbidden()
     
     #POST の場合はロール変更
@@ -25,7 +25,7 @@ def group(request):
 def upsert(request):
     user = request.user
     #管理権限以外はエラー (403)
-    if user.role != u'admin':
+    if user.role != 'admin':
         return HttpResponseForbidden()
     
     #(POST) upsert
@@ -66,7 +66,7 @@ def upsert(request):
     #(GET)変更フォーム作成
     elif request.method == 'GET':
         #id_指定がない場合は新規作成
-        if request.GET.has_key('id_') == False:
+        if 'id_' not in request.GET:
             form = GroupForm()
         #id_指定がある場合はDBから初期状態取得
         else:
@@ -91,7 +91,7 @@ def upsert(request):
 @login_required
 def delete(request):
     #管理権限以外はエラー (403)
-    if request.user.role != u'admin':
+    if request.user.role != 'admin':
         return HttpResponseForbidden()
     #削除する Group ID
     id_ = int(request.GET['id_'])

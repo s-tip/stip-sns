@@ -53,8 +53,8 @@ def init_receive_slack(token,channel):
     sc.rtm_connect()
     post_slack_channel = channel
     slack_token = token
-    print 'slack token: %s' % (slack_token)
-    print 'slack channel: %s' % (post_slack_channel)
+    print('slack token: %s' % (slack_token))
+    print('slack channel: %s' % (post_slack_channel))
     global sc
     global post_slack_channel
     global slack_token
@@ -63,10 +63,10 @@ def init_receive_slack(token,channel):
 def start_receive_slack_thread():
     token = SNSConfig.get_slack_bot_token()
     if token is None:
-        print 'Slack token is undefined.'
+        print('Slack token is undefined.')
         return
     if len(token) == 0:
-        print 'Slack token length is 0.'
+        print('Slack token length is 0.')
         return
     #Slack ユーザがいなければ作る
     slack_users = STIPUser.objects.filter(username=SNS_SLACK_BOT_ACCOUNT)
@@ -103,36 +103,36 @@ def convert_channel_info(post):
 def convert_user_id(post):
     for user_info in USER_ID_PATTERN.finditer(post):
         user_profile = get_user_profile(user_info.group('user_id'))
-        user_name = user_profile[u'real_name']
+        user_name = user_profile['real_name']
         post = post.replace(user_info.group('user_info'),'"@%s"' % (user_name))
     return post
 
 #user_id から user_profile取得
 def get_user_profile(user_id):
-    sc.api_call('users.info',user=user_id)[u'user'][u'profile']
-    return sc.api_call('users.info',user=user_id)[u'user'][u'profile']
+    sc.api_call('users.info',user=user_id)['user']['profile']
+    return sc.api_call('users.info',user=user_id)['user']['profile']
     
 #slack 投稿データから stip 投稿を行う
 def post_stip_from_slack(receive_data,slack_bot_channel_name,slack_user):
     POST_INDEX_TITLE = 0
 
-    if receive_data.has_key(u'subtype'):
+    if 'subtype' in receive_data:
         #投稿以外のメッセージなので対象外
         return
     #user_id から user_info 取得
     try:
-        user_id = receive_data[u'user']
+        user_id = receive_data['user']
     except KeyError:
         return
     user_profile = get_user_profile(user_id)
 
     #bot からの発言は対象外
-    if user_profile.has_key('bot_id'):
+    if 'bot_id' in user_profile:
         return
     
     #S-TIP 投稿データを取得する
-    text = receive_data[u'text']
-    stip_params = get_stip_params(text,user_profile[u'display_name'])
+    text = receive_data['text']
+    stip_params = get_stip_params(text,user_profile['display_name'])
     if stip_params is None:
         return
         
@@ -140,7 +140,7 @@ def post_stip_from_slack(receive_data,slack_bot_channel_name,slack_user):
     files_for_cti_extractor, files_for_stip_post = get_attached_files(receive_data)
 
     #CTI Element Extractor 追加
-    stip_params = set_extractor_info(stip_params,files_for_cti_extractor,user_profile[u'display_name'])
+    stip_params = set_extractor_info(stip_params,files_for_cti_extractor,user_profile['display_name'])
                             
     #本文に各種 footer 情報を追加
     post = stip_params[STIP_PARAMS_INDEX_POST]
@@ -171,36 +171,36 @@ def post_stip_from_slack(receive_data,slack_bot_channel_name,slack_user):
 
     #channle_id から channel 情報取得
     try:
-        channel_id = receive_data[u'channel']
+        channel_id = receive_data['channel']
         resp = sc.api_call('channels.info',channel=channel_id)
-        if resp.has_key(u'channel'):
+        if 'channel' in resp:
             #public channel
-            channel_name = resp[u'channel'][u'name']
+            channel_name = resp['channel']['name']
         else:
             #private channnel
             resp = sc.api_call('groups.info',channel=channel_id)
-            channel_name = resp[u'group'][u'name']
+            channel_name = resp['group']['name']
         if channel_name != slack_bot_channel_name:
             #該当チャンネルではないの skip
             return
-        post += ('%s: %s\n' % (u'Channel',channel_name))
+        post += ('%s: %s\n' % ('Channel',channel_name))
     except KeyError:
         #チャンネル名が取れないので skip
         return
                             
     #アカウント名
     try:
-        post += ('Full name: %s\n' % (user_profile[u'real_name']))
+        post += ('Full name: %s\n' % (user_profile['real_name']))
     except KeyError:
         #アカウント名が取れないので skip
         return
                                 
     #メッセージ id
-    if receive_data.has_key(u'client_msg_id'):
-        post += ('%s: %s\n' % (u'Message ID',receive_data[u'client_msg_id']))
+    if 'client_msg_id' in receive_data:
+        post += ('%s: %s\n' % ('Message ID',receive_data['client_msg_id']))
                                 
-    if receive_data.has_key(u'ts'):
-        ts = receive_data[u'ts']
+    if 'ts' in receive_data:
+        ts = receive_data['ts']
         dt =  datetime.datetime(*time.gmtime(float(ts))[:6],tzinfo=pytz.utc)
         post += ('%s: %s\n' % ('Timestamp',dt.strftime('%Y-%m-%dT%H:%M:%S.%f%z')))
     stip_params[STIP_PARAMS_INDEX_POST] = post
@@ -231,9 +231,9 @@ def receive_slack(sc):
             for receive_data in receive_data_lists:
                 try:
                     files_for_cti_extractor = None
-                    if receive_data.has_key(u'type'):
-                        message_type = receive_data[u'type'] 
-                        if message_type == u'message':
+                    if 'type' in receive_data:
+                        message_type = receive_data['type'] 
+                        if message_type == 'message':
                             post_stip_from_slack(receive_data,slack_bot_channel_name,slack_user)
                         else:
                             #print 'event: %s: skip' % (receive_data[u'type'])
@@ -256,7 +256,7 @@ def receive_slack(sc):
             
 def get_attached_file_from_slack(file_path):
     headers = {}
-    headers[u'Authorization'] = 'Bearer ' + slack_token
+    headers['Authorization'] = 'Bearer ' + slack_token
     resp = requests.get(
         url = file_path,
         headers = headers,
@@ -267,13 +267,13 @@ def get_attached_file_from_slack(file_path):
 def get_attached_files(receive_data):
     files_for_stip_post = {}
     files_for_cti_extractor = []
-    if receive_data.has_key(u'files'):
+    if 'files' in receive_data:
         #添付ファイルあり
-        files = receive_data[u'files']
+        files = receive_data['files']
         for file_ in files:
             #attached_files 情報
-            file_path = file_[u'url_private']
-            file_name = file_[u'name']
+            file_path = file_['url_private']
+            file_name = file_['name']
             resp = get_attached_file_from_slack(file_path)
             uploaded_file = SimpleUploadedFile(file_name,resp.content)
             files_for_stip_post[file_name] = uploaded_file
@@ -384,9 +384,9 @@ def get_extractor_items(extractor_list):
     for item in extractor_list:
         if item[4] == True:
             format_data = {}
-            format_data[u'type'] = item[0]
-            format_data[u'value'] = item[1]
-            format_data[u'title'] = item[2]
+            format_data['type'] = item[0]
+            format_data['value'] = item[1]
+            format_data['title'] = item[2]
             items.append(format_data)
     return items
 

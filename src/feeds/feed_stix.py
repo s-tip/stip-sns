@@ -80,7 +80,7 @@ class FeedStix(FeedStixCommon):
 
         #ThreatActors 格納
         for ta_json in tas:
-            value = ta_json[u'value']
+            value = ta_json['value']
             if SNSConfig.get_cs_custid() is not None and SNSConfig.get_cs_custkey() is not None:
                 ta = self.get_ta_from_crowd_strike(value)
                 if ta is None:
@@ -106,12 +106,12 @@ class FeedStix(FeedStixCommon):
             if intrusion_set is None:
                 return None
             description = ''
-            if intrusion_set.has_key(u'description') and len(intrusion_set[u'description']) != 0:
-                description += intrusion_set[u'description']
-            if intrusion_set.has_key(u'aliases'):
-                description += u'\n\n<br/><br/>Aliases: '
-                for alias in intrusion_set[u'aliases']:
-                    description += (u'%s, ' % (alias))
+            if 'description' in intrusion_set and len(intrusion_set['description']) != 0:
+                description += intrusion_set['description']
+            if 'aliases' in intrusion_set:
+                description += '\n\n<br/><br/>Aliases: '
+                for alias in intrusion_set['aliases']:
+                    description += ('%s, ' % (alias))
                 description = description[:-2]
             ta = CommonExtractor._get_threat_actor_object(ta_value,description)
             return ta
@@ -139,20 +139,20 @@ class FeedStix(FeedStixCommon):
             #description 作成
             description = '<br/>'
             description += ('%s: %s<br/>' % ('Threat Actor',ta_value))
-            if attacker_entity.has_key('known_as'):
+            if 'known_as' in attacker_entity:
                 description += ('%s: %s<br/>' % ('Known As',attacker_entity['known_as']))
-            if attacker_entity.has_key('motivations'):
+            if 'motivations' in attacker_entity:
                 ta_motivations = attacker_entity['motivations']
                 description += ('%s: ' % ('Motivation'))
                 for ta_motivation in ta_motivations:
-                    description += ('%s,' % (ta_motivation[u'value']))
+                    description += ('%s,' % (ta_motivation['value']))
                 description = description[:-1]
                 description += '<br/>'
             else:
                 ta_motivations = []
-            if attacker_entity.has_key('short_description'):
+            if 'short_description' in attacker_entity:
                 description += ('%s: %s<br/>' % ('Short Description',attacker_entity['short_description']))
-            if attacker_entity.has_key('url'):
+            if 'url' in attacker_entity:
                 url = attacker_entity['url']
                 #Falcon 不具合対応までの暫定対処
                 #url = 'https://falcon.crowdstrike.com/intelligence/actors/ricochet-chollima/'
@@ -299,7 +299,7 @@ class FeedStix(FeedStixCommon):
                 if isinstance(prop,cybox.objects.file_object.File) == True:
                     #Fileである
                     if prop.file_name is not None:
-                        file_name = u'|%s|' % (prop.file_name.value)
+                        file_name = '|%s|' % (prop.file_name.value)
                         lines.append((FILE_NAME_TYPE,file_name,observable.id_))
                     if prop.md5 is not None:
                         if isinstance(prop.md5,HexBinary):

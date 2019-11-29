@@ -37,7 +37,7 @@ class StipSMTPServer(smtpd.SMTPServer):
         from ctirs.models import SNSConfig
         smtp_accept_mail_address = SNSConfig.get_smtp_accept_mail_address()
         if smtp_accept_mail_address not in rcptos:
-            print 'Receiver Mail address is not permitted. ' + str(rcptos)
+            print('Receiver Mail address is not permitted. ' + str(rcptos))
             return
 
         #mailfrom
@@ -153,7 +153,7 @@ class StipSMTPServer(smtpd.SMTPServer):
             if char_set is not None:
                 file_name = file_name.decode(char_set)
             else:
-                file_name = unicode(file_name)
+                file_name = str(file_name)
         return file_name
 
     #payload のchar_setを取得

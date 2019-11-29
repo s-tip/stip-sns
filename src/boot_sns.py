@@ -16,40 +16,40 @@ class StipSnsBoot(AppConfig):
 
         is_skip_sequnece = is_skip_sequence()
         if is_skip_sequnece == False:
-            print '>>> Start Auto Deploy'
-            print '>>> Start collcect static --noinput'
+            print('>>> Start Auto Deploy')
+            print('>>> Start collcect static --noinput')
             #collectstatic
             call_command('collectstatic','--noinput')
 
             #loaddata (region)
             region_count = Region.objects.count()
-            print '>>> region record count: ' + str(region_count)
+            print('>>> region record count: ' + str(region_count))
             if region_count == 0:
-                print '>>> Start loaddata region'
+                print('>>> Start loaddata region')
                 call_command('loaddata','region')
-                print '>>> region record count: ' + str(Region.objects.count())
+                print('>>> region record count: ' + str(Region.objects.count()))
             else:
-                print '>>> Skip loaddata region'
+                print('>>> Skip loaddata region')
 
             #loaddata (country)
             country_count = Country.objects.count()
-            print '>>> coutnry record count: ' + str(country_count)
+            print('>>> coutnry record count: ' + str(country_count))
             if country_count == 0:
-                print '>>> Start loaddata country'
+                print('>>> Start loaddata country')
                 call_command('loaddata','country')
-                print '>>> coutnry record count: ' + str(Country.objects.count())
+                print('>>> coutnry record count: ' + str(Country.objects.count()))
             else:
-                print '>>> Skip loaddata country'
+                print('>>> Skip loaddata country')
 
             #loaddata (sns_config)
             sns_config_count = SNSConfig.objects.count()
-            print '>>> sns_config record count: ' + str(sns_config_count)
+            print('>>> sns_config record count: ' + str(sns_config_count))
             if sns_config_count == 0:
-                print '>>> Start loaddata sns_config'
+                print('>>> Start loaddata sns_config')
                 call_command('loaddata','sns_config')
-                print '>>> sns_config record count: ' + str(SNSConfig.objects.count())
+                print('>>> sns_config record count: ' + str(SNSConfig.objects.count()))
             else:
-                print '>>> Skip loaddata sns_config'
+                print('>>> Skip loaddata sns_config')
 
             
         #ATTCK コレクションがない場合は起動時に取得し、攻撃者情報リストを取得する

@@ -14,12 +14,12 @@ def post(request):
     
     try:
         #anonymous投稿か？
-        if request.POST.has_key(KEY_ANONYMOUS) == True:
+        if KEY_ANONYMOUS in request.POST:
             #投稿ユーザーはアノニマス
             user = STIPUser.get_anonymous_user()
         else:
             #usernameがない
-            if request.POST.has_key(KEY_USERNAME) == False:
+            if KEY_USERNAME not in request.POST:
                 raise Exception('No username.')
             #user情報取得
             try:

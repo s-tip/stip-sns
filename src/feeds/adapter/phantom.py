@@ -41,20 +41,20 @@ def create_container_id(container_name, sns_profile, artifacts=[]):
         verify=False)
 
     if resp.status_code != 200:
-        print '!!!! container error: status_code=%d' % (resp.status_code)
-        print '!!!! container error: body =%s' % (json.dumps(resp.json()))
+        print('!!!! container error: status_code=%d' % (resp.status_code))
+        print('!!!! container error: body =%s' % (json.dumps(resp.json())))
         return None
     j = resp.json()
     if j['success']:
         return j['id']
     else:
-        print '!!!!error: body =%s' % (json.dumps(resp.json()))
+        print('!!!!error: body =%s' % (json.dumps(resp.json())))
         return None
 
 
 def run_play_book(sns_profile, container_id, playbook_name):
     url = '%s/playbook_run' % (get_base_url(sns_profile))
-    print url
+    print(url)
 
     d = {
         "container_id": container_id,
@@ -63,7 +63,7 @@ def run_play_book(sns_profile, container_id, playbook_name):
         "scope": "new"
     }
 
-    print d
+    print(d)
 
     headers = get_phantom_request_headers(sns_profile)
     resp = requests.post(
@@ -74,15 +74,15 @@ def run_play_book(sns_profile, container_id, playbook_name):
         verify=False)
 
     if resp.status_code != 200:
-        print '!!!! playbook_run error: status_code=%d' % (resp.status_code)
-        print '!!!! playbook_run error: body=%s' % (json.dumps(resp.json()))
+        print('!!!! playbook_run error: status_code=%d' % (resp.status_code))
+        print('!!!! playbook_run error: body=%s' % (json.dumps(resp.json())))
         return None
 
     j = resp.json()
     if j['recieved']:
         return j['playbook_run_id']
     else:
-        print '!!!!playbook_run error: body=%s' % (json.dumps(resp.json()))
+        print('!!!!playbook_run error: body=%s' % (json.dumps(resp.json())))
         return None
 
 

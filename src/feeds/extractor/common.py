@@ -262,7 +262,7 @@ class CommonExtractor(object):
     #更新された辞書と一緒にtupleで返却
     @staticmethod
     def is_duplicate(d,type_,value):
-        if d.has_key(type_) == False:
+        if type_ not in d:
             #辞書にそのタイプが初出の場合はリストを作成
             d[type_] = [value]
             return False,d
@@ -436,9 +436,9 @@ class CommonExtractor(object):
     #web 画面から取得した indicators json から stix indicators 作成する
     @staticmethod
     def get_indicator_from_json(indicator_json,user_timezone):
-        type_ = indicator_json[u'type']
-        v = indicator_json[u'value']
-        title = indicator_json[u'title']
+        type_ = indicator_json['type']
+        v = indicator_json['value']
+        title = indicator_json['title']
         o_ = None
 
         #ipv4か?
@@ -488,7 +488,7 @@ class CommonExtractor(object):
             
         #なにも該当していないので None
         if o_ is None:
-            print '何も該当なし:' + str(type_) + ':' + str(v)
+            print('何も該当なし:' + str(type_) + ':' + str(v))
             return None
         
         #indicator 作って返却
@@ -499,8 +499,8 @@ class CommonExtractor(object):
     #web 画面から取得した ttp json から stix ttp 作成する
     @staticmethod
     def get_exploit_target_from_json(ttp_json):
-        json_cve = ttp_json[u'value']
-        json_title = ttp_json[u'title']
+        json_cve = ttp_json['value']
+        json_title = ttp_json['title']
         
         #title は "%CVE番号% (index)" とする
         title = '%s (%s)' % (json_cve,json_title)

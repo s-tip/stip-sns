@@ -28,38 +28,38 @@ class StipSns(object):
 def _get_language_contents(stix2_titles,stix2_contents):
     contents = {}
     for stix2_title in stix2_titles:
-        language = stix2_title[u'language']
-        if contents.has_key(language) == True:
+        language = stix2_title['language']
+        if language in contents:
                 d = contents[language]
-                d[u'name'] = stix2_title[u'title']
+                d['name'] = stix2_title['title']
                 contents[language] = d
         else:
                 d = {}
-                d[u'name'] = stix2_title[u'title']
+                d['name'] = stix2_title['title']
                 contents[language] = d
 
     for stix2_content in stix2_contents:
-        language = stix2_content[u'language']
-        if contents.has_key(language) == True:
+        language = stix2_content['language']
+        if language in contents:
             d = contents[language]
-            d[u'description'] = stix2_content[u'content']
+            d['description'] = stix2_content['content']
             contents[language] = d
         else:
             d = {}
-            d[u'description'] = stix2_content[u'content']
+            d['description'] = stix2_content['content']
             contents[language] = d
     return contents
 
 #json データから Vulunerability 作成する
 def _get_vulnerability_object(ttp,stip_identity):
-    cve = ttp[u'value']
-    title = ttp[u'title']
-    name = u'%s (%s)' % (title,cve)
+    cve = ttp['value']
+    title = ttp['title']
+    name = '%s (%s)' % (title,cve)
 
     external_references = []
     external_reference = {}
-    external_reference[u'source_name'] = u'cve'
-    external_reference[u'external_id'] = cve
+    external_reference['source_name'] = 'cve'
+    external_reference['external_id'] = cve
     external_references.append(external_reference)
 
     vulnerability = Vulnerability(
@@ -71,9 +71,9 @@ def _get_vulnerability_object(ttp,stip_identity):
 
 #json データから ThreatActor 作成する
 def _get_threat_actor_object(ta,stip_identity):
-    name = ta[u'value']
-    description = ta[u'title']
-    threat_actor_types = u'crime-syndicate'
+    name = ta['value']
+    description = ta['title']
+    threat_actor_types = 'crime-syndicate'
 
     threat_actor = ThreatActor(
         name=name,
@@ -84,27 +84,27 @@ def _get_threat_actor_object(ta,stip_identity):
 
 #json データから Indicator 作成する
 def _get_indicator_object(indicator,stip_identity):
-    name = indicator[u'title']
-    description = indicator[u'title']
-    type_ = indicator[u'type']
-    value = indicator[u'value']
+    name = indicator['title']
+    description = indicator['title']
+    type_ = indicator['type']
+    value = indicator['value']
 
-    indicator_types = u'compromised'
+    indicator_types = 'compromised'
 
     if type_ == fec.JSON_OBJECT_TYPE_IPV4:
-        pattern = u'[ipv4-addr:value = \'%s\']' % (value)
+        pattern = '[ipv4-addr:value = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_URI:
-        pattern = u'[url:value = \'%s\']' % (value)
+        pattern = '[url:value = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_MD5:
-        pattern = u'[file:hashes.\'MD5\' = \'%s\']' % (value)
+        pattern = '[file:hashes.\'MD5\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_SHA1:
-        pattern = u'[file:hashes.\'SHA1\' = \'%s\']' % (value)
+        pattern = '[file:hashes.\'SHA1\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_SHA256:
-        pattern = u'[file:hashes.\'SHA256\' = \'%s\']' % (value)
+        pattern = '[file:hashes.\'SHA256\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_SHA512:
-        pattern = u'[file:hashes.\'SHA512\' = \'%s\']' % (value)
+        pattern = '[file:hashes.\'SHA512\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_FILE_NAME:
-        pattern = u'[file:name = \'%s\']' % (value)
+        pattern = '[file:name = \'%s\']' % (value)
     else:
         return None
 
@@ -119,11 +119,11 @@ def _get_indicator_object(indicator,stip_identity):
 #GlanularMarkings 作成する 
 def _make_granular_markings(stix2_title,stix2_content,lang):
     granular_markings = []
-    if stix2_title[u'language'] != lang:
-        granular_marking = GranularMarking(lang=stix2_title[u'language'],selectors=[u'name'])
+    if stix2_title['language'] != lang:
+        granular_marking = GranularMarking(lang=stix2_title['language'],selectors=['name'])
         granular_markings.append(granular_marking)
-    if stix2_content[u'language'] != lang:
-        granular_marking = GranularMarking(lang=stix2_content[u'language'],selectors=[u'description'])
+    if stix2_content['language'] != lang:
+        granular_marking = GranularMarking(lang=stix2_content['language'],selectors=['description'])
         granular_markings.append(granular_marking)
     if len(granular_markings) == 0:
         return None
@@ -173,7 +173,7 @@ def get_stix2_bundle(
     if granular_markings is None:
         #S-TIP オブジェクト用の language-content 作成
         language_contents = _get_language_contents(stix2_titles,stix2_contents)
-        if language_contents.has_key(common_lang) == True:
+        if common_lang in language_contents:
             del language_contents[common_lang]
         
         s_tip_lc = LanguageContent(

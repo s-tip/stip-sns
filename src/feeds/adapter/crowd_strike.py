@@ -26,34 +26,34 @@ def request(url):
 
 def query_actors(query_value):
     #URL に query 指定する
-    attack_query_url = u'https://intelapi.crowdstrike.com/actors/queries/actors/v1?q=' + query_value
+    attack_query_url = 'https://intelapi.crowdstrike.com/actors/queries/actors/v1?q=' + query_value
     return request(attack_query_url)
 
 def get_actor_entities(actor_id):
     #URL に actor_id  を指定する
-    attacker_entities_url = u'https://intelapi.crowdstrike.com/actors/entities/actors/v1?ids=' + actor_id
+    attacker_entities_url = 'https://intelapi.crowdstrike.com/actors/entities/actors/v1?ids=' + actor_id
     return request(attacker_entities_url)
 
 def search_indicator(value):
     #URL に actor_id  を指定する
-    search_indicator_url = u'https://intelapi.crowdstrike.com/indicator/v2/search/indicator?equal=' + value 
+    search_indicator_url = 'https://intelapi.crowdstrike.com/indicator/v2/search/indicator?equal=' + value 
     j = request(search_indicator_url)
     return j
 
 def query_reports(query_value):
     #URL に query 指定する
-    reports_query_url = u'https://intelapi.crowdstrike.com/reports/queries/reports/v1?name=' + query_value
+    reports_query_url = 'https://intelapi.crowdstrike.com/reports/queries/reports/v1?name=' + query_value
     return request(reports_query_url)
 
 def get_report_entities(report_id):
     #URL に query 指定する
-    reports_entity_url = u'https://intelapi.crowdstrike.com/reports/entities/reports/v1?ids=' + report_id
+    reports_entity_url = 'https://intelapi.crowdstrike.com/reports/entities/reports/v1?ids=' + report_id
     return request(reports_entity_url)
 
 #report id から report title と URL の tuple を返却する
 def get_report_info(report_name):
     resp = query_reports(report_name)
-    report_id = resp[u'resources'][0]
+    report_id = resp['resources'][0]
     resp = get_report_entities(report_id)
     #最初の要素を使う
     resource = resp['resources'][0]

@@ -89,10 +89,10 @@ class Attck(Document):
     def set_intrusion_set(cls,intrusion_set):
         doc = Attck()
         doc.intrusion_set = json.loads(intrusion_set.serialize())
-        if doc.intrusion_set.has_key(u'name') == True:
-            doc.name = doc.intrusion_set[u'name']
-        if doc.intrusion_set.has_key(u'aliases') == True:
-            doc.aliases = doc.intrusion_set[u'aliases']
+        if 'name' in doc.intrusion_set:
+            doc.name = doc.intrusion_set['name']
+        if 'aliases' in doc.intrusion_set:
+            doc.aliases = doc.intrusion_set['aliases']
         doc.save()
         return doc
     
