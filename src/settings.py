@@ -8,8 +8,8 @@ PROJECT_DIR = Path(__file__).parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
-#SECRET_KEY = config('SECRET_KEY')
-#CTIRS
+# SECRET_KEY = config('SECRET_KEY')
+# CTIRS
 SECRET_KEY = 'j%yjl@$v=xi6((y3!=bf3$n5)e)+af)*+syuia#co)1edp=dv-'
 
 
@@ -77,14 +77,14 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'urls'
 WSGI_APPLICATION = 'wsgi.application'
-COMMON_PROJECT_DIR='/opt/s-tip/common'
+COMMON_PROJECT_DIR = '/opt/s-tip/common'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             PROJECT_DIR.child('templates'),
-            Path(os.path.join(COMMON_PROJECT_DIR,'src/templates')),
+            Path(os.path.join(COMMON_PROJECT_DIR, 'src/templates')),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -120,14 +120,14 @@ STATIC_URL = '/static/'
 
 SESSION_COOKIE_NAME = 'stip'
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
-#HTTP 上で動作させるかどうかのフラグ
-ENV_DEV_OVER_HTTP_KEY  = 'DEV_OVER_HTTP'
+# HTTP 上で動作させるかどうかのフラグ
+ENV_DEV_OVER_HTTP_KEY = 'DEV_OVER_HTTP'
 dev_over_http = False
 if ENV_DEV_OVER_HTTP_KEY in os.environ:
     if os.environ[ENV_DEV_OVER_HTTP_KEY] == 'True':
         dev_over_http = True
-#http で動作させないときは SESSION_COOKIE_SECURE を立てる
-if dev_over_http == False:
+# http で動作させないときは SESSION_COOKIE_SECURE を立てる
+if not dev_over_http:
     SESSION_COOKIE_SECURE = True
 
 MEDIA_ROOT = PROJECT_DIR.parent.child('media')
@@ -143,13 +143,13 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 
 CONF_DIR = PROJECT_DIR.parent.child('conf')
 CONF_FILE_PATH = CONF_DIR + os.sep + 'sns.conf'
-RS_PROJECT_DIR='/opt/s-tip/rs'
-RS_SRC_ROOT_DIR= RS_PROJECT_DIR + os.sep + 'src' + os.sep + 'ctirs'
-RS_MODELS_DIR= RS_SRC_ROOT_DIR + os.sep + 'models'
-RS_SNS_MODELS_DIR= RS_MODELS_DIR + os.sep + 'sns'
+RS_PROJECT_DIR = '/opt/s-tip/rs'
+RS_SRC_ROOT_DIR = RS_PROJECT_DIR + os.sep + 'src' + os.sep + 'ctirs'
+RS_MODELS_DIR = RS_SRC_ROOT_DIR + os.sep + 'models'
+RS_SNS_MODELS_DIR = RS_MODELS_DIR + os.sep + 'sns'
 
 STATICFILES_DIRS = (
-    os.path.join(COMMON_PROJECT_DIR,'src/static'),
+    os.path.join(COMMON_PROJECT_DIR, 'src/static'),
 )
 
 FIXTURE_DIRS = (
@@ -161,4 +161,3 @@ FIXTURE_DIRS = (
 PDF_BASE_DIR = MEDIA_ROOT + os.sep + 'pdf'
 PDF_FONT_DIR = PDF_BASE_DIR + os.sep + 'font' + os.sep
 PDF_IMAGE_DIR = PDF_BASE_DIR + os.sep + 'image' + os.sep
-

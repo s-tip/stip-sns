@@ -21,10 +21,10 @@ def search(request):
         count = {}
         results = {}
 
-        results['feed'] = Feed.query(request.user,querystring)
+        results['feed'] = Feed.query(request.user, querystring)
         results['users'] = User.objects.filter(
-            Q(username__icontains=querystring) |
-            Q(screen_name__icontains=querystring)
+            Q(username__icontains=querystring)
+            | Q(screen_name__icontains=querystring)
         )
 
         count['feed'] = len(results['feed'])

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-#from bootcamp.feeds import views
+# from bootcamp.feeds import views
 from feeds import views
 
 urlpatterns = [

@@ -1,7 +1,9 @@
 import sys
 import ssl
 import pytz
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import datetime
 import splunklib.client as client
 import splunklib.results as r
@@ -70,7 +72,7 @@ def get_oneshot_query_count(con, query, timezone, **kwargs):
 
 
 def get_datetime_from_epoch(epoch, timezone):
-    dt = datetime.datetime.fromtimestamp(float(epoch),tz=pytz.timezone(timezone))
+    dt = datetime.datetime.fromtimestamp(float(epoch), tz=pytz.timezone(timezone))
     dt_str = dt.strftime('%Y/%m/%d %H:%M:%S%z')
     return dt_str
 
@@ -104,7 +106,7 @@ def get_sightings(stip_user, indicators):
     ALLOW_QUERY_INDICATOR_TYPES = ['ipv4', 'domain']
     sightings = []
     for indicator in indicators:
-        type_, value,id_ = indicator
+        type_, value, id_ = indicator
         if type_ in ALLOW_QUERY_INDICATOR_TYPES:
-            sightings.append(get_sighting(stip_user, type_, value,id_))
+            sightings.append(get_sighting(stip_user, type_, value, id_))
     return sightings

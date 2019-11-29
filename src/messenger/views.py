@@ -28,7 +28,7 @@ def inbox(request):
         'messages': messages,
         'conversations': conversations,
         'active': active_conversation
-        })
+    })
 
 
 @login_required
@@ -46,7 +46,7 @@ def messages(request, username):
         'messages': messages,
         'conversations': conversations,
         'active': active_conversation
-        })
+    })
 
 
 @login_required
@@ -60,7 +60,7 @@ def new(request):
         except Exception:
             try:
                 to_user_username = to_user_username[
-                    to_user_username.rfind('(')+1:len(to_user_username)-1]
+                    to_user_username.rfind('(') + 1:len(to_user_username) - 1]
                 to_user = User.objects.get(username=to_user_username)
 
             except Exception:
@@ -115,7 +115,7 @@ def users(request):
     template = '{0} ({1})'
     for user in users:
         if user.get_screen_name() != user.username:
-            dump.append(template.format(user.get_screen_name(),user.username))
+            dump.append(template.format(user.get_screen_name(), user.username))
         else:
             dump.append(user.username)
     data = json.dumps(dump)

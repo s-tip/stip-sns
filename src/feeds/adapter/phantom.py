@@ -99,7 +99,7 @@ def get_artifact(cef):
     return d
 
 
-def get_cef(fileHash='', destinationAddress='', destinationDnsDomain='',requestURL=''):
+def get_cef(fileHash='', destinationAddress='', destinationDnsDomain='', requestURL=''):
     # Artifact Details
     cef = {
         "destinationAddress": destinationAddress,
@@ -114,7 +114,7 @@ def get_cef(fileHash='', destinationAddress='', destinationDnsDomain='',requestU
 def call_run_phantom_playbook(stip_user, indicators):
     artifacts = []
     for indicator in indicators:
-        type_, value,_ = indicator
+        type_, value, _ = indicator
         cef = None
         if type_ == 'ipv4':
             cef = get_cef(destinationAddress=value)

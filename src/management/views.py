@@ -10,19 +10,20 @@ from feeds.mongo import Attck
 from django.conf import settings as django_settings
 from daemon.slack.receive import start_receive_slack_thread
 
+
 @login_required
 def user(request):
     ROLE_SELECT_KEY = 'role_select_'
     ROLE_SELECT_KEY_LENGTH = len('role_select_')
     user = request.user
-    #管理権限以外はエラー (403)
+    # 管理権限以外はエラー (403)
     if user.role != 'admin':
         return HttpResponseForbidden()
-    
-    #POST の場合はロール変更
+
+    # POST の場合はロール変更
     if request.method == 'POST':
-        for key in  request.POST:
-            if key.startswith(ROLE_SELECT_KEY) == False:
+        for key in request.POST:
+            if not key.startswith(ROLE_SELECT_KEY):
                 continue
             role = request.POST[key]
             user_id = int(key[ROLE_SELECT_KEY_LENGTH:])
@@ -32,39 +33,44 @@ def user(request):
     users = STIPUser.objects.filter(is_active=True).order_by('username')
     return render(request, 'management/users.html', {'users': users})
 
+
 def group(request):
     return
 
+
 def check_port(port):
-    if isinstance(port,int) == False:
+    if not isinstance(port, int):
         return False
     if port < 0 or port > 65535:
         return False
     return True
 
+
 @login_required
 def modify_attck_information(request):
-    #管理権限以外はエラー (403)
+    # 管理権限以外はエラー (403)
     if request.user.role != 'admin':
         return HttpResponseForbidden()
-    #ATTCK 洗い替えと保存
+    # ATTCK 洗い替えと保存
     Attck.modify_save_attck_information()
-    #その後は config 画面に遷移
+    # その後は config 画面に遷移
     return sns_config(request)
+
 
 @login_required
 def reboot_slack_thread(request):
-    #管理権限以外はエラー (403)
+    # 管理権限以外はエラー (403)
     if request.user.role != 'admin':
         return HttpResponseForbidden()
-    #thread 再起動
+    # thread 再起動
     start_receive_slack_thread()
-    #その後は config 画面に遷移
+    # その後は config 画面に遷移
     return sns_config(request)
+
 
 @login_required
 def sns_config(request):
-    #管理権限以外はエラー (403)
+    # 管理権限以外はエラー (403)
     if request.user.role != 'admin':
         return HttpResponseForbidden()
     sns_config = SNSConfig.objects.get()
@@ -102,15 +108,15 @@ def sns_config(request):
             sns_config.stix_ns_name = form.cleaned_data.get('stix_ns_name')
             sns_config.slack_bot_token = form.cleaned_data.get('slack_bot_token')
             sns_config.slack_bot_channel = form.cleaned_data.get('slack_bot_channel')
-            if check_port(sns_config.circl_mongo_port) == False:
+            if not check_port(sns_config.circl_mongo_port):
                 messages.add_message(request,
-                                 messages.WARNING,
-                                 _('Mongo Port For Saving CVE Information From Circl.lu is invalid.'))
+                                     messages.WARNING,
+                                     _('Mongo Port For Saving CVE Information From Circl.lu is invalid.'))
                 return render(request, 'management/sns_config.html', {'form': form})
-            if check_port(sns_config.smtp_port) == False:
+            if not check_port(sns_config.smtp_port):
                 messages.add_message(request,
-                                 messages.WARNING,
-                                 _('SMTP Port is invalid.'))
+                                     messages.WARNING,
+                                     _('SMTP Port is invalid.'))
                 return render(request, 'management/sns_config.html', {'form': form})
 
             sns_config.save()
@@ -149,11 +155,6 @@ def sns_config(request):
             'stix_ns_name': sns_config.stix_ns_name,
             'slack_bot_token': sns_config.slack_bot_token,
             'slack_bot_channel': sns_config.slack_bot_channel,
-            })
+        })
 
     return render(request, 'management/sns_config.html', {'form': form})
-
-
-
-
-

@@ -2,6 +2,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from ctirs.models import Group
 
+
 class GroupForm(forms.ModelForm):
     members = forms.CharField(
         widget=forms.HiddenInput(),
@@ -24,12 +25,7 @@ class GroupForm(forms.ModelForm):
         max_length=1024,
         label=_('description'),
         required=False)
- 
+
     class Meta:
         model = Group
-        fields = ['id_','en_name', 'local_name', 'description']
-
-
-
-
-
+        fields = ['id_', 'en_name', 'local_name', 'description']

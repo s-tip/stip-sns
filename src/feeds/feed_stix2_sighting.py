@@ -124,7 +124,7 @@ def get_stix2_marking_definition():
 def get_stix2_tlp_white():
     d = get_stix2_marking_definition()
     d['id'] = 'marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9'
-    tlp = { 'tlp': 'white'}
+    tlp = {'tlp': 'white'}
     d['definition'] = tlp
     return d
 
