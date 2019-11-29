@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import io
 import os
 import pytz
@@ -150,7 +149,7 @@ def load(request):
                                                     'jira': imported_jira,
                                                     'user': request.user,
                                                     'csrf_token': csrf_token,
-                                                    }).encode('utf-8'))
+                                                    })
 
     return HttpResponse(html)
 
@@ -169,7 +168,7 @@ def _html_feeds(last_feed_datetime, user, csrf_token, feed_source='all'):
                                                     'jira': imported_jira,
                                                     'user': user,
                                                     'csrf_token': csrf_token
-                                                    }).encode('utf-8'))
+                                                    })
 
     return html
 
@@ -469,7 +468,7 @@ def get_merged_conf_list(common_config_content,personal_list_content):
     #個人設定から
     for personal_item in personal_list_content.split('\r\n'):
         if len(personal_item) != 0:
-            l_.append(personal_item.encode('utf-8'))
+            l_.append(personal_item
     #重複を取り除いて返却
     return list(set(l_))
 
@@ -551,8 +550,8 @@ def like(request):
 @login_required
 def attach(request):
     file_id = request.POST['file_id']
-    attach_file_name = Feed.get_attach_file_name(file_id).encode('utf-8')
-    attach_file_path = Feed.get_attach_file_path(file_id).encode('utf-8')
+    attach_file_name = Feed.get_attach_file_name(file_id)
+    attach_file_path = Feed.get_attach_file_path(file_id)
     #response作成
     with open(attach_file_path,'r') as fp:
         response = HttpResponse(fp.read(),content_type='application/octet-stream')
@@ -762,7 +761,7 @@ def create_sighting_object(request):
             count, first_seen, last_seen,
             stip_user)
 
-        stix2_str = stix2.serialize(True,ensure_ascii=False).encode('utf-8')
+        stix2_str = stix2.serialize(True,ensure_ascii=False)
 
         _,stix2_file_path =tempfile.mkstemp()
         with open(stix2_file_path,'w') as fp:
@@ -1107,7 +1106,7 @@ def save_post(request,
         feed.stix2_package_id = bundle.id
         _,stix2_file_path =tempfile.mkstemp()
         with open(stix2_file_path,'w') as fp:
-            fp.write(bundle.serialize(True,ensure_ascii=False).encode('utf-8'))
+            fp.write(bundle.serialize(True,ensure_ascii=False))
         #RS に登録する
         rs.regist_ctim_rs(feed.user,bundle.id,stix2_file_path)
         os.remove(stix2_file_path)

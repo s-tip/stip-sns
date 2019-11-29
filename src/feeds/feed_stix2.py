@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 import pytz
 import feeds.extractor.common  as fec

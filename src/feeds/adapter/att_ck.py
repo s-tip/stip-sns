@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from stix2 import TAXIICollectionSource, Filter
 from taxii2client import Server, Collection
 from feeds.mongo import Attck

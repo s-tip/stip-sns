@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import smtpd
 import asyncore
 import email

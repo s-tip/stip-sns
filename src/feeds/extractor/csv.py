@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from feeds.extractor.common import CommonExtractor, FileExtractor
 
 class CSVExtractor(FileExtractor):

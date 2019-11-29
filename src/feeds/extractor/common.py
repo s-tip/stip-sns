@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 import re
 import os
@@ -343,11 +342,6 @@ class CommonExtractor(object):
                             index += 1
                         else:
                             break
-                    #予め unicode は str に変換する
-                    if isinstance(actor_word,str) is False:
-                        actor_word = actor_word.encode('utf-8')
-                    if isinstance(word,str) is False:
-                        word = word.encode('utf-8')
                     #大文字小文字は区別しない
                     if actor_word.lower() != word.lower():
                         #単語が違う (次の actor_words checkを行う)

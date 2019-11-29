@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 import pytz
 from django.conf import settings as django_settings
@@ -160,7 +159,7 @@ class FeedPDF(object):
         txt ='<b>Content:</b>'
         story.append(Paragraph(txt,styles['Normal']))
         #txt = feed.post.value.encode('utf-8')
-        txt = feed.post.encode('utf-8')
+        txt = feed.post
         story.append(Paragraph(txt,styles['Normal']))
 
         #空行

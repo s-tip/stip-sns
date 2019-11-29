@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from decouple import Csv, config, UndefinedValueError
 from unipath import Path

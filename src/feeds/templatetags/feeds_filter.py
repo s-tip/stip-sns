@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import urllib.parse
 import traceback
 from django import template

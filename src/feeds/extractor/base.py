@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from feeds.extractor.csv import CSVExtractor
 from feeds.extractor.pdf import PDFExtractor
 from feeds.extractor.post import PostExtractor

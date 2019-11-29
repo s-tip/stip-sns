@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from io import BytesIO
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.layout import LAParams

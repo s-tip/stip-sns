@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*
 import json
 from stix2 import parse
 from stix2.v21.sro import Sighting

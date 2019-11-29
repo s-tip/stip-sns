@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import traceback
 import re
 import datetime
@@ -17,7 +16,6 @@ from feeds.adapter.att_ck import ATTCK_Taxii_Server
 from stip.common.const import MARKING_STRUCTURE_STIP_ATTACHEMENT_CONTENT_PREFIX,MARKING_STRUCTURE_STIP_ATTACHEMENT_FILENAME_PREFIX
 from ctirs.models import SNSConfig
 
-ENCODING='utf-8'
 
 ATT_CK_REG_STR='\[\[\S+\|(?P<ta_name>.+?)\]\](?P<description>.+)'
 ATT_CK_PATTERN = re.compile(ATT_CK_REG_STR)
@@ -216,7 +214,7 @@ class FeedStix(FeedStixCommon):
         #IPv4形式である
         try:
             if prop.category == cybox.objects.address_object.Address.CAT_IPV4:
-                return prop.address_value.value.decode('utf-8')
+                return prop.address_value.value
             return None
         except:
             return None
@@ -240,7 +238,7 @@ class FeedStix(FeedStixCommon):
     @classmethod
     def get_exploit_targets(cls,stix_package):
         #CSVファイルのラベル
-        CVE_TYPE = 'cve'.decode(ENCODING)
+        CVE_TYPE = 'cve'
         lines = []
 
         if stix_package.exploit_targets is not None:
@@ -254,15 +252,15 @@ class FeedStix(FeedStixCommon):
     @classmethod
     def get_indicators(cls,stix_package,indicator_only=False):
         #CSVファイルのラベル
-        IPV4_TYPE = 'ipv4'.decode(ENCODING)
-        DOMAIN_TYPE = 'domain'.decode(ENCODING)
-        MD5_TYPE = 'md5'.decode(ENCODING)
-        SHA1_TYPE = 'sha1'.decode(ENCODING)
-        SHA256_TYPE = 'sha256'.decode(ENCODING)
-        SHA512_TYPE = 'sha512'.decode(ENCODING)
-        URI_TYPE = 'uri'.decode(ENCODING)
-        FILE_NAME_TYPE = 'file_name'.decode(ENCODING)
-        EMAIL_ADDRESS_TYPE = 'e-mail'.decode(ENCODING)
+        IPV4_TYPE = 'ipv4'
+        DOMAIN_TYPE = 'domain'
+        MD5_TYPE = 'md5'
+        SHA1_TYPE = 'sha1'
+        SHA256_TYPE = 'sha256'
+        SHA512_TYPE = 'sha512'
+        URI_TYPE = 'uri'
+        FILE_NAME_TYPE = 'file_name'
+        EMAIL_ADDRESS_TYPE = 'e-mail'
 
         #STIXのうちobservables,indicatorsの要素を抜き出す
         observables = []
@@ -290,11 +288,11 @@ class FeedStix(FeedStixCommon):
                         continue
                 if isinstance(prop,cybox.objects.domain_name_object.DomainName) == True:
                     #Domain名である
-                    lines.append((DOMAIN_TYPE,prop.value.value.decode(ENCODING),observable.id_))
+                    lines.append((DOMAIN_TYPE,prop.value.value,observable.id_))
                     continue
                 if isinstance(prop,cybox.objects.uri_object.URI) == True:
                     #uriである
-                    lines.append((URI_TYPE,prop.value.value.decode(ENCODING),observable.id_))
+                    lines.append((URI_TYPE,prop.value.value,observable.id_))
                     continue
                 if isinstance(prop,cybox.objects.file_object.File) == True:
                     #Fileである
@@ -306,30 +304,30 @@ class FeedStix(FeedStixCommon):
                             value = prop.md5.value
                         else:
                             value = prop.md5
-                        lines.append((MD5_TYPE,value.decode(ENCODING),observable.id_))
+                        lines.append((MD5_TYPE,value,observable.id_))
                     if prop.sha1 is not None:
                         if isinstance(prop.sha1,HexBinary):
                             value = prop.sha1.value
                         else:
                             value = prop.sha1
-                        lines.append((SHA1_TYPE,value.decode(ENCODING),observable.id_))
+                        lines.append((SHA1_TYPE,value,observable.id_))
                     if prop.sha256 is not None:
                         if isinstance(prop.sha256,HexBinary):
                             value = prop.sha256.value
                         else:
                             value = prop.sha256
-                        lines.append((SHA256_TYPE,value.decode(ENCODING),observable.id_))
+                        lines.append((SHA256_TYPE,value,observable.id_))
                     if prop.sha512 is not None:
                         if isinstance(prop.sha512,HexBinary):
                             value = prop.sha512.value
                         else:
                             value = prop.sha512
-                        lines.append((SHA512_TYPE,value.decode(ENCODING),observable.id_))
+                        lines.append((SHA512_TYPE,value,observable.id_))
                     continue
                 if isinstance(prop,cybox.objects.address_object.Address) == True:
                     #Addressである
                     if (prop.category == cybox.objects.address_object.Address.CAT_EMAIL):
-                        lines.append((EMAIL_ADDRESS_TYPE,prop.address_value.value.decode(ENCODING),observable.id_))
+                        lines.append((EMAIL_ADDRESS_TYPE,prop.address_value.value,observable.id_))
                     continue
                 try:
                     if isinstance(prop,cybox.objects.network_connection_object.NetworkConnection) == True:   

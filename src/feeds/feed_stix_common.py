@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from mixbox import idgen
 from mixbox.namespaces import Namespace
 from stix.extensions.marking.simple_marking import SimpleMarkingStructure
@@ -30,8 +29,8 @@ class FeedStixCommon(object):
     def _make_information_source(self):
         #Tool情報作成
         tool = ToolInformation()
-        tool.name = const.SNS_TOOL_NAME.decode('utf-8')
-        tool.vendor = const.SNS_TOOL_VENDOR.decode('utf-8')
+        tool.name = const.SNS_TOOL_NAME
+        tool.vendor = const.SNS_TOOL_VENDOR
         tools = ToolInformationList()
         tools.append(tool)
         #Identity 作成
@@ -81,7 +80,7 @@ class FeedStixCommon(object):
                         country_name_code_type='ISO_3166-1_alpha-2',
                         admin_area_name_code=admin_area_name_code,
                         organisation_name=organisation_name,
-                        industry_type=industry_type.encode('utf-8'),
+                        industry_type=industry_type,
                         admin_area_name_code_type="ISO_3166-2",
                         )
         ais_marking_specification =  s.stix_header.handling.marking[0]
