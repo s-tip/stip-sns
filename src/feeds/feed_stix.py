@@ -8,7 +8,7 @@ from stix.core import Indicators, ExploitTargets
 from stix.core.stix_package import STIXPackage
 from stix.core.stix_header import STIXHeader
 from cybox.common.properties import HexBinary
-from feed_stix_common import FeedStixCommon
+from feeds.feed_stix_common import FeedStixCommon
 from feeds.extractor.common import CommonExtractor
 from feeds.adapter.crowd_strike import query_actors, get_actor_entities
 from feeds.adapter.att_ck import ATTCK_Taxii_Server
