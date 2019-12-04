@@ -10,7 +10,7 @@ import threading
 
 from django.http.request import HttpRequest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from slackclient import SlackClient
+from slack import WebClient
 from ctirs.models import System, STIPUser, SNSConfig, AttachFile, Feed
 from stip.common.const import TLP_CHOICES, SNS_SLACK_BOT_ACCOUNT
 from feeds.views import get_merged_conf_list, post_common
@@ -43,21 +43,23 @@ for choice in TLP_CHOICES:
 SLACK_POLL_INTERVAL_SEC = 1
 
 proxies = System.get_request_proxies()
+
+global sc
+global post_slack_channel
+global slack_token
+
 sc = None
 post_slack_channel = None
 slack_token = None
 
 
 def init_receive_slack(token, channel):
-    sc = SlackClient(token, proxies=proxies)
+    sc = WebClient(token=token, proxies=proxies)
     sc.rtm_connect()
     post_slack_channel = channel
     slack_token = token
     print('slack token: %s' % (slack_token))
     print('slack channel: %s' % (post_slack_channel))
-    global sc
-    global post_slack_channel
-    global slack_token
     return sc
 
 
