@@ -34,7 +34,7 @@ class ATTCK_Taxii_Server(object):
             api_root = attck_txs.api_roots[0]
             for collection in api_root.collections:
                 if collection.title == cls.COLLCETION_TITLE:
-                    collection = Collection("%s/stix/collections/%s/" % (cls.ATT_CK_TAXII_SERVER, collection.id))
+                    collection = Collection("%s/stix/collections/%s/" % (cls.ATT_CK_TAXII_SERVER, collection.id), proxies=proxies)
                     return TAXIICollectionSource(collection)
             return None
         except Exception:
