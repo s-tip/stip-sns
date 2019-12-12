@@ -10,7 +10,7 @@ class CSVExtractor(FileExtractor):
         confirm_indicators = []
         confirm_ttps = []
         confirm_tas = []
-        with open(file_.file_path, 'r') as fp:
+        with open(file_.file_path, 'rb') as fp:
             lines = fp.readlines()
             # 各行から Observable を取得する
             row = 1
@@ -39,7 +39,7 @@ class CSVExtractor(FileExtractor):
                         # white_list check
                         white_flag = cls._is_included_white_list(value, white_list)
                         # white_list に含まれない場合に checked をつける
-                        confirm_indicators.append((type_, value.decode('utf-8'), title, file_.file_name, (white_flag is False)))
+                        confirm_indicators.append((type_, value, title, file_.file_name, (white_flag is False)))
                 # cve チェック
                 cve = CSVExtractor._get_cve_from_csv_line(line)
                 if cve is not None:

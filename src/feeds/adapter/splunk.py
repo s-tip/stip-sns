@@ -8,7 +8,6 @@ import datetime
 import splunklib.client as client
 import splunklib.results as r
 from splunklib.six.moves import urllib as splunk_urllib
-from io import BytesIO
 from ctirs.models import System
 
 STATS_QUERY = '|stats earliest_time(_time),latest_time(_time),count'
@@ -20,20 +19,20 @@ def request(url, message, **kwargs):
     headers = dict(message.get('headers', []))
     req = splunk_urllib.request.Request(url, data, headers)
     try:
-        response = splunk_urllib.request.urlopen(req)
+        r = splunk_urllib.request.urlopen(req)
     except splunk_urllib.error.URLError as response:
         # If running Python 2.7.9+, disable SSL certificate validation and try again
         if sys.version_info >= (2, 7, 9):
-            response = splunk_urllib.request.urlopen(req, context=ssl._create_unverified_context())
+            r = splunk_urllib.request.urlopen(req, context=ssl._create_unverified_context())
         else:
             raise
     except splunk_urllib.error.HTTPError as response:
         pass  # Propagate HTTP errors via the returned response message
     return {
-        'status': response.code,
-        'reason': response.msg,
-        'headers': dict(response.info()),
-        'body': BytesIO(response.read().encode('utf-8'))
+        'status': r.code,
+        'reason': r.msg,
+        'headers': dict(r.info()),
+        'body': r
     }
 
 
@@ -52,7 +51,8 @@ def get_connect(sns_profile):
         handler=handler(proxies),
         username=sns_profile.splunk_username,
         password=sns_profile.splunk_password,
-        scheme=sns_profile.splunk_scheme)
+        scheme=sns_profile.splunk_scheme,
+        proxies=proxies)
     return con
 
 

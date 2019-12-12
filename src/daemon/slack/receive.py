@@ -293,7 +293,7 @@ def get_attached_files(receive_data):
             attach_file.file_name = file_name
             _, tmp_file_path = tempfile.mkstemp()
             attach_file.file_path = tmp_file_path
-            with open(attach_file.file_path, 'w') as fp:
+            with open(attach_file.file_path, 'w', encoding='utf-8') as fp:
                 fp.write(resp.content)
             files_for_cti_extractor.append(attach_file)
     return files_for_cti_extractor, files_for_stip_post

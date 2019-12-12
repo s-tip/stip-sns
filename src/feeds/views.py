@@ -395,7 +395,7 @@ def confirm_indicator(request):
         attach_file.file_name = f.name
         _, tmp_file_path = tempfile.mkstemp()
         attach_file.file_path = tmp_file_path
-        with open(attach_file.file_path, 'w') as fp:
+        with open(attach_file.file_path, 'w', encoding='utf-8') as fp:
             fp.write(f.read())
         files.append(attach_file)
 
@@ -572,7 +572,7 @@ def attach(request):
     attach_file_name = Feed.get_attach_file_name(file_id)
     attach_file_path = Feed.get_attach_file_path(file_id)
     # response作成
-    with open(attach_file_path, 'r') as fp:
+    with open(attach_file_path, 'r', encoding='utf-8') as fp:
         response = HttpResponse(fp.read(), content_type='application/octet-stream')
         response['Content-Disposition'] = 'attachment; filename=%s' % (attach_file_name)
     return response
@@ -792,7 +792,7 @@ def create_sighting_object(request):
         stix2_str = stix2.serialize(True, ensure_ascii=False)
 
         _, stix2_file_path = tempfile.mkstemp()
-        with open(stix2_file_path, 'w') as fp:
+        with open(stix2_file_path, 'w', encoding='utf-8') as fp:
             fp.write(stix2_str)
         # RS に登録する
         rs.regist_ctim_rs(feed.user, stix2.id, stix2_file_path)
@@ -877,7 +877,7 @@ def call_jira(request):
 
         # PDF添付
         feed_pdf = FeedPDF(feed, stix_package)
-        pdf_attachment = io.StringIO()
+        pdf_attachment = io.BytesIO()
         feed_pdf.make_pdf_content(pdf_attachment, feed)
         pdf_file_name = '%s.pdf' % (package_id)
         j.add_attachment(issue=issue, attachment=pdf_attachment, filename=pdf_file_name)
@@ -901,9 +901,9 @@ def download_stix(request):
     stix_file_path = Feed.get_cached_file_path(feed_file_name_id)
     # response作成
     file_name = '%s.xml' % (feed_file_name_id)
-    with open(stix_file_path, 'r') as fp:
+    with open(stix_file_path, 'r', encoding='utf-8') as fp:
         output = io.StringIO()
-        output.write(str(fp.read(), 'utf-8'))
+        output.write(fp.read())
         response = HttpResponse(output.getvalue(), content_type='application/xml')
         response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
     return response
@@ -915,9 +915,9 @@ def download_stix2(request):
     stix_file_path = rs.get_stix_file_path(request.user, feed_file_name_id)
     # response作成
     file_name = '%s.json' % (feed_file_name_id)
-    with open(stix_file_path, 'r') as fp:
+    with open(stix_file_path, 'r', encoding='utf-8') as fp:
         output = io.StringIO()
-        output.write(str(fp.read(), 'utf-8'))
+        output.write(fp.read())
         response = HttpResponse(output.getvalue(), content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
     return response
@@ -1148,7 +1148,7 @@ def save_post(request,
                                   request.user)
         feed.stix2_package_id = bundle.id
         _, stix2_file_path = tempfile.mkstemp()
-        with open(stix2_file_path, 'w') as fp:
+        with open(stix2_file_path, 'w', encoding='utf-8') as fp:
             fp.write(bundle.serialize(True, ensure_ascii=False))
         # RS に登録する
         rs.regist_ctim_rs(feed.user, bundle.id, stix2_file_path)
@@ -1175,7 +1175,7 @@ def save_post(request,
         # ファイルが単数
         temp = tempfile.NamedTemporaryFile()
         file_ = feed.files.get()
-        with open(file_.file_path) as fp:
+        with open(file_.file_path, 'r', encoding='utf-8') as fp:
             temp.write(fp.read())
             temp.seek(0)
         upploaded_filename = file_.file_name
@@ -1270,10 +1270,10 @@ def save_post(request,
 # filepathを返却する
 def write_stix_file(feed, feed_stix):
     stix_file_path = '%s%s%s' % (const.STIX_FILE_DIR, str(feed.filename_pk), '.xml')
-    with open(stix_file_path, 'w') as fp:
+    with open(stix_file_path, 'w', encoding='utf-8') as fp:
         # STIXの中身を追加
         stix_content = feed_stix.get_xml_content()
-        fp.write(stix_content)
+        fp.write(stix_content.decode())
     return stix_file_path
 
 

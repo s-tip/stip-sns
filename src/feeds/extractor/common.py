@@ -83,10 +83,10 @@ class BaseExtractor(object):
         return cls.word_extract_reg.findall(line)
 
     @classmethod
-    # value が str なら unicode にする
+    # value が bytes なら str にする
     def decode(cls, v_):
-        if isinstance(v_, str):
-            return v_.encode('utf-8')
+        if isinstance(v_, bytes):
+            return v_.decode()
         return v_
 
     # white_list に value がマッチングする場合は True
