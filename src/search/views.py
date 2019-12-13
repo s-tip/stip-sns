@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django.contrib.auth.decorators import login_required
 from ctirs.models import STIPUser as User
 from django.db.models import Q
@@ -22,10 +21,10 @@ def search(request):
         count = {}
         results = {}
 
-        results['feed'] = Feed.query(request.user,querystring)
+        results['feed'] = Feed.query(request.user, querystring)
         results['users'] = User.objects.filter(
-            Q(username__icontains=querystring) |
-            Q(screen_name__icontains=querystring)
+            Q(username__icontains=querystring)
+            | Q(screen_name__icontains=querystring)
         )
 
         count['feed'] = len(results['feed'])

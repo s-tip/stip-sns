@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import json
 
@@ -20,22 +19,24 @@ from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
 from feeds.views import FEEDS_NUM_PAGES, feeds
 
-#Japan
+# Japan
 DEFAULT_COUNTRY = 'JP'
-#Tokyo
+# Tokyo
 DEFAULT_CODE = 'JP-13'
 
+
 def login(request):
-    auth_views.login(request,template_name='cover.html')
-    if request.user.is_authenticated() == True:
+    auth_views.login(request, template_name='cover.html')
+    if request.user.is_authenticated():
         stip_user = request.user
         lang = stip_user.language
         request.session['_language'] = lang
         translation.activate(lang)
-        if request.user.is_modified_password == False:
-            #初回ログイン時はパスワード変更画面に飛ばす
+        if not request.user.is_modified_password:
+            # 初回ログイン時はパスワード変更画面に飛ばす
             return redirect('password_modified')
     return feeds(request)
+
 
 def home(request):
     if request.user.is_authenticated():
@@ -49,6 +50,7 @@ def home(request):
         request.session['_language'] = lang
         translation.activate(lang)
         return render(request, 'cover.html')
+
 
 @login_required
 def network(request):
@@ -67,24 +69,24 @@ def network(request):
 @login_required
 def profile(request, username):
     page_user = get_object_or_404(User, username=username)
-    #page_user は STIPUser
+    # page_user は STIPUser
     feeds = Feed.get_feeds(
         api_user=request.user,
         user_id=page_user.id,
         index=0,
         size=FEEDS_NUM_PAGES)
-    
-    #from_feed = -1
+
+    # from_feed = -1
     from_feed = None
     if feeds:
-        #from_feed = feeds[0].id
+        # from_feed = feeds[0].id
         from_feed = feeds[0].package_id
     return render(request, 'core/profile.html', {
         'page_user': page_user,
         'feeds': feeds,
         'from_feed': from_feed,
         'page': 1
-        })
+    })
 
 
 @login_required
@@ -93,11 +95,11 @@ def settings(request):
     profile = stip_user.sns_profile
     if request.method == 'POST':
         form = ProfileForm(request.POST)
-        #countryに応じてchoices変更する
+        # countryに応じてchoices変更する
         country = request.POST['country']
         form.fields['administrative_area'].choices = Region.get_administrative_areas_choices(country)
         if form.is_valid():
-            #Screen Name はここで修正する
+            # Screen Name はここで修正する
             stip_user.screen_name = form.cleaned_data.get('screen_name')
             stip_user.timezone = form.cleaned_data.get('timezone')
             stip_user.affiliation = form.cleaned_data.get('affiliation')
@@ -107,19 +109,19 @@ def settings(request):
             stip_user.description = form.cleaned_data.get('description')
             stip_user.tlp = form.cleaned_data.get('tlp')
             code = form.cleaned_data.get('administrative_area')
-            #region情報を取得
+            # region情報を取得
             try:
-                #administrative_code が指定されている場合は region から国情報を取得する
+                # administrative_code が指定されている場合は region から国情報を取得する
                 region = Region.objects.get(code=code)
                 administraive_code = region.code
                 administraive_area = region.administrative_area
                 country_code = region.country_code
-            except:
-                #administrative_code が指定されていない場合は region, administrative_code, administrative_area はNone
+            except BaseException:
+                # administrative_code が指定されていない場合は region, administrative_code, administrative_area はNone
                 region = None
                 administraive_code = None
                 administraive_area = None
-                #Country は form 指定の値
+                # Country は form 指定の値
                 country_code = form.cleaned_data.get('country')
             stip_user.region = region
             stip_user.administrative_code = administraive_code
@@ -153,7 +155,7 @@ def settings(request):
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Your profile was successfully edited.'))
-            #言語を変更
+            # 言語を変更
             lang = stip_user.language
             translation.activate(lang)
             request.session['_language'] = lang
@@ -174,29 +176,28 @@ def settings(request):
             'tlp': stip_user.tlp,
             'country': country,
             'administrative_area': code,
-            'ci' : stip_user.ci,
-            'language' : stip_user.language,
-            'scan_csv' : profile.scan_csv,
-            'scan_pdf' : profile.scan_pdf,
-            'scan_post' : profile.scan_post,
-            'scan_txt' : profile.scan_txt,
-            'threat_actors' : profile.threat_actors,
-            'indicator_white_list' : profile.indicator_white_list,
-            'timezone' : stip_user.timezone,
-            'phantom_host' : profile.phantom_host,
-            'phantom_source_name' : profile.phantom_source_name,
-            'phantom_playbook_name' : profile.phantom_playbook_name,
-            'phantom_auth_token' : profile.phantom_auth_token,
-            'splunk_host' : profile.splunk_host,
-            'splunk_api_port' : profile.splunk_api_port,
-            'splunk_web_port' : profile.splunk_web_port,
-            'splunk_username' : profile.splunk_username,
-            'splunk_password' : profile.splunk_password,
-            'splunk_scheme' : profile.splunk_scheme,
-            'splunk_query' : profile.splunk_query,
-            })
+            'ci': stip_user.ci,
+            'language': stip_user.language,
+            'scan_csv': profile.scan_csv,
+            'scan_pdf': profile.scan_pdf,
+            'scan_post': profile.scan_post,
+            'scan_txt': profile.scan_txt,
+            'threat_actors': profile.threat_actors,
+            'indicator_white_list': profile.indicator_white_list,
+            'timezone': stip_user.timezone,
+            'phantom_host': profile.phantom_host,
+            'phantom_source_name': profile.phantom_source_name,
+            'phantom_playbook_name': profile.phantom_playbook_name,
+            'phantom_auth_token': profile.phantom_auth_token,
+            'splunk_host': profile.splunk_host,
+            'splunk_api_port': profile.splunk_api_port,
+            'splunk_web_port': profile.splunk_web_port,
+            'splunk_username': profile.splunk_username,
+            'splunk_password': profile.splunk_password,
+            'splunk_scheme': profile.splunk_scheme,
+            'splunk_query': profile.splunk_query,
+        })
         form.fields['administrative_area'].choices = Region.get_administrative_areas_choices(country)
-
 
     return render(request, 'core/settings.html', {'form': form})
 
@@ -216,7 +217,7 @@ def picture(request):
 
 
 @login_required
-def password(request,msg=None):
+def password(request, msg=None):
     user = request.user
     if request.method == 'POST':
         form = ChangePasswordForm(request.POST)
@@ -224,7 +225,7 @@ def password(request,msg=None):
             new_password = form.cleaned_data.get('new_password')
             user.set_password(new_password)
             if user.username == 'admin':
-                #build_in account のパスワード変更
+                # build_in account のパスワード変更
                 User.change_build_password(new_password)
             user.is_modified_password = True
             user.save()
@@ -236,13 +237,15 @@ def password(request,msg=None):
     else:
         form = ChangePasswordForm(instance=user)
 
-    return render(request, 'core/password.html', {'form': form,'password_msg':msg})
+    return render(request, 'core/password.html', {'form': form, 'password_msg': msg})
+
 
 @login_required
-def password_modified(request,msg=None):
+def password_modified(request, msg=None):
     user = request.user
     form = ChangePasswordForm(instance=user)
-    return render(request, 'core/password.html', {'form': form,'password_msg':'Please Change Your Password!!!'})
+    return render(request, 'core/password.html', {'form': form, 'password_msg': 'Please Change Your Password!!!'})
+
 
 @login_required
 def upload_picture(request):
@@ -285,7 +288,7 @@ def save_uploaded_picture(request):
         filename = django_settings.MEDIA_ROOT + '/profile_pictures/' +\
             request.user.username + '.jpg'
         im = Image.open(tmp_filename)
-        cropped_im = im.crop((x, y, w+x, h+y))
+        cropped_im = im.crop((x, y, w + x, h + y))
         cropped_im.thumbnail((200, 200), Image.ANTIALIAS)
         if cropped_im.mode != 'RGB':
             cropped_im = cropped_im.convert('RGB')
@@ -298,9 +301,10 @@ def save_uploaded_picture(request):
 
     return redirect('/settings/picture/')
 
+
 @login_required
 @ajax_required
-#country_code からadministrative_area情報を返却する
+# country_code からadministrative_area情報を返却する
 def get_administrative_area(request):
     country_code = request.GET.get('country_code')
     dump = []

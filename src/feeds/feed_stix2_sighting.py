@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*
 import json
 from stix2 import parse
 from stix2.v21.sro import Sighting
@@ -41,8 +40,8 @@ def insert_sighting_object(
 
 def get_external_reference(title, observable_id):
     return {
-        u'source_name': title,
-        u'external_id': observable_id
+        'source_name': title,
+        'external_id': observable_id
     }
 
 
@@ -66,18 +65,18 @@ def replace_stix2_tlp(stix2_str):
     modified_refs = {}
     objects = []
 
-    for object_ in stix2[u'objects']:
+    for object_ in stix2['objects']:
         try:
-            if object_[u'type'] == u'marking-definition':
-                if object_[u'definition_type'] == u'tlp':
-                    color = object_[u'definition'][u'tlp'].lower()
+            if object_['type'] == 'marking-definition':
+                if object_['definition_type'] == 'tlp':
+                    color = object_['definition']['tlp'].lower()
                     stix_tlp = get_stix2_tlp(color)
                     objects.append(stix_tlp)
-                    modified_refs[object_[u'id']] = stix_tlp[u'id']
+                    modified_refs[object_['id']] = stix_tlp['id']
                     continue
-                elif object_[u'definition_type'] == u'ais':
+                elif object_['definition_type'] == 'ais':
                     # omit
-                    modified_refs[object_[u'id']] = None
+                    modified_refs[object_['id']] = None
                     continue
             objects.append(object_)
         except KeyError:
@@ -86,9 +85,9 @@ def replace_stix2_tlp(stix2_str):
             objects.append(object_)
 
     for object_ in objects:
-        if u'object_marking_refs' in object_:
+        if 'object_marking_refs' in object_:
             object_marking_refs = []
-            for object_marking_ref in object_[u'object_marking_refs']:
+            for object_marking_ref in object_['object_marking_refs']:
                 if object_marking_ref in modified_refs:
                     if modified_refs[object_marking_ref] is None:
                         # omit
@@ -97,60 +96,60 @@ def replace_stix2_tlp(stix2_str):
                         object_marking_refs.append(modified_refs[object_marking_ref])
                 else:
                     object_marking_refs.append(object_marking_ref)
-            object_[u'object_marking_refs'] = object_marking_refs
-    stix2[u'objects'] = objects
+            object_['object_marking_refs'] = object_marking_refs
+    stix2['objects'] = objects
     return stix2
 
 
 def get_stix2_tlp(color):
-    if color == u'white':
+    if color == 'white':
         return get_stix2_tlp_white()
-    if color == u'green':
+    if color == 'green':
         return get_stix2_tlp_green()
-    if color == u'amber':
+    if color == 'amber':
         return get_stix2_tlp_amber()
-    if color == u'red':
+    if color == 'red':
         return get_stix2_tlp_red()
     return None
 
 
 def get_stix2_marking_definition():
     d = {}
-    d[u'type'] = u'marking-definition'
-    d[u'created'] = u'2017-01-20T00:00:00.000Z'
-    d[u'definition_type'] = u'tlp'
+    d['type'] = 'marking-definition'
+    d['created'] = '2017-01-20T00:00:00.000Z'
+    d['definition_type'] = 'tlp'
     return d
 
 
 def get_stix2_tlp_white():
     d = get_stix2_marking_definition()
-    d[u'id'] = u'marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9'
-    tlp = { u'tlp': u'white'}
-    d[u'definition'] = tlp
+    d['id'] = 'marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9'
+    tlp = {'tlp': 'white'}
+    d['definition'] = tlp
     return d
 
 
 def get_stix2_tlp_green():
     d = get_stix2_marking_definition()
-    d[u'id'] = u'marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da'
-    tlp = {u'tlp': u'green'}
-    d[u'definition'] = tlp
+    d['id'] = 'marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da'
+    tlp = {'tlp': 'green'}
+    d['definition'] = tlp
     return d
 
 
 def get_stix2_tlp_amber():
     d = get_stix2_marking_definition()
-    d[u'id'] = u'marking-definition--f88d31f6-486f-44da-b317-01333bde0b82'
-    tlp = {u'tlp': u'amber'}
-    d[u'definition'] = tlp
+    d['id'] = 'marking-definition--f88d31f6-486f-44da-b317-01333bde0b82'
+    tlp = {'tlp': 'amber'}
+    d['definition'] = tlp
     return d
 
 
 def get_stix2_tlp_red():
     d = get_stix2_marking_definition()
-    d[u'id'] = u'marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed'
-    tlp = {u'tlp': u'red'}
-    d[u'definition'] = tlp
+    d['id'] = 'marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed'
+    tlp = {'tlp': 'red'}
+    d['definition'] = tlp
     return d
 
 
