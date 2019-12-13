@@ -1,73 +1,72 @@
-# -*- coding: utf-8 -*-
 import threading
 from django.apps import AppConfig
 from django.core.management import call_command
 from django.utils.translation import ugettext_lazy
 from stip.common.boot import is_skip_sequence
 from django.conf import settings as django_settings
-#from daemon.email.smtp import start_mail_thread
+# from daemon.email.smtp import start_mail_thread
+
 
 class StipSnsBoot(AppConfig):
     name = 'boot_sns'
 
     def ready(self):
-        from ctirs.models import Region,Country, SNSConfig
+        from ctirs.models import Region, Country, SNSConfig
         from feeds.mongo import init_attck_collection
 
         is_skip_sequnece = is_skip_sequence()
-        if is_skip_sequnece == False:
-            print '>>> Start Auto Deploy'
-            print '>>> Start collcect static --noinput'
-            #collectstatic
-            call_command('collectstatic','--noinput')
+        if not is_skip_sequnece:
+            print('>>> Start Auto Deploy')
+            print('>>> Start collcect static --noinput')
+            # collectstatic
+            call_command('collectstatic', '--noinput')
 
-            #loaddata (region)
+            # loaddata (region)
             region_count = Region.objects.count()
-            print '>>> region record count: ' + str(region_count)
+            print('>>> region record count: ' + str(region_count))
             if region_count == 0:
-                print '>>> Start loaddata region'
-                call_command('loaddata','region')
-                print '>>> region record count: ' + str(Region.objects.count())
+                print('>>> Start loaddata region')
+                call_command('loaddata', 'region')
+                print('>>> region record count: ' + str(Region.objects.count()))
             else:
-                print '>>> Skip loaddata region'
+                print('>>> Skip loaddata region')
 
-            #loaddata (country)
+            # loaddata (country)
             country_count = Country.objects.count()
-            print '>>> coutnry record count: ' + str(country_count)
+            print('>>> coutnry record count: ' + str(country_count))
             if country_count == 0:
-                print '>>> Start loaddata country'
-                call_command('loaddata','country')
-                print '>>> coutnry record count: ' + str(Country.objects.count())
+                print('>>> Start loaddata country')
+                call_command('loaddata', 'country')
+                print('>>> coutnry record count: ' + str(Country.objects.count()))
             else:
-                print '>>> Skip loaddata country'
+                print('>>> Skip loaddata country')
 
-            #loaddata (sns_config)
+            # loaddata (sns_config)
             sns_config_count = SNSConfig.objects.count()
-            print '>>> sns_config record count: ' + str(sns_config_count)
+            print('>>> sns_config record count: ' + str(sns_config_count))
             if sns_config_count == 0:
-                print '>>> Start loaddata sns_config'
-                call_command('loaddata','sns_config')
-                print '>>> sns_config record count: ' + str(SNSConfig.objects.count())
+                print('>>> Start loaddata sns_config')
+                call_command('loaddata', 'sns_config')
+                print('>>> sns_config record count: ' + str(SNSConfig.objects.count()))
             else:
-                print '>>> Skip loaddata sns_config'
+                print('>>> Skip loaddata sns_config')
 
-            
-        #ATTCK コレクションがない場合は起動時に取得し、攻撃者情報リストを取得する
+        # ATTCK コレクションがない場合は起動時に取得し、攻撃者情報リストを取得する
         init_attck_collection()
-        
-        #smtp daemon 起動
-        #start_mail_thread()
-        
-        #country/region の日本語対応
+
+        # smtp daemon 起動
+        # start_mail_thread()
+
+        # country/region の日本語対応
         self.convert_country_and_region_in_japanese()
-        
-        #slack WebSocket start
+
+        # slack WebSocket start
         from daemon.slack.receive import start_receive_slack_thread
         start_receive_slack_thread()
 
     def convert_country_and_region_in_japanese(self):
-        #日本語化対象
-        #日本の都道府県
+        # 日本語化対象
+        # 日本の都道府県
         ugettext_lazy('Aichi')
         ugettext_lazy('Akita')
         ugettext_lazy('Aomori')
@@ -115,8 +114,8 @@ class StipSnsBoot(AppConfig):
         ugettext_lazy('Yamagata')
         ugettext_lazy('Yamaguchi')
         ugettext_lazy('Yamanashi')
-        
-        #国名
+
+        # 国名
         ugettext_lazy('Afghanistan')
         ugettext_lazy('Åland Islands')
         ugettext_lazy('Albania')
@@ -366,4 +365,3 @@ class StipSnsBoot(AppConfig):
         ugettext_lazy('Yemen')
         ugettext_lazy('Zambia')
         ugettext_lazy('Zimbabwe')
-

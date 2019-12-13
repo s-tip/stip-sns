@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from ctirs.models import SNSConfig
 
+
 class SNSConfigForm(forms.ModelForm):
     common_cti_extractor_threat_actors_list = forms.CharField(
-        label = _('Common Threat Actors List'),
-        widget=forms.Textarea(attrs={'class':'form-control','style':'resize:none'}),
+        label=_('Common Threat Actors List'),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'style': 'resize:none'}),
         required=False)
     common_cti_extractor_white_list = forms.CharField(
-        label = _('Common CTI Extractor White List'),
-        widget=forms.Textarea(attrs={'class':'form-control','style':'resize:none'}),
+        label=_('Common CTI Extractor White List'),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'style': 'resize:none'}),
         required=False)
     sns_identity_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
@@ -155,17 +155,15 @@ class SNSConfigForm(forms.ModelForm):
         label=_('Slack Bot Channel'),
         required=False)
 
-
     class Meta:
         model = SNSConfig
-        fields = ['common_cti_extractor_threat_actors_list','common_cti_extractor_white_list',
+        fields = ['common_cti_extractor_threat_actors_list', 'common_cti_extractor_white_list',
                   'sns_identity_name', 'sns_header_title', 'sns_body_color', 'sns_version_path', 'sns_public_suffix_list_file_path',
                   'circl_mongo_host', 'circl_mongo_port', 'circl_mongo_database',
                   'attck_mongo_host', 'attck_mongo_port', 'attck_mongo_database',
-                  'cs_custid','cs_custkey',
-                  'rs_host','rs_community_name',
+                  'cs_custid', 'cs_custkey',
+                  'rs_host', 'rs_community_name',
                   'gv_l2_url',
-                  'jira_host','jira_username','jira_password','jira_project','jira_type',
+                  'jira_host', 'jira_username', 'jira_password', 'jira_project', 'jira_type',
                   'smtp_port', 'smtp_accept_mail_address',
                   'stix_ns_url', 'stix_ns_name', 'slack_bot_token', 'slack_bot_channel']
-
