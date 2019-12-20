@@ -1,4 +1,3 @@
-import os
 import json
 import time
 import requests
@@ -6,11 +5,12 @@ import datetime
 import pytz
 import re
 import tempfile
+import slack
+import asyncio
 import threading
 
 from django.http.request import HttpRequest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from slack import WebClient
 from ctirs.models import System, STIPUser, SNSConfig, AttachFile, Feed
 from stip.common.const import TLP_CHOICES, SNS_SLACK_BOT_ACCOUNT
 from feeds.views import get_merged_conf_list, post_common
@@ -25,75 +25,88 @@ from feeds.views import KEY_TAS as STIP_PARAMS_INDEX_TAS
 from feeds.views import KEY_USERNAME as STIP_PARAMS_INDEX_USER_NAME
 
 TLP_REGEX_PATTERN_STR = r'^.*{TLP:\s*([a-zA-Z]+)}.*$'
-TLP_REGEX_PATTERN = re.compile(TLP_REGEX_PATTERN_STR, flags=(re.MULTILINE))
+TLP_REGEX_PATTERN = re.compile(
+    TLP_REGEX_PATTERN_STR,
+    flags=(re.MULTILINE))
 REFERRED_URL_PATTERN_STR = r'^.*{URL:\s*<(\S+)>}.*$'
-REFERRED_URL_PATTERN = re.compile(REFERRED_URL_PATTERN_STR, flags=(re.MULTILINE))
+REFERRED_URL_PATTERN = re.compile(
+    REFERRED_URL_PATTERN_STR,
+    flags=(re.MULTILINE))
 COMMAND_STIX_PATTERN_STR = r'^:stix\s*(\S+)$'
 COMMAND_STIX_PATTERN = re.compile(COMMAND_STIX_PATTERN_STR)
 CHANNEL_PATTERN_STR = r'(?P<channel_info><#[0-9A-Z]+?\|(?P<channel_name>.+?)>)'
-CHANNEL_PATTERN = re.compile(CHANNEL_PATTERN_STR, flags=(re.MULTILINE))
+CHANNEL_PATTERN = re.compile(
+    CHANNEL_PATTERN_STR,
+    flags=(re.MULTILINE))
 USER_ID_PATTERN_STR = '(?P<user_info><@(?P<user_id>[0-9A-Z]+?)>)'
-USER_ID_PATTERN = re.compile(USER_ID_PATTERN_STR, flags=(re.MULTILINE))
+USER_ID_PATTERN = re.compile(
+    USER_ID_PATTERN_STR,
+    flags=(re.MULTILINE))
 
 # TLP_LIST 初期化
 TLP_LIST = []
 for choice in TLP_CHOICES:
     TLP_LIST.append(choice[0])
 
-SLACK_POLL_INTERVAL_SEC = 1
-
 proxies = System.get_request_proxies()
-
-global sc
-global post_slack_channel
-global slack_token
-
-sc = None
+wc = None
 post_slack_channel = None
 slack_token = None
 
 
-def init_receive_slack(token, channel):
-    sc = WebClient(token=token, proxies=proxies)
-    sc.rtm_connect()
-    post_slack_channel = channel
-    slack_token = token
-    print('slack token: %s' % (slack_token))
-    print('slack channel: %s' % (post_slack_channel))
-    return sc
-
-
 def start_receive_slack_thread():
-    token = SNSConfig.get_slack_bot_token()
-    if token is None:
+    global post_slack_channel
+    global slack_token
+    global wc
+
+    slack_token = SNSConfig.get_slack_bot_token()
+    if slack_token is None:
         print('Slack token is undefined.')
         return
-    if len(token) == 0:
+    if len(slack_token) == 0:
         print('Slack token length is 0.')
         return
     # Slack ユーザがいなければ作る
     slack_users = STIPUser.objects.filter(username=SNS_SLACK_BOT_ACCOUNT)
     if len(slack_users) == 0:
         # slack ユーザ作成する
-        slack_user = STIPUser.objects.create_user(SNS_SLACK_BOT_ACCOUNT, SNS_SLACK_BOT_ACCOUNT, SNS_SLACK_BOT_ACCOUNT, is_admin=False)
+        slack_user = STIPUser.objects.create_user(
+            SNS_SLACK_BOT_ACCOUNT,
+            SNS_SLACK_BOT_ACCOUNT,
+            SNS_SLACK_BOT_ACCOUNT,
+            is_admin=False)
         slack_user.save()
-    channel = SNSConfig.get_slack_bot_chnnel()
-    sc = init_receive_slack(token, channel)
-    th = threading.Thread(target=receive_slack, args=[sc])
-    th.setDaemon(True)
+    post_slack_channel = SNSConfig.get_slack_bot_chnnel()
+
+    wc = slack.WebClient(token=slack_token)
+    rtm_client = slack.RTMClient(token=slack_token)
+
+    th = threading.Thread(
+        target=slack_client_start,
+        args=[rtm_client])
     th.start()
+    return
+
+
+def slack_client_start(rtm_client):
+    future = asyncio.ensure_future(
+        rtm_client._connect_and_read(),
+        loop=rtm_client._event_loop)
+    rtm_client._event_loop.run_until_complete(future)
 
 
 # 指定の stix id を返却する
 def download_stix_id(command_stix_id):
+    global wc
     # cache の STIX を返却
-    stix_file_path = Feed.get_cached_file_path(command_stix_id.replace(':', '--'))
+    stix_file_path = Feed.get_cached_file_path(
+        command_stix_id.replace(':', '--'))
     file_name = '%s.xml' % (command_stix_id)
-    sc.api_call('files.upload',
-                initial_comment='',
-                channels=post_slack_channel,
-                file=open(stix_file_path, 'rb'),
-                filename=file_name)
+    wc.files_upload(
+        initial_comment='',
+        channels=post_slack_channel,
+        file=open(stix_file_path, 'rb'),
+        filename=file_name)
     return
 
 
@@ -110,18 +123,21 @@ def convert_user_id(post):
     for user_info in USER_ID_PATTERN.finditer(post):
         user_profile = get_user_profile(user_info.group('user_id'))
         user_name = user_profile['real_name']
-        post = post.replace(user_info.group('user_info'), '"@%s"' % (user_name))
+        post = post.replace(
+            user_info.group('user_info'),
+            '"@%s"' % (user_name))
     return post
 
 
 # user_id から user_profile取得
 def get_user_profile(user_id):
-    sc.api_call('users.info', user=user_id)['user']['profile']
-    return sc.api_call('users.info', user=user_id)['user']['profile']
+    global wc
+    return wc.users_info(user=user_id)['user']['profile']
 
 
 # slack 投稿データから stip 投稿を行う
 def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
+    global wc
     POST_INDEX_TITLE = 0
 
     if 'subtype' in receive_data:
@@ -148,7 +164,10 @@ def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
     files_for_cti_extractor, files_for_stip_post = get_attached_files(receive_data)
 
     # CTI Element Extractor 追加
-    stip_params = set_extractor_info(stip_params, files_for_cti_extractor, user_profile['display_name'])
+    stip_params = set_extractor_info(
+        stip_params,
+        files_for_cti_extractor,
+        user_profile['display_name'])
 
     # 本文に各種 footer 情報を追加
     post = stip_params[STIP_PARAMS_INDEX_POST]
@@ -180,14 +199,18 @@ def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
     # channle_id から channel 情報取得
     try:
         channel_id = receive_data['channel']
-        resp = sc.api_call('channels.info', channel=channel_id)
-        if 'channel' in resp:
+        channel_name = None
+        try:
+            resp = wc.channels_info(channel=channel_id)
             # public channel
             channel_name = resp['channel']['name']
-        else:
+        except slack.errors.SlackApiError:
             # private channnel
-            resp = sc.api_call('groups.info', channel=channel_id)
+            resp = wc.groups_info(channel=channel_id)
             channel_name = resp['group']['name']
+        except Exception:
+            # チャンネル名が取れないので skip
+            pass
         if channel_name != slack_bot_channel_name:
             # 該当チャンネルではないの skip
             return
@@ -228,40 +251,19 @@ def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
     return
 
 
-def receive_slack(sc):
+@slack.RTMClient.run_on(event='message')
+def receive_slack(**payload):
     # channel 名から先頭の # を外す
     slack_bot_channel_name = SNSConfig.get_slack_bot_chnnel()[1:]
-    th = threading.currentThread()
     slack_user = STIPUser.objects.get(username=SNS_SLACK_BOT_ACCOUNT)
-    # thread 停止フラグが立つまで繰り返し
-    while getattr(th, "do_run", True):
-        receive_data_lists = sc.rtm_read()
-        if len(receive_data_lists) > 0:
-            for receive_data in receive_data_lists:
-                try:
-                    files_for_cti_extractor = None
-                    if 'type' in receive_data:
-                        message_type = receive_data['type']
-                        if message_type == 'message':
-                            post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user)
-                        else:
-                            # print 'event: %s: skip' % (receive_data[u'type'])
-                            pass
-                except BaseException:
-                    import traceback
-                    traceback.print_exc()
-                    pass
-                finally:
-                    # 添付ファイル削除
-                    if files_for_cti_extractor is not None:
-                        for file_ in files_for_cti_extractor:
-                            try:
-                                os.remove(file_.file_path)
-                            except BaseException:
-                                pass
+    receive_data = payload['data']
 
-        else:
-            time.sleep(SLACK_POLL_INTERVAL_SEC)
+    try:
+        post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user)
+    except BaseException as e:
+        import traceback
+        traceback.print_exc()
+        raise e
 
 
 def get_attached_file_from_slack(file_path):
@@ -293,7 +295,7 @@ def get_attached_files(receive_data):
             attach_file.file_name = file_name
             _, tmp_file_path = tempfile.mkstemp()
             attach_file.file_path = tmp_file_path
-            with open(attach_file.file_path, 'w', encoding='utf-8') as fp:
+            with open(attach_file.file_path, 'wb') as fp:
                 fp.write(resp.content)
             files_for_cti_extractor.append(attach_file)
     return files_for_cti_extractor, files_for_stip_post
@@ -375,8 +377,12 @@ def set_extractor_info(stip_params, attached_files, username):
         stip_user = None
 
     if stip_user is not None:
-        white_list = get_merged_conf_list(SNSConfig.get_common_white_list(), stip_user.sns_profile.indicator_white_list)
-        ta_list = get_merged_conf_list(SNSConfig.get_common_ta_list(), stip_user.sns_profile.threat_actors)
+        white_list = get_merged_conf_list(
+            SNSConfig.get_common_white_list(),
+            stip_user.sns_profile.indicator_white_list)
+        ta_list = get_merged_conf_list(
+            SNSConfig.get_common_ta_list(),
+            stip_user.sns_profile.threat_actors)
     else:
         ta_list = []
         white_list = []
@@ -384,13 +390,17 @@ def set_extractor_info(stip_params, attached_files, username):
     confirm_indicators, confirm_ets, confirm_tas = Extractor.get_stix_element(
         files=attached_files,
         posts=[stip_params[STIP_PARAMS_INDEX_POST]],
-        referred_url=stip_params[STIP_PARAMS_INDEX_REFERRED_URL] if len(stip_params[STIP_PARAMS_INDEX_REFERRED_URL]) != 0 else None,
+        referred_url=stip_params[STIP_PARAMS_INDEX_REFERRED_URL] if len(
+            stip_params[STIP_PARAMS_INDEX_REFERRED_URL]) != 0 else None,
         ta_list=ta_list,
         white_list=white_list
     )
-    stip_params[STIP_PARAMS_INDEX_INDICATORS] = json.dumps(get_extractor_items(confirm_indicators))
-    stip_params[STIP_PARAMS_INDEX_TTPS] = json.dumps(get_extractor_items(confirm_ets))
-    stip_params[STIP_PARAMS_INDEX_TAS] = json.dumps(get_extractor_items(confirm_tas))
+    stip_params[STIP_PARAMS_INDEX_INDICATORS] = json.dumps(
+        get_extractor_items(confirm_indicators))
+    stip_params[STIP_PARAMS_INDEX_TTPS] = json.dumps(
+        get_extractor_items(confirm_ets))
+    stip_params[STIP_PARAMS_INDEX_TAS] = json.dumps(
+        get_extractor_items(confirm_tas))
     return stip_params
 
 

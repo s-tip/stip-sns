@@ -6,7 +6,6 @@ import hashlib
 import tempfile
 import codecs
 import traceback
-import io
 import datetime
 import threading
 import zipfile
@@ -395,7 +394,7 @@ def confirm_indicator(request):
         attach_file.file_name = f.name
         _, tmp_file_path = tempfile.mkstemp()
         attach_file.file_path = tmp_file_path
-        with open(attach_file.file_path, 'w', encoding='utf-8') as fp:
+        with open(attach_file.file_path, 'wb') as fp:
             fp.write(f.read())
         files.append(attach_file)
 
@@ -572,7 +571,7 @@ def attach(request):
     attach_file_name = Feed.get_attach_file_name(file_id)
     attach_file_path = Feed.get_attach_file_path(file_id)
     # response作成
-    with open(attach_file_path, 'r', encoding='utf-8') as fp:
+    with open(attach_file_path, 'rb') as fp:
         response = HttpResponse(fp.read(), content_type='application/octet-stream')
         response['Content-Disposition'] = 'attachment; filename=%s' % (attach_file_name)
     return response
@@ -1175,7 +1174,7 @@ def save_post(request,
         # ファイルが単数
         temp = tempfile.NamedTemporaryFile()
         file_ = feed.files.get()
-        with open(file_.file_path, 'r', encoding='utf-8') as fp:
+        with open(file_.file_path, 'rb') as fp:
             temp.write(fp.read())
             temp.seek(0)
         upploaded_filename = file_.file_name
@@ -1202,25 +1201,25 @@ def save_post(request,
         slack_post = slack_post.replace('&gt;', '%amp;gt;')
 
         # Slack 投稿用の添付ファイル作成
-        from daemon.slack.receive import post_slack_channel, sc
-        if sc is not None:
+        from daemon.slack.receive import post_slack_channel, wc
+        if wc is not None:
             if temp is not None:
                 try:
                     # ファイルが添付されている場合は file uplaod をコメント付きで
-                    sc.api_call('files.upload',
-                                initial_comment=slack_post,
-                                channels=post_slack_channel,
-                                file=open(temp.name, 'rb'),
-                                filename=upploaded_filename)
+                    wc.files_upload(
+                        initial_comment=slack_post,
+                        channels=post_slack_channel,
+                        file=open(temp.name, 'rb'),
+                        filename=upploaded_filename)
                 finally:
                     # 閉じると同時に削除される
                     temp.close()
             else:
                 try:
-                    sc.api_call('chat.postMessage',
-                                text=slack_post,
-                                channel=post_slack_channel,
-                                as_user='true')
+                    wc.chat_postMessage(
+                        text=slack_post,
+                        channel=post_slack_channel,
+                        as_user='true')
                 except Exception as _:
                     pass
 
