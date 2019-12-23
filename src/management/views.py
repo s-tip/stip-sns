@@ -1,4 +1,3 @@
-import threading
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render
@@ -7,8 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from ctirs.models import STIPUser, SNSConfig
 from management.forms import SNSConfigForm
 from feeds.mongo import Attck
-from django.conf import settings as django_settings
-from daemon.slack.receive import start_receive_slack_thread
+from daemon.slack.receive import restart_receive_slack_thread
 
 
 @login_required
@@ -63,7 +61,7 @@ def reboot_slack_thread(request):
     if request.user.role != 'admin':
         return HttpResponseForbidden()
     # thread 再起動
-    start_receive_slack_thread()
+    restart_receive_slack_thread()
     # その後は config 画面に遷移
     return sns_config(request)
 

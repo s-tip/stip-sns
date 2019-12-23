@@ -50,14 +50,40 @@ for choice in TLP_CHOICES:
 
 proxies = System.get_request_proxies()
 wc = None
+th = None
+rtm_client = None
 post_slack_channel = None
 slack_token = None
+
+
+class SlackThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.started = threading.Event()
+        self.alive = True
+        self.start()
+
+    def begin(self):
+        self.started.set()
+
+    def end(self):
+        rtm_client._stopped = True
+        self.started.clear()
+
+    def run(self):
+        future = asyncio.ensure_future(
+            rtm_client._connect_and_read(),
+            loop=rtm_client._event_loop)
+        rtm_client._event_loop.run_until_complete(future)
+        rtm_client.stop()
 
 
 def start_receive_slack_thread():
     global post_slack_channel
     global slack_token
     global wc
+    global th
+    global rtm_client
 
     slack_token = SNSConfig.get_slack_bot_token()
     if slack_token is None:
@@ -77,22 +103,24 @@ def start_receive_slack_thread():
             is_admin=False)
         slack_user.save()
     post_slack_channel = SNSConfig.get_slack_bot_chnnel()
-
     wc = slack.WebClient(token=slack_token)
     rtm_client = slack.RTMClient(token=slack_token)
-
-    th = threading.Thread(
-        target=slack_client_start,
-        args=[rtm_client])
-    th.start()
+    th = SlackThread()
     return
 
 
-def slack_client_start(rtm_client):
-    future = asyncio.ensure_future(
-        rtm_client._connect_and_read(),
-        loop=rtm_client._event_loop)
-    rtm_client._event_loop.run_until_complete(future)
+def restart_receive_slack_thread():
+    global th
+    global rtm_client
+
+    el = rtm_client._event_loop
+    th.end()
+    th.join()
+    rtm_client = slack.RTMClient(
+        token=slack_token,
+        loop=el)
+    th = SlackThread()
+    return
 
 
 # 指定の stix id を返却する
