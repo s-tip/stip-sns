@@ -116,6 +116,7 @@ def restart_receive_slack_thread():
     el = rtm_client._event_loop
     th.end()
     th.join()
+    slack_token = SNSConfig.get_slack_bot_token()
     rtm_client = slack.RTMClient(
         token=slack_token,
         loop=el)
