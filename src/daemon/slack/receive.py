@@ -52,7 +52,6 @@ proxies = System.get_request_proxies()
 wc = None
 th = None
 rtm_client = None
-post_slack_channel = None
 slack_token = None
 
 
@@ -79,7 +78,6 @@ class SlackThread(threading.Thread):
 
 
 def start_receive_slack_thread():
-    global post_slack_channel
     global slack_token
     global wc
     global th
@@ -102,7 +100,6 @@ def start_receive_slack_thread():
             SNS_SLACK_BOT_ACCOUNT,
             is_admin=False)
         slack_user.save()
-    post_slack_channel = SNSConfig.get_slack_bot_chnnel()
     wc = slack.WebClient(token=slack_token)
     rtm_client = slack.RTMClient(token=slack_token)
     th = SlackThread()
@@ -131,6 +128,7 @@ def download_stix_id(command_stix_id):
     stix_file_path = Feed.get_cached_file_path(
         command_stix_id.replace(':', '--'))
     file_name = '%s.xml' % (command_stix_id)
+    post_slack_channel = SNSConfig.get_slack_bot_chnnel()
     wc.files_upload(
         initial_comment='',
         channels=post_slack_channel,
