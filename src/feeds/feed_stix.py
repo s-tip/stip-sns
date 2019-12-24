@@ -175,7 +175,7 @@ class FeedStix(FeedStixCommon):
             content = base64.b64encode(fp.read())
 
         # content作成
-        marking_specification_content = self._make_marking_specification_statement(MARKING_STRUCTURE_STIP_ATTACHEMENT_CONTENT_PREFIX, content)
+        marking_specification_content = self._make_marking_specification_statement(MARKING_STRUCTURE_STIP_ATTACHEMENT_CONTENT_PREFIX, content.decode('utf-8'))
         # filename作成
         marking_specification_file_name = self._make_marking_specification_statement(MARKING_STRUCTURE_STIP_ATTACHEMENT_FILENAME_PREFIX, file_.file_name)
 

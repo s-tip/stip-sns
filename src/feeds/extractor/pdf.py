@@ -1,4 +1,4 @@
-from io import BytesIO
+from io import StringIO
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.layout import LAParams
 from pdfminer.converter import TextConverter
@@ -17,7 +17,7 @@ class PDFExtractor(FileExtractor):
     # 指定の PDF ファイルを開き、indicators, cve, threat_actor の要素を返却する
     @classmethod
     def _get_element_from_target_file(cls, file_, ta_list=[], white_list=[]):
-        outfp = BytesIO()
+        outfp = StringIO()
 
         # PDF ファイルを解析する
         pdf_device = TextConverter(pdf_rsrcmgr, outfp, codec=pdf_codec, laparams=pdf_laparams)
