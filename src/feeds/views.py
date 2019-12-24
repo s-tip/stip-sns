@@ -384,7 +384,6 @@ def is_stix2_post(request):
 
 
 @login_required
-@ajax_required
 # 添付されたファイルに indicators が含まれているかを確認する
 def confirm_indicator(request):
     # 添付ファイルごとに AttachFile を作成し list に格納　
