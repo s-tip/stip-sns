@@ -1,18 +1,20 @@
 #!/usr/bin/python
 # coding: UTF-8
-import sys,traceback,argparse
+import sys
+import traceback
+import argparse
 import json
 import requests
 
 ##############################
-#post_stip
-#S-TIP 投稿スクリプト
+# post_stip
+# S-TIP 投稿スクリプト
 ##############################
-#第1引数：URL (必須)
-#第2引数：POST 情報(必須)
-#第3引数：attachment file(任意)
+# 第1引数：URL (必須)
+# 第2引数：POST 情報(必須)
+# 第3引数：attachment file(任意)
 ##############################
-#オプション
+# オプション
 # url post_info_file [attachment_file,...]
 ##############################
 '''
@@ -57,23 +59,23 @@ post_info_file例
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description = 'Post S-TIP Script')
-    parser.add_argument('-u','--url',help='Post url')
-    parser.add_argument('-p','--post_info_file',help='Post setting information')
-    parser.add_argument('attachments',nargs='*',help='attachement')
+    parser = argparse.ArgumentParser(description='Post S-TIP Script')
+    parser.add_argument('-u', '--url', help='Post url')
+    parser.add_argument('-p', '--post_info_file', help='Post setting information')
+    parser.add_argument('attachments', nargs='*', help='attachement')
     args = parser.parse_args()
 
     if args.url is None:
-        print 'No URL.'
+        print('No URL.')
         parser.print_help()
         sys.exit(1)
 
     if args.post_info_file is None:
-        print 'No Post info file.'
+        print('No Post info file.')
         parser.print_help()
         sys.exit(1)
 
-    with open(args.post_info_file,'r') as fp:
+    with open(args.post_info_file, 'r') as fp:
         payload = json.load(fp)
 
     index = 0
@@ -81,7 +83,7 @@ if __name__ == '__main__':
     for file_path in args.attachments:
         item_name = 'attachments_%d' % (index)
         index += 1
-        files[item_name] = open(file_path,'rb')
+        files[item_name] = open(file_path, 'rb')
 
     r = requests.post(
         args.url,
@@ -91,6 +93,6 @@ if __name__ == '__main__':
 
     b = json.loads(r.text)
     if r.status_code != 200:
-        print 'Request Failed (%s, %s).' % (r.status_code,b['reason'])
+        print('Request Failed (%s, %s).' % (r.status_code, b['reason']))
     else:
-        print 'Success!'
+        print('Success!')
