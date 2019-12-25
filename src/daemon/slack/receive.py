@@ -13,6 +13,7 @@ from django.http.request import HttpRequest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from ctirs.models import System, STIPUser, SNSConfig, AttachFile, Feed
 from stip.common.const import TLP_CHOICES, SNS_SLACK_BOT_ACCOUNT
+from api.v1.views import get_request_via_confirm_indicator
 from feeds.views import get_merged_conf_list, post_common
 from feeds.extractor.base import Extractor
 from feeds.views import KEY_TLP as STIP_PARAMS_INDEX_TLP
@@ -270,6 +271,9 @@ def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
         request.POST = stip_params
         request.FILES = files_for_stip_post
         request.META['SERVER_NAME'] = 'localhost'
+        request.user = slack_user
+        request = get_request_via_confirm_indicator(request)
+        # ここから rest api 経由としたい
         post_common(request, slack_user)
     except Exception as e:
         import traceback
