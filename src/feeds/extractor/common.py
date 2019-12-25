@@ -19,7 +19,7 @@ from feeds.mongo import Cve
 from ctirs.models import SNSConfig
 
 # regular expression
-ipv4_reg_expression = r'.*?((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[[]{0,1}\.[\]]{0,1}){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)).*?$'
+ipv4_reg_expression = r'.*?((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[\[]{0,1}\.[\]]{0,1}){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)).*?$'
 ipv4_reg = re.compile(ipv4_reg_expression)
 url_reg_expression = r'.*?(https?|ftp)\[?(:)\]?(\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+).*?$'
 url_reg = re.compile(url_reg_expression)
@@ -31,7 +31,7 @@ sha256_expression = '.*?(([0-9]|[a-f]|[A-F]){64}).*?$'
 sha256_reg = re.compile(sha256_expression)
 sha512_expression = '.*?(([0-9]|[a-f]|[A-F]){128}).*?$'
 sha512_reg = re.compile(sha512_expression)
-domain_expression = r'.*?([A-Za-z0-9][A-Za-z0-9_-]*(\.[A-Za-z][A-Za-z0-9_-]*)*([[]{0,1}\.[\]]{0,1}[A-Za-z][A-Za-z][A-Za-z]*)).*?'
+domain_expression = r'.*?([A-Za-z0-9][A-Za-z0-9_-]*(\.[A-Za-z][A-Za-z0-9_-]*)*([\[]{0,1}\.[\]]{0,1}[A-Za-z][A-Za-z][A-Za-z]*)).*?'
 domain_reg = re.compile(domain_expression)
 cve_expression = '.*(CVE-([0-9]){4}-([0-9]){1,5}).*$'
 cve_reg = re.compile(cve_expression)
@@ -55,7 +55,7 @@ JSON_OBJECT_TYPE_EMAIL_ADDRESS = 'email_address'
 
 
 class BaseExtractor(object):
-    word_extract_expression = r'([[\]\-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)'
+    word_extract_expression = r'([\[\]\-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)'
     word_extract_reg = re.compile(word_extract_expression)
     CVE_TYPE_STR = 'cve'
     TA_TYPE_STR = 'threat_actor'
@@ -178,12 +178,12 @@ class FileExtractor(BaseExtractor):
     # Extract 対象ファイルを返却
     @classmethod
     def _get_target_files(cls, files):
-        l = []
+        ret_ = []
         if files is not None:
             for file_ in files:
                 if cls._is_target_file(file_.file_name):
-                    l.append(file_)
-        return l
+                    ret_.append(file_)
+        return ret_
 
     # Extract 対象 ファイルであるかの判定ロジック
     @classmethod
