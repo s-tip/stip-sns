@@ -36,10 +36,8 @@ def post(request):
         if extract:
             # indicators 取得
             request.user = user
-            json_response = confirm_indicator(request)
-            j = json.loads(json_response.content)
             # confirm_indicators から再度 post するデータを取得する
-            request.POST = get_post_common_post(request.POST.copy(), j)
+            request = get_request_via_confirm_indicator(request)
         feed = post_common(request, user)
 
         dump = {
@@ -54,6 +52,15 @@ def post(request):
                 'reason': str(e)}
         data = json.dumps(dump)
         return HttpResponseBadRequest(data, content_type='application/json')
+
+
+# RestAPI, Slack 共通
+def get_request_via_confirm_indicator(request):
+    json_response = confirm_indicator(request)
+    j = json.loads(json_response.content)
+    # confirm_indicators から再度 post するデータを取得する
+    request.POST = get_post_common_post(request.POST.copy(), j)
+    return request
 
 
 def get_post_common_post(temp_post, j):

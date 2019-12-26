@@ -270,6 +270,7 @@ def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
         request.POST = stip_params
         request.FILES = files_for_stip_post
         request.META['SERVER_NAME'] = 'localhost'
+        request.user = slack_user
         post_common(request, slack_user)
     except Exception as e:
         import traceback
