@@ -54,17 +54,17 @@ class FeedPDF(object):
         # header
         string = self.set_header_string()
         canvas.setFont(self.FONT_MEIRYO, PDF_HEADER_FONT_SIZE)
-        canvas.drawCentredString((PAGE_WIDTH / 2.0), (PAGE_HEIGHT - 20), string)
+        canvas.drawCentredString((PAGE_WIDTH / 2.0), (PAGE_HEIGHT - 32), string)
 
         # footer
         string = self.set_footer_string()
         canvas.setFont(self.FONT_MEIRYO, PDF_HEADER_FONT_SIZE)
-        canvas.drawCentredString((PAGE_WIDTH / 2.0), 20, string)
+        canvas.drawCentredString((PAGE_WIDTH / 2.0), 24, string)
 
         # 左上: アイコン
-        image_path = django_settings.PDF_IMAGE_DIR + 'apple-icon-180x180.png'
-        canvas.drawImage(image_path, 10*mm, 285*mm, width=10*mm, height=10*mm, preserveAspectRatio=True, mask=[0, 0, 0, 0, 0, 0])
-
+        image_path = django_settings.PDF_IMAGE_DIR + 'stip-logo.png'
+        canvas.drawImage(image_path, 8.4*mm, 273.6*mm, width=15*mm, height=15*mm, preserveAspectRatio=True, mask=[0, 0, 0, 0, 0, 0])
+        # 297(A4)-15(image)-8.4mm(margin)
         # 右上: TLP表記
         string = 'TLP: %s' % (self.feed.tlp.upper())
         # Tableにて実装
@@ -95,9 +95,9 @@ class FeedPDF(object):
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ]))
         # 配置位置
-        table.wrapOn(canvas, 180*mm, 287*mm)
-        table.drawOn(canvas, 180*mm, 287*mm)
-
+        table.wrapOn(canvas, 178*mm, 282.7*mm)
+        table.drawOn(canvas, 178*mm, 282.7*mm)
+        
         canvas.restoreState()
 
     def first_page(self, canvas, doc):
