@@ -774,12 +774,15 @@ $(function () {
 
   //新規投稿の投稿ボタン押下時
   $(".btn-post").click(function () {
+        display_processing_animation();
 	// indicator 確認後投稿へ
 	confirm_indicators();
+        remove_processing_animation();
   });
 
   //確認画面の投稿ボタン押下時
   $('#confirm-compose').click(function () {
+          display_processing_animation();
 	  $('#confirm_indicators_modal_dialog').modal('hide');
 	  var f = $('#compose-form');
 	  var button = $(".btn-post");
@@ -842,6 +845,7 @@ $(function () {
 	  	alert(msg);
 	  }).always(function(){
 		  //button toggle 処理はこの呼び出し元で行うため、ここでは実施しない
+              remove_processing_animation();
    	      button.prop('disabled',false);
           toggle_new_cancle_button();
 	  });
@@ -1676,4 +1680,14 @@ $(function () {
 	  }
   }); 
 
+  // display processing animation
+  function display_processing_animation(){
+      var processing_msg = '<div class="processing-msg">' + 'Processing...' + '</div>';
+      $('body').append('<div id="processing">' + processing_msg + '</div>');
+  }
+
+  // remove processing animation
+  function remove_processing_animation(){
+      $('#processing').remove();
+  }
 });
