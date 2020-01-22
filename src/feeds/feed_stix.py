@@ -246,7 +246,16 @@ class FeedStix(FeedStixCommon):
                 if exploit_target.vulnerabilities is not None:
                     for vulnerability in exploit_target.vulnerabilities:
                         if vulnerability.cve_id is not None:
-                            lines.append((CVE_TYPE, vulnerability.cve_id, None))
+                            lines.append((CVE_TYPE, vulnerability.cve_id, vulnerability.description.value))
+        return lines
+
+    @classmethod
+    def get_threat_actors(cls, stix_package):
+        ACTORS_TYPE = 'threat_actors'
+        lines = []
+        if stix_package.threat_actors is not None:
+            for threat_actor in stix_package.threat_actors:
+                lines.append((ACTORS_TYPE, threat_actor.title, threat_actor.description))
         return lines
 
     @classmethod

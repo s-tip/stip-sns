@@ -9,7 +9,7 @@ import traceback
 import datetime
 import threading
 import zipfile
-import ioc_fanger
+import iocextract
 import ctirs.models.sns.feeds.rs as rs
 import stip.common.const as const
 import feeds.feed_stix2_sighting as stip_sighting
@@ -1187,9 +1187,9 @@ def save_post(request,
     # slack 投稿
     if feed.user.username != const.SNS_SLACK_BOT_ACCOUNT:
         slack_post = ''
-        slack_post += '[%s]\n' % (feed.title)
+        slack_post += '[%s]\n' % (iocextract.defang(feed.title))
         slack_post += '\n'
-        slack_post += '%s\n' % (ioc_fanger.defang(feed.post))
+        slack_post += '%s\n' % (iocextract.defang(feed.post))
         slack_post += '\n'
         slack_post += '---------- S-TIP Post Info (TLP: %s) ----------\n' % (feed.tlp)
         slack_post += '%s: %s\n' % ('Account', feed.user.username)

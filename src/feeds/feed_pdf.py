@@ -1,12 +1,14 @@
+from bs4 import BeautifulSoup
 import datetime
 import pytz
+import iocextract
 from django.conf import settings as django_settings
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import pagesizes, colors, fonts
 from reportlab.lib.units import cm, mm
 from reportlab.lib.pagesizes import A4, portrait
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.platypus import Paragraph, PageBreak, Spacer
 from reportlab.platypus.tables import Table, TableStyle
@@ -97,7 +99,7 @@ class FeedPDF(object):
         # 配置位置
         table.wrapOn(canvas, 178*mm, 282.7*mm)
         table.drawOn(canvas, 178*mm, 282.7*mm)
-        
+
         canvas.restoreState()
 
     def first_page(self, canvas, doc):
@@ -106,12 +108,60 @@ class FeedPDF(object):
     def last_page(self, canvas, doc):
         self.set_common_per_page(canvas, doc)
 
-    # PDF作成
-    def make_pdf_content(self, response, feed):
+    # テーブル作成
+    def create_table(self, d, row_num, col_widths):
         HEADER_BACKGROUND_COLOR = colors.HexColor('#48ACC6')
         EVEN_BACKGROUND_COLOR = colors.HexColor('#DAEEF3')
         ODD_BACKGROUND_COLOR = colors.white
 
+        table = Table(d, colWidths=col_widths)
+        table.setStyle(TableStyle([
+            # 背景色
+            # 先頭行(ヘッダ)
+            # 2ECCFA
+            ('BACKGROUND', (0, 0), (-1, 0), HEADER_BACKGROUND_COLOR),
+            # 表で使うフォントとそのサイズを設定
+            ('FONT', (0, 0), (-1, -1), self.FONT_MEIRYO, 9),
+            # 先頭行だけbold
+            ('FONT', (0, 0), (-1, 0), self.FONT_MEIRYO_BOLD, 9),
+            # 先頭行は白
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            # 罫線
+            ('BOX', (0, 0), (-1, -1), 0.10, HEADER_BACKGROUND_COLOR),
+            ('INNERGRID', (0, 0), (-1, -1), 0.10, HEADER_BACKGROUND_COLOR),
+            # セルの縦文字位置を、TOPにする
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+
+        # stripe
+        for i in range(row_num):
+            if (i % 2) == 0:
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, i + 1), (-1, i + 1), EVEN_BACKGROUND_COLOR),
+                    ('TEXTCOLOR', (0, i + 1), (-1, i + 1), colors.black),
+                ]))
+            else:
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, i + 1), (-1, i + 1), ODD_BACKGROUND_COLOR),
+                    ('TEXTCOLOR', (0, i + 1), (-1, i + 1), colors.black),
+                ]))
+        return table
+
+    # <A>タグを除外して、最後にURLを追記
+    def html_text(self, text):
+        text = text.replace('<br>', '\n')
+        text = text.replace('<br/>', '\n')
+        soup = BeautifulSoup(text, 'html.parser')
+        output = soup.get_text()
+        elems = soup.find_all('a')
+        for elem in elems:
+            output = output + '\n' + elem.get('href')
+
+        output = output.replace('\n', '<br/>')
+        return output
+
+    # PDF作成
+    def make_pdf_content(self, response, feed):
         # style変更
         styles = getSampleStyleSheet()
         for name in ('Normal', 'BodyText', 'Title', 'Heading1', 'Heading2', 'Heading3', 'Heading4', 'Heading5', 'Heading6', 'Bullet', 'Definition', 'Code'):
@@ -124,7 +174,7 @@ class FeedPDF(object):
         story = []
 
         # Title
-        string = '<b>Title:</b> %s' % (feed.title)
+        string = '<b>Title:</b> %s' % iocextract.defang(feed.title)
         story.append(Paragraph(string, styles['Normal']))
 
         # Author
@@ -158,16 +208,19 @@ class FeedPDF(object):
         txt = '<b>Content:</b>'
         story.append(Paragraph(txt, styles['Normal']))
         # txt = feed.post.value.encode('utf-8')
-        txt = feed.post
+        txt = iocextract.defang(feed.post)
         story.append(Paragraph(txt, styles['Normal']))
 
         # 空行
         story.append(Spacer(1, 1.0*cm))
 
-        # STIXからObservablesとIndicatorsを抽出
+        # テーブルのセルスタイル設定
+        style = ParagraphStyle(name='Normal', fontName=self.FONT_MEIRYO, fontSize=9, leading=9)
+
+        # indicators
         indicators = FeedStix.get_indicators(self.stix_package)
         if len(indicators) == 0:
-            txt = '<b>Indicators: </b>None'
+            txt = '<b>Indicators:</b> No Data'
             story.append(Paragraph(txt, styles['Normal']))
         else:
             txt = '<b>Indicators:</b>'
@@ -180,51 +233,90 @@ class FeedPDF(object):
                 ['Type', 'Indicators'],
             ]
 
+            # Sort(優先度は1列目、2列目の順で名前順)
+            indicators.sort(key=lambda x: x[1])
+            indicators.sort(key=lambda x: x[0])
+
             # STIXからObservablesとIndicatorsを抽出
             for item in indicators:
                 (type_, value, _) = item
                 item = []
-                item.append(type_)
+                item.append(Paragraph(type_, style))
                 # file_nameの場合は値がパイプで囲まれている
                 if type_ == 'file_name':
                     # 前後のパイプをトリミング
                     value = value[1:-1]
-                item.append(value)
+                # defang
+                value = iocextract.defang(value)
+                item.append(Paragraph(value, style))
                 d.append(item)
 
-            # この幅くらいがちょうどよい
-            table = Table(d, colWidths=(20*mm, 135*mm), rowHeights=6*mm)
-            table.setStyle(TableStyle([
-                # 背景色
-                # 先頭行(ヘッダ)
-                # 2ECCFA
-                ('BACKGROUND', (0, 0), (-1, 0), HEADER_BACKGROUND_COLOR),
-                # 表で使うフォントとそのサイズを設定
-                ('FONT', (0, 0), (-1, -1), self.FONT_MEIRYO, 9),
-                # 先頭行だけbold
-                ('FONT', (0, 0), (-1, 0), self.FONT_MEIRYO_BOLD, 9),
-                # 先頭行は白
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                # 罫線
-                ('BOX', (0, 0), (-1, -1), 0.10, HEADER_BACKGROUND_COLOR),
-                ('INNERGRID', (0, 0), (-1, -1), 0.10, HEADER_BACKGROUND_COLOR),
-                # セルの縦文字位置を、TOPにする
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ]))
+            # テーブル作成とスタイル設定
+            indicators_table = self.create_table(d, len(indicators), (20*mm, 135*mm))
+            story.append(indicators_table)
 
-            # stripe
-            for i in range(len(indicators)):
-                if (i % 2) == 0:
-                    table.setStyle(TableStyle([
-                        ('BACKGROUND', (0, i + 1), (-1, i + 1), EVEN_BACKGROUND_COLOR),
-                        ('TEXTCOLOR', (0, i + 1), (-1, i + 1), colors.black),
-                    ]))
-                else:
-                    table.setStyle(TableStyle([
-                        ('BACKGROUND', (0, i + 1), (-1, i + 1), ODD_BACKGROUND_COLOR),
-                        ('TEXTCOLOR', (0, i + 1), (-1, i + 1), colors.black),
-                    ]))
-            story.append(table)
+        # 空行
+        story.append(Spacer(1, 1.0*cm))
+
+        # Exploit Targets
+        exploit_targets = FeedStix.get_exploit_targets(self.stix_package)
+        if len(exploit_targets) == 0:
+            txt = '<b>Exploit Targets:</b> No Data'
+            story.append(Paragraph(txt, styles['Normal']))
+        else:
+            txt = '<b>Exploit Targets:</b>'
+            story.append(Paragraph(txt, styles['Normal']))
+            # 空行
+            story.append(Spacer(1, 0.1*cm))
+            # Table
+            d = [
+                # header
+                ['CVE', 'Description'],
+            ]
+
+            # Description情報を抽出
+            for item in exploit_targets:
+                (_, cve, value) = item
+                item = []
+                value = self.html_text(value)
+                item.append(Paragraph(cve, style))
+                item.append(Paragraph(value, style))
+                d.append(item)
+
+            # テーブル作成とスタイル設定
+            cve_table = self.create_table(d, len(exploit_targets), (30*mm, 125*mm))
+            story.append(cve_table)
+
+        # 空行
+        story.append(Spacer(1, 1.0*cm))
+
+        # Threat Actors
+        threat_actors = FeedStix.get_threat_actors(self.stix_package)
+        if len(threat_actors) == 0:
+            txt = '<b>Threat Actors:</b> No Data'
+            story.append(Paragraph(txt, styles['Normal']))
+        else:
+            txt = '<b>Threat Actors:</b>'
+            story.append(Paragraph(txt, styles['Normal']))
+            # 空行
+            story.append(Spacer(1, 0.1*cm))
+            # Table
+            d = [
+                # header
+                ['Name', 'Description'],
+            ]
+
+            # Description情報を抽出
+            for item in threat_actors:
+                (_, actor, value) = item
+                item = []
+                item.append(Paragraph(actor, style))
+                item.append(Paragraph(str(value), style))
+                d.append(item)
+
+            # テーブル作成とスタイル設定
+            actors_table = self.create_table(d, len(threat_actors), (30*mm, 125*mm))
+            story.append(actors_table)
 
         # 改ページ
         story.append(PageBreak())
