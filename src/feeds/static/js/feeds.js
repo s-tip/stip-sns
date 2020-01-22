@@ -665,6 +665,7 @@ $(function () {
                     table_datas[file_name][TABLE_ID_TAS] = data['tas'][file_name]
                 }
             }
+            remove_processing_animation();
             // table_data があれば modal 表示
             if (Object.keys(table_datas).length > 0) {
                 make_extract_tables(table_datas);
@@ -777,7 +778,6 @@ $(function () {
         display_processing_animation();
         // indicator 確認後投稿へ
         confirm_indicators();
-        remove_processing_animation();
     });
 
     //確認画面の投稿ボタン押下時
