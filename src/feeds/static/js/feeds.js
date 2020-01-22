@@ -1683,11 +1683,11 @@ $(function () {
   // display processing animation
   function display_processing_animation(){
       var processing_msg = '<div class="processing-msg">' + 'Processing...' + '</div>';
-      $('body').append('<div id="processing">' + processing_msg + '</div>');
+      $('body').append('<div id="processing-div">' + processing_msg + '</div>');
   }
 
   // remove processing animation
   function remove_processing_animation(){
-      $('#processing').remove();
+      $('#processing-div').remove();
   }
 });

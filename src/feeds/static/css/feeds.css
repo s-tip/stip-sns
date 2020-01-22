@@ -319,7 +319,7 @@ ul.stream li .response-action-menu-li
   cursor: pointer;
 }
 
-#processing{
+#processing-div{
   display: table;
   width: 100%;
   height: 100%;
