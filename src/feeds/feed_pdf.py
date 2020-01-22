@@ -149,15 +149,15 @@ class FeedPDF(object):
 
     # <A>タグを除外して、最後にURLを追記
     def html_text(self, text):
-        text = text.replace("<br>", "\n")
-        text = text.replace("<br/>", "\n")
-        soup = BeautifulSoup(text, "html.parser")
+        text = text.replace('<br>', '\n')
+        text = text.replace('<br/>', '\n')
+        soup = BeautifulSoup(text, 'html.parser')
         output = soup.get_text()
         elems = soup.find_all('a')
         for elem in elems:
-            output = output + "\n" + elem.get('href')
+            output = output + '\n' + elem.get('href')
 
-        output = output.replace("\n", "<br/>")
+        output = output.replace('\n', '<br/>')
         return output
 
     # PDF作成
