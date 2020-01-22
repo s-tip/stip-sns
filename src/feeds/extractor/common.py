@@ -506,7 +506,7 @@ class CommonExtractor(object):
 
         # 各種 CVE 情報のリンクを作成
         mitre_url = 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(json_cve)
-        circl_url = 'http://cve.circl.lu/cve/' + str(json_cve)
+        circl_url = 'https://cve.circl.lu/cve/' + str(json_cve)
 
         # Expoit_Target, Vulnerability の Short Description は link
         common_short_description = '%s (<a href="%s" target="_blank">MITRE</a>, <a href="%s" target="_blank">circl.lu</a>)<br/>' % (json_cve, mitre_url, circl_url)
