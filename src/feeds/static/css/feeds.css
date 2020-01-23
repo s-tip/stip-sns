@@ -328,7 +328,8 @@ ul.stream li .response-action-menu-li
   left: 0;
   background-color: #ffffff;
   opacity: 0.5;
- }
+  z-index: 2000;
+}
 
 .processing-msg{
   display: table-cell;
