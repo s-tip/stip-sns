@@ -220,7 +220,6 @@ class FeedStix(FeedStixCommon):
             return matchobj[1]
         urls = dict()
         out = re.sub(URL_PATTERN, matchurls, text)
-        print(urls)
         for url in urls.keys():
             out = out + '\n<br/>' + 'URL: ' + url
         return out
