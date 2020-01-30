@@ -19,6 +19,8 @@ from ctirs.models import SNSConfig
 
 ATT_CK_REG_STR = r'\[\[\S+\|(?P<ta_name>.+?)\]\](?P<description>.+)'
 ATT_CK_PATTERN = re.compile(ATT_CK_REG_STR)
+# [TITLE](URL)形式を抽出する正規表現
+URL_PATTERN = re.compile(r'\[(.+?)\]\(([0-9A-Za-z\-\._~!#\$\&\'\*\+,/:;=?@\[\] ]+)\)')
 
 
 class FeedStix(FeedStixCommon):
@@ -112,6 +114,7 @@ class FeedStix(FeedStixCommon):
                 for alias in intrusion_set['aliases']:
                     description += ('%s, ' % (alias))
                 description = description[:-2]
+            description = self.remove_hyperlink(description)
             ta = CommonExtractor._get_threat_actor_object(ta_value, description)
             return ta
         except BaseException:
@@ -208,6 +211,18 @@ class FeedStix(FeedStixCommon):
             s = '%s,%s\n' % (type_, value)
             v += s
         return v
+
+    # リンクを外して、URLを最後に追加する
+    def remove_hyperlink(self, text):
+        # オブジェクトのタイトルを返す。URLはリストに追加する。
+        def matchurls(matchobj):
+            urls[matchobj[2]] = ''
+            return matchobj[1]
+        urls = dict()
+        out = re.sub(URL_PATTERN, matchurls, text)
+        for url in urls.keys():
+            out = out + '\n<br/>' + 'URL: ' + url
+        return out
 
     @classmethod
     def _get_value_from_address_object(cls, prop):
