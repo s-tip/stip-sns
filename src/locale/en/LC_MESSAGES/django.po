@@ -138,8 +138,6 @@ msgid "Default TLP"
 msgstr ""
 
 #: src/core/templates/core/network.html:53
-#: src/management/templates/management/users.html:38
-#: src/management/templates/management/users.html:82
 msgid "Role"
 msgstr ""
 
@@ -166,9 +164,6 @@ msgstr ""
 #: src/core/templates/core/password.html:43
 #: src/core/templates/core/settings.html:64
 #: src/groups/templates/groups/upsert.html:70
-#: src/management/templates/management/users.html:41
-#: src/management/templates/management/users.html:66
-#: src/management/templates/management/users.html:85
 msgid "Save"
 msgstr ""
 
@@ -432,37 +427,33 @@ msgstr ""
 msgid "Group was successfully deleted."
 msgstr ""
 
-#: src/management/templates/management/users.html:15 src/templates/base.html:45
+#: src/templates/base.html:45
 msgid "User Management"
 msgstr ""
 
-#: src/management/templates/management/users.html:32
-#: src/management/templates/management/users.html:76
-msgid "Icon"
-msgstr ""
+#  msgid "Icon"
+#  msgstr ""
 
-#: src/management/templates/management/users.html:35
-#: src/management/templates/management/users.html:79
-msgid "Account Name"
-msgstr ""
+#  msgid "Account Name"
+#  msgstr ""
 
-#: src/management/templates/management/users.html:57 src/settings.py:205
+#: src/settings.py:205
 msgid "ROLE_CHOICE_admin"
 msgstr "admin"
 
-#: src/management/templates/management/users.html:58 src/settings.py:206
+#: src/settings.py:206
 msgid "ROLE_CHOICE_user"
 msgstr "user"
 
-#: src/management/templates/management/users.html:59 src/settings.py:207
+#: src/settings.py:207
 msgid "ROLE_CHOICE_machine"
 msgstr "machine"
 
-#: src/management/templates/management/users.html:60 src/settings.py:208
+#: src/settings.py:208
 msgid "ROLE_CHOICE_machine_feed_only"
 msgstr "machine (feed only)"
 
-#: src/management/templates/management/users.html:61 src/settings.py:209
+#: src/settings.py:209
 msgid "ROLE_CHOICE_machine_bot"
 msgstr "BOT"
 

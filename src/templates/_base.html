@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}S-TIP SNS{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{% static 'img/favicon.ico' %}">
+    <title>{% block title %}S-TIP{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link href="{% static 'css/bootstrap.min.css' %}?v=1" rel="stylesheet">
     <link href="{% static 'css/bootcamp.css' %}?v=1" rel="stylesheet">
     <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
               <button type="button" class="navbar-right-icon navbar-toggle" data-toggle="collapse" data-target="#menu">
               <img src="{{ user.get_picture }}" class="user"> 
               </button>
-              <a class="navbar-brand" href="{% url 'home' %}"><img src="/static/stip-logo.png" class="stip-logo-header-img"/>&nbsp;{{sns_base_header_title|default:'S-TIP'}} {% if git_version %}<font style="font-size:8px;">({{git_version}})</font>{% endif %}</a>
+              <a class="navbar-brand" href="{% url 'home' %}"><img src="/static/img/stip-logo.png" class="stip-logo-header-img"/>&nbsp;{{sns_base_header_title|default:'S-TIP'}} {% if git_version %}<font style="font-size:8px;">({{git_version}})</font>{% endif %}</a>
             </div>
             <div class="collapse navbar-collapse" id="menu">
               <ul class="nav navbar-nav">
@@ -43,16 +43,15 @@
                 </li>
                 <li><a href="{% url 'feeds' %}">{% trans 'Feed' %}</a></li>
                 <li><a href="{% url 'network' %}">{% trans 'Users' %}</a></li>
-                {% ifequal user.role 'admin' %}
+                {% if user.is_admin %}
 				  <li class="dropdown">
 					<a href="#" id="navbar-configuration" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans 'Management' %}<span class="caret"></span></a>
 					<ul class="dropdown-menu">
                       <li><a href="{% url 'sns_config' %}">{% trans 'SNS Config' %}</a></li>
-                      <li><a href="{% url 'management_user' %}">{% trans 'User Management' %}</a></li>
                       <li><a href="{% url 'management_group' %}">{% trans 'Group Management' %}</a></li>
 					</ul>
 	  			  </li>
-                {% endifequal %}
+                {% endif %}
               </ul>
               {% if not hide_search %}
                 <form class="navbar-form navbar-left" role="search" action="{% url 'search' %}">
