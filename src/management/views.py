@@ -25,7 +25,7 @@ def check_port(port):
 def modify_attck_information(request):
     # 管理権限以外はエラー (403)
     if not request.user.is_admin:
-        return HttpResponseForbidden("You have no permission.")
+        return HttpResponseForbidden('You have no permission.')
     # ATTCK 洗い替えと保存
     Attck.modify_save_attck_information()
     # その後は config 画面に遷移
@@ -36,7 +36,7 @@ def modify_attck_information(request):
 def reboot_slack_thread(request):
     # 管理権限以外はエラー (403)
     if not request.user.is_admin:
-        return HttpResponseForbidden("You have no permission.")
+        return HttpResponseForbidden('You have no permission.')
     # thread 再起動
     restart_receive_slack_thread()
     # その後は config 画面に遷移
@@ -47,7 +47,7 @@ def reboot_slack_thread(request):
 def sns_config(request):
     # 管理権限以外はエラー (403)
     if not request.user.is_admin:
-        return HttpResponseForbidden("You have no permission.")
+        return HttpResponseForbidden('You have no permission.')
     sns_config = SNSConfig.objects.get()
     if request.method == 'POST':
         form = SNSConfigForm(request.POST)

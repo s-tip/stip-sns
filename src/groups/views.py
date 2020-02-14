@@ -13,7 +13,7 @@ def group(request):
     user = request.user
     # 管理権限以外はエラー (403)
     if not user.is_admin:
-        return HttpResponseForbidden("You have no permission.")
+        return HttpResponseForbidden('You have no permission.')
 
     # POST の場合はロール変更
     if request.method == 'POST':
@@ -27,7 +27,7 @@ def upsert(request):
     user = request.user
     # 管理権限以外はエラー (403)
     if not user.is_admin:
-        return HttpResponseForbidden("You have no permission.")
+        return HttpResponseForbidden('You have no permission.')
 
     # (POST) upsert
     if request.method == 'POST':
@@ -94,7 +94,7 @@ def upsert(request):
 def delete(request):
     # 管理権限以外はエラー (403)
     if not user.is_admin:
-        return HttpResponseForbidden("You have no permission.")
+        return HttpResponseForbidden('You have no permission.')
     # 削除する Group ID
     id_ = int(request.GET['id_'])
     group = Group.objects.get(id=id_)
