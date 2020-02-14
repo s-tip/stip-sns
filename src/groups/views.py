@@ -12,8 +12,8 @@ from ctirs.models import STIPUser
 def group(request):
     user = request.user
     # 管理権限以外はエラー (403)
-    if user.role != 'admin':
-        return HttpResponseForbidden()
+    if not user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
 
     # POST の場合はロール変更
     if request.method == 'POST':
@@ -26,8 +26,8 @@ def group(request):
 def upsert(request):
     user = request.user
     # 管理権限以外はエラー (403)
-    if user.role != 'admin':
-        return HttpResponseForbidden()
+    if not user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
 
     # (POST) upsert
     if request.method == 'POST':
@@ -93,8 +93,8 @@ def upsert(request):
 @login_required
 def delete(request):
     # 管理権限以外はエラー (403)
-    if request.user.role != 'admin':
-        return HttpResponseForbidden()
+    if not user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
     # 削除する Group ID
     id_ = int(request.GET['id_'])
     group = Group.objects.get(id=id_)
