@@ -1,30 +1,297 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load i18n %}
-{% load humanize %}
-
-{% block title %} Search {% endblock %}
 
 {% block head %}
-  <link href="{% static 'css/search.css' %}" rel="stylesheet">
+  <link href="{% static 'css/feeds.css' %}?v=1" rel="stylesheet">
+  <link href="{% static 'css/multi-select.css' %}?v=1" rel="stylesheet">
+  <link href="{% static 'css/jquery.dataTables.min.css' %}?v=1" rel="stylesheet">
+  <script src="{% static 'js/jquery.bullseye-1.0-min.js' %}"></script>
+  <script src="{% static 'js/jquery.multi-select.js' %}?v=1"></script>
+  <script src="{% static 'js/search_feeds.js' %}?v=1"></script>
+  <script src="{% static 'js/jquery.quicksearch.js' %}?v=1"></script>
+  <script src="{% static 'js/jquery.dataTables.min.js' %}?v=1"></script>
 {% endblock head %}
 
 {% block main %}
-  <div class="page-header">
-    <h1>Search</h1>
-  </div>
 
-  <div class="row" style="padding-top: 4em; padding-bottom: 8em;">
-    <div class="col-md-8 col-md-offset-2">
-      <h3>{% trans "Search Feed, Articles, Questions and Users" %}</h3>
-      <form role="search" action="{% url 'search' %}" style="padding-top: 1em;">
-        <div class="input-group">
-          <input type="text" class="form-control input-lg" name="q" placeholder="{% trans 'Search' %}">
-          <span class="input-group-btn">
-            <button type="submit" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-search"></span></button>
-          </span>
+  <div class="row">
+    <div class="col-md-9 col-md-offset-1">
+
+      <div class="page-header">
+        <button type="button" class="btn btn-primary pull-right btn-compose" title="{% trans 'Press N to new' %}" id="button-new">
+          <span class="glyphicon glyphicon-share-alt"></span> {% trans 'New' %}
+        </button>
+        <button type="button" class="btn btn-danger pull-right btn-compose" id="button-cancel">
+          <span class="glyphicon glyphicon-remove"></span> {% trans 'Cancel' %}
+        </button>
+        <h1>{% trans 'Feed' %}</h1>
+      </div> <!-- page-header -->
+
+      <h4>{% trans 'Search word' %}: "{{ query_string }}"</h4>
+      <div class="panel panel-default panel-feed">
+	  <div class="panel-heading">
+          <h3 class="panel-title">{% trans 'Latest posts' %}</h3>
+        </div> <!-- panel-heading -->
+        <div class="panel-body">
+          <div class="compose" screen_name="{{user.get_screen_name}}" tlp="{{user.tlp}}">
+            <form role="form" id="compose-form">
+              {% csrf_token %}
+              <input type="hidden" name="last_feed">
+              <br/>
+
+              <div class="form-check">
+	              <label for="compose-stix-2">{% trans 'Also outputs STIX 2.1 format' %}:</label>&nbsp;&nbsp;
+	              <input class="form-check-input" type="checkbox" id="compose-stix-2" name="stix2"/> Yes
+              </div>
+
+              <br/>
+
+              <div class="input-group">
+                 <label for="check-annonymous">{% trans 'Author' %}:</label>
+                 <br/>
+                 <span id="span-author">{{user.get_screen_name}}@{{user.get_affiliation|default:'no affiliation'}}</span>
+                 &nbsp;&nbsp;
+                 <input type="checkbox" name="anonymous" id="check-annonymous" user_name="{{user.get_screen_name}}" author_name="{{user.get_screen_name}}@{{user.get_affiliation|default:'no affiliation'}}"/>&nbsp;{% trans 'Anonymous' %}
+              </div>
+
+              <br/>
+
+              <div class="form-group container-fluid compose-title-root-div" id="compose-title-root-div">
+                <div class="row compose-title-div">
+              	  <div class="compose-title-text-div col-xs-8">
+		              <label for="compose-title">{% trans 'Title' %}:</label><br/>
+		              <input class="form-control compose-title" type="text" id="compose-title" name="title"/>
+	              </div>
+              	  <div class="compose-title-language-div col-xs-2">
+		              <label>{% trans 'Language' %}:</label><br/>
+			            <select class="form-control compose-title-language-select">
+			              {% get_current_language as LANGUAGE_CODE %}
+        			      {% get_available_languages as LANGUAGES %}
+			              {% for lang in LANGUAGES %}
+        			        <option value="{{ lang.0 }}">{{ lang.1 }}</option>
+			              {% endfor %}
+        			    </select>
+	              </div>
+              	  <div class="compose-title-icon-div col-xs-2">
+              	      <span class="glyphicon glyphicon-plus-sign btn-sm btn-info compose-title-plus-button"></span>
+              	      <span class="glyphicon glyphicon-remove-sign btn-sm btn-danger btn-info compose-title-remove-button"></span>
+	              </div>
+                </div>
+              </div>
+
+              <br/>
+
+              <div class="form-group container-fluid compose-content-root-div" id="compose-content-root-div">
+                <div class="row compose-content-div">
+              	  <div class="compose-content-textarea-div col-xs-8">
+		              <label for="compose-content">{% trans 'Content' %}:</label><br/>
+		              <textarea class="form-control compose-content" rows="10" name="post" id="compose-content"></textarea>
+                	 <span class="help-block help-count pull-right">10240</span>
+	              </div>
+              	  <div class="compose-content-language-div col-xs-2">
+		              <label>{% trans 'Language' %}:</label><br/>
+			            <select class="form-control compose-content-language-select">
+			              {% get_current_language as LANGUAGE_CODE %}
+        			      {% get_available_languages as LANGUAGES %}
+			              {% for lang in LANGUAGES %}
+        			        <option value="{{ lang.0 }}">{{ lang.1 }}</option>
+			              {% endfor %}
+        			    </select>
+	              </div>
+              	  <div class="compose-content-icon-div col-xs-2">
+              	      <span class="glyphicon glyphicon-plus-sign btn-sm btn-info compose-content-plus-button"></span>
+              	      <span class="glyphicon glyphicon-remove-sign btn-sm btn-danger btn-info compose-content-remove-button"></span>
+	              </div>
+                </div>
+              </div>
+              
+              <br/>
+
+              <div class="border-div">
+                <div class="form-group">
+	              <label for="refer-url">{% trans 'Referred URL' %}:</label><br/>
+	              <input class="form-control" type="text" id="referred-url" name="referred_url"/>
+                </div> <!-- form-group -->
+              </div> <!-- border-div -->
+
+              <br/>
+
+              <div class="border-div">
+	            <label for="attach-file-div">{% trans 'Attachments' %}: </label><br/>
+                <div id="attach-file-root" >
+                  <div id="attach-file-div">
+                    <div class="input-group">
+                      <label class="input-group-btn">
+                        <span class="btn btn-primary btn-attach">
+                          <span class="glyphicon glyphicon-paperclip"></span>
+                          <input type="file" style="display:none" class="file-attach" id="file-attach"/>
+                        </span>
+                      </label>
+                      <input type="text" class="form-control" readonly id="file-attach-text"/>
+                      <label class="input-group-btn">
+                        <span class="btn btn-remove">
+                          <span class="glyphicon glyphicon-trash"></span>
+                        </span>
+                      </label>
+                    </div><!-- input-group -->
+                  </div><!-- attach-file-div -->
+                </div><!-- attach-file-root -->
+              </div> <!-- border-div -->
+
+              <br/>
+
+              <div class="border-div">
+                <div class="form-group">
+                  <label for="sharing-menu">{% trans 'TLP' %} (Traffic Light Protocol): </label><br/>
+                  <div class="btn-group" data-toggle="buttons" id="tlp-div">
+                    <label class="btn btn-default btn-sm {%ifequal user.tlp 'RED'%}active{%endifequal%} label-tlp" id="label-tlp-red">
+                      <input type="radio" autocomplate="off" name="TLP" value="RED" class="radio-tlp" id="radio-tlp-red" {%ifequal user.tlp "RED"%}checked{%endifequal%}>RED
+                    </label>
+                    <label class="btn btn-default btn-sm {%ifequal user.tlp 'AMBER'%}active{%endifequal%} label-tlp" id="label-tlp-amber">
+                      <input type="radio" autocomplate="off" name="TLP" value="AMBER" class="radio-tlp" id="radio-tlp-amber" {%ifequal user.tlp "AMBER"%}checked{%endifequal%}>AMBER
+                    </label>
+                    <label class="btn btn-default btn-sm {%ifequal user.tlp 'GREEN'%}active{%endifequal%} label-tlp" id="label-tlp-green">
+                      <input type="radio" autocomplate="off" name="TLP" value="GREEN" class="radio-tlp" id="radio-tlp-green" {%ifequal user.tlp "GREEN"%}checked{%endifequal%}>GREEN
+                    </label>
+                    <label class="btn btn-default btn-sm {%ifequal user.tlp 'WHITE'%}active{%endifequal%} label-tlp" id="label-tlp-white">
+                      <input type="radio" autocomplate="off" name="TLP" value="WHITE" class="radio-tlp" id="radio-tlp-white" {%ifequal user.tlp "WHITE"%}checked{%endifequal%}>WHITE
+                    </label>
+                  </div> <!-- btn-group -->
+                </div> <!--  form-group -->
+              </div> <!--  border-div -->
+
+              <br/>
+
+              <div class="border-div">
+                <label for="sharing-menu">{% trans 'Sharing Range' %}: </label><br/>
+                <div class="radio">
+                	<label><input type="radio" name="publication" class="publication-radio" id="publication-people" value="people"/>{% trans 'People' %} / {% trans 'System'%}</label>
+                </div>
+
+                <div id="publication-people-div">
+                  <div class="row account-select-style">
+                    <div class="col-md-12">
+                      <div class="account-select-left">
+                        <label>{% trans 'Select Sharing Accounts' %}</label>
+                        <select multiple class="form-control" id="account-select-box">
+                          {% for user in users %}
+                          <option value="{{user.id}}">{{user.get_screen_name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div> <!--  col-md-12 -->
+                  </div> <!-- row style-select -->
+                </div> <!-- publication-people-div -->
+
+                <div class="radio">
+                	<label><input type="radio" name="publication" class="publication-radio" id="publication-group" value="group"/>{% trans 'Group'%}</label>
+                </div>
+                <div id="publication-group-div">
+                  <div class="dropdown">
+                    <div class="sharing-list">
+                      <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" id="sharing-menu" aria-haspopup="true" aria-expanded="true">
+                        {% trans 'Choose Group' %}
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" id="dropdown-sharing-group" aria-labelledby="sharing-menu">
+                        {% for group in sharing_groups %}
+                          {% ifequal group.locale user.language %}
+                          <li><a data-value="{{group.en_name}}">{{group.local_name}}</a></li>
+                          {% else %}
+                          <li><a data-value="{{group.en_name}}">{{group.en_name}}</a></li>
+                          {% endifequal %}
+                        {% endfor %}
+                      </ul>
+                      <input type="hidden" name="group" value="">
+                    </div> <!-- sharing-list -->
+                  </div> <!-- dropdown -->
+                </div> <!-- publication-group-div -->
+                <div class="radio">
+                  <label><input type="radio" name="publication" class="publication-radio" id="publication-all" value="all" checked/>{% trans 'All Users' %}</label>
+                </div>
+              </div> <!-- border-div -->
+
+              <br/>
+				<!--
+                <div class="input-group">
+                 <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>"src/locale/ja/LC_MESSAGES/django.po"
+                 <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus"></span></button>
+                 <span class="glyphicon glyphicon-plus"></span>
+                 <span class="glyphicon glyphicon-minus"></span>
+                </div>
+                <br/>
+                -->
+              <button type="button" class="btn btn-primary btn-post" title="{% trans 'Press Ctrl + Enter to post' %}">
+                <span class="glyphicon glyphicon-send"></span> {% trans 'Post' %}
+              </button>
+              <button type="button" class="btn btn-danger btn-cancel-compose">
+                <span class="glyphicon glyphicon-remove"></span> {% trans 'Cancel' %}
+              </button>
+              <br/>
+              <br/>
+            </form>
+          </div> <!-- compose -->
+          
+          <div class="modal fade" id="confirm_indicators_modal_dialog" tabindex="-1">
+          	<div class="modal-dialog modal-lg">
+          		<div class="modal-content">
+          			<div class="modal-header">
+          				<button type="button" class="close" data-dismiss="modal"><span></span></button>
+          				<h4 class="modal-title">Check Imported CTI Elements</h4>
+          			</div>
+          			<div class="modal-body" id='indicator-modal-body'>
+          			</div>
+          			<div class="modal-footer">
+          				<button type="button" class="btn btn-default" id="confirm-cancel" data-dismiss="modal">Cancel</button>
+          				<button type="button" class="btn btn-primary" id="confirm-compose">Compose</button>
+          			</div>
+          		</div>
+          	</div>
+          </div>
+
+          <div class="modal fade" id="splunk-sighting-modal-dialog" tabindex="-1">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span></span></button>
+                    <h4 class="modal-title">Splunk Sighting Results</h4>
+                  </div>
+                  <div class="modal-body" id='splunk-sighting-modal-body'>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" id="confirm-cancel" data-dismiss="modal">OK</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <div class="stream-update">
+            <a href="#">{% trans 'new posts'|capfirst %}&nbsp;(<span class="new-posts"></span>)</a>
+          </div>
+          <ul class="stream">
+            {% for feed in feeds %}
+              {% include 'feeds/partial_feed.html' with feed=feed %}
+            {% endfor %}
+          </ul>
+          <div class="load">
+            <img src="{% static 'img/loading.gif' %}">
+          </div>
+          <div class="more-link">
+          	<a class="more-link">More feeds</a>
+          </div>
+          <form method="get" action="{% url 'load' %}" id="load_feed" autocomplete="off">
+            <input type="hidden" name="feed_source" id="feed_source" value="all">
+            <input type="hidden" name="from_feed" value="{{ from_feed }}">
+            <input type="hidden" name="last_reload" value="{{ last_reload }}">
+            <input type="hidden" name="page" value="{{ page }}">
+	    <input type="hidden" name="query_string" value="{{ query_string }}">
+          </form>
+
         </div>
-      </form>
+      </div>      
     </div>
   </div>
+
+
+
 {% endblock main %}
