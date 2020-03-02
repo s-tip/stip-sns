@@ -1,10 +1,8 @@
 import datetime
 from django.contrib.auth.decorators import login_required
-from ctirs.models import Group
-from ctirs.models import STIPUser as User
 from django.db.models import Q
 from django.shortcuts import redirect, render
-from ctirs.models import Feed
+from ctirs.models import Group, Feed, STIPUser as User
 
 try:
     from jira import JIRA
