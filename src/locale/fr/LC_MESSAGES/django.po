@@ -323,10 +323,13 @@ msgstr ""
 
 #: feeds/models.py:51 feeds/templates/feeds/feed.html:7
 #: feeds/templates/feeds/feeds.html:23
-#: search/templates/search/partial_feed_results.html:4
-#: search/templates/search/partial_results_menu.html:5 templates/base.html:41
+#: templates/base.html:41
 msgid "Feed"
 msgstr "Accueil"
+
+#: src/search/templates/search/search.html:31
+msgid "Search"
+msgstr "Chercher"
 
 #: feeds/models.py:52
 msgid "Feeds"
@@ -401,7 +404,6 @@ msgstr "Nouveau message"
 #: questions/templates/questions/ask.html:6
 #: questions/templates/questions/question.html:14
 #: questions/templates/questions/questions.html:17
-#: search/templates/search/partial_questions_results.html:4
 msgid "Questions"
 msgstr ""
 
@@ -457,32 +459,6 @@ msgstr "Toutes les questions"
 #: questions/templates/questions/questions.html:28
 msgid "No question to display"
 msgstr "Pas de questions à afficher"
-
-#: search/templates/search/partial_articles_results.html:24
-msgid "No article found"
-msgstr "Pas d'article trouvé"
-
-#: search/templates/search/partial_feed_results.html:23
-msgid "No feed found"
-msgstr "Pas de publication trouvée"
-
-#: search/templates/search/partial_questions_results.html:22
-msgid "No question found"
-msgstr "Pas de question trouvée"
-
-#: search/templates/search/partial_users_results.html:19
-msgid "No user found"
-msgstr "Pas d'utilisateur trouvé"
-
-#: search/templates/search/results.html:17
-#: search/templates/search/search.html:22
-msgid "Search"
-msgstr "Rechercher"
-
-#: search/templates/search/results.html:23
-#: search/templates/search/search.html:19
-msgid "Search Feed, Articles, Questions and Users"
-msgstr "Rechercher Publications, Articles, Questions et Utilisateurs"
 
 #: templates/base.html:64
 msgid "Log out"

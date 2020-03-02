@@ -150,8 +150,6 @@ msgstr "パスワード"
 
 #: src/core/templates/core/network.html:5
 #: src/core/templates/core/network.html:12
-#: src/search/templates/search/partial_results_menu.html:9
-#: src/search/templates/search/partial_users_results.html:3
 #: src/templates/base.html:45
 msgid "Users"
 msgstr "利用者一覧"
@@ -177,6 +175,8 @@ msgid "Default TLP"
 msgstr "デフォルト TLP"
 
 #: src/core/templates/core/network.html:53
+#: src/management/templates/management/users.html:37
+#: src/management/templates/management/users.html:81
 msgid "Role"
 msgstr "役割"
 
@@ -204,6 +204,9 @@ msgstr "パスワードを変更"
 #: src/core/templates/core/settings.html:64
 #: src/groups/templates/groups/upsert.html:70
 #: src/management/templates/management/threat_actors.html:23
+#: src/management/templates/management/users.html:40
+#: src/management/templates/management/users.html:65
+#: src/management/templates/management/users.html:84
 #: src/management/templates/management/white_list.html:24
 msgid "Save"
 msgstr "保存"
@@ -254,11 +257,13 @@ msgstr "プロファイル編集の保存に成功しました"
 
 #: src/feeds/templates/feeds/feed.html:7 src/feeds/templates/feeds/feed.html:19
 #: src/feeds/templates/feeds/feeds.html:28
-#: src/search/templates/search/partial_feed_results.html:4
-#: src/search/templates/search/partial_results_menu.html:5
 #: src/templates/base.html:44
 msgid "Feed"
 msgstr "投稿一覧"
+
+#: src/search/templates/search/search.html:31
+msgid "Search"
+msgstr "検索"
 
 #: src/feeds/templates/feeds/feeds.html:22
 msgid "Press N to new"
@@ -290,7 +295,6 @@ msgid "Anonymous"
 msgstr "匿名投稿"
 
 #: src/feeds/templates/feeds/feeds.html:62
-#: src/search/templates/search/partial_feed_results.html:17
 msgid "Title"
 msgstr "タイトル"
 
@@ -493,30 +497,39 @@ msgstr "Threat Actors 管理"
 msgid "Input The Name List of Common Threat Actors"
 msgstr ""
 
-#: src/templates/base.html:50
+#: src/management/templates/management/users.html:14 src/templates/base.html:50
 msgid "User Management"
 msgstr "ユーザ管理"
 
-#  msgid "Icon"
-#  msgstr "アイコン"
+#: src/management/templates/management/users.html:31
+#: src/management/templates/management/users.html:75
+msgid "Icon"
+msgstr "アイコン"
 
-#  msgid "Account Name"
-#  msgstr "アカウント"
+#: src/management/templates/management/users.html:34
+#: src/management/templates/management/users.html:78
+msgid "Account Name"
+msgstr "アカウント"
 
-#  msgid "ROLE_CHOICE_admin"
-#  msgstr "管理者"
+#: src/management/templates/management/users.html:56
+msgid "ROLE_CHOICE_admin"
+msgstr "管理者"
 
-#  msgid "ROLE_CHOICE_user"
-#  msgstr "ユーザ"
+#: src/management/templates/management/users.html:57
+msgid "ROLE_CHOICE_user"
+msgstr "ユーザ"
 
-#  msgid "ROLE_CHOICE_machine"
-#  msgstr "マシン"
+#: src/management/templates/management/users.html:58
+msgid "ROLE_CHOICE_machine"
+msgstr "マシン"
 
-#  msgid "ROLE_CHOICE_machine_feed_only"
-#  msgstr "マシン (投稿のみ)"
+#: src/management/templates/management/users.html:59
+msgid "ROLE_CHOICE_machine_feed_only"
+msgstr "マシン (投稿のみ)"
 
-#  msgid "ROLE_CHOICE_machine_bot"
-#  msgstr "BOT"
+#: src/management/templates/management/users.html:60
+msgid "ROLE_CHOICE_machine_bot"
+msgstr "BOT"
 
 #: src/management/templates/management/white_list.html:7
 #: src/management/templates/management/white_list.html:15
@@ -541,40 +554,6 @@ msgstr ""
 #: src/messenger/templates/messenger/new.html:7
 msgid "New message"
 msgstr ""
-
-#: src/search/templates/search/partial_articles_results.html:3
-msgid "Articles"
-msgstr ""
-
-#: src/search/templates/search/partial_articles_results.html:24
-msgid "No article found"
-msgstr ""
-
-#: src/search/templates/search/partial_feed_results.html:23
-msgid "No feed found"
-msgstr "フィードが見つかりませんでした"
-
-#: src/search/templates/search/partial_questions_results.html:4
-msgid "Questions"
-msgstr ""
-
-#: src/search/templates/search/partial_questions_results.html:22
-msgid "No question found"
-msgstr ""
-
-#: src/search/templates/search/partial_users_results.html:19
-msgid "No user found"
-msgstr "ユーザが見つかりませんでした"
-
-#: src/search/templates/search/results.html:17
-#: src/search/templates/search/search.html:22 src/templates/base.html:61
-msgid "Search"
-msgstr "検索"
-
-#: src/search/templates/search/results.html:23
-#: src/search/templates/search/search.html:19
-msgid "Search Feed, Articles, Questions and Users"
-msgstr "フィード、ユーザを検索"
 
 #: src/settings.py:333
 msgid "Aichi"
