@@ -116,7 +116,7 @@ def load(request):
     page = int(request.GET.get('page'))
     feed_source = request.GET.get('feed_source')
     user_id = None
-    query_string = request.GET(key='query_string', default=None)
+    query_string = request.GET.get(key='query_string', default=None)
     if feed_source is not None:
         if feed_source != 'all':
             user_id = feed_source
