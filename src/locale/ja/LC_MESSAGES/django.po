@@ -175,8 +175,6 @@ msgid "Default TLP"
 msgstr "デフォルト TLP"
 
 #: src/core/templates/core/network.html:53
-#: src/management/templates/management/users.html:37
-#: src/management/templates/management/users.html:81
 msgid "Role"
 msgstr "役割"
 
@@ -204,9 +202,6 @@ msgstr "パスワードを変更"
 #: src/core/templates/core/settings.html:64
 #: src/groups/templates/groups/upsert.html:70
 #: src/management/templates/management/threat_actors.html:23
-#: src/management/templates/management/users.html:40
-#: src/management/templates/management/users.html:65
-#: src/management/templates/management/users.html:84
 #: src/management/templates/management/white_list.html:24
 msgid "Save"
 msgstr "保存"
@@ -497,37 +492,28 @@ msgstr "Threat Actors 管理"
 msgid "Input The Name List of Common Threat Actors"
 msgstr ""
 
-#: src/management/templates/management/users.html:14 src/templates/base.html:50
+#: src/templates/base.html:50
 msgid "User Management"
 msgstr "ユーザ管理"
 
-#: src/management/templates/management/users.html:31
-#: src/management/templates/management/users.html:75
 msgid "Icon"
 msgstr "アイコン"
 
-#: src/management/templates/management/users.html:34
-#: src/management/templates/management/users.html:78
 msgid "Account Name"
 msgstr "アカウント"
 
-#: src/management/templates/management/users.html:56
 msgid "ROLE_CHOICE_admin"
 msgstr "管理者"
 
-#: src/management/templates/management/users.html:57
 msgid "ROLE_CHOICE_user"
 msgstr "ユーザ"
 
-#: src/management/templates/management/users.html:58
 msgid "ROLE_CHOICE_machine"
 msgstr "マシン"
 
-#: src/management/templates/management/users.html:59
 msgid "ROLE_CHOICE_machine_feed_only"
 msgstr "マシン (投稿のみ)"
 
-#: src/management/templates/management/users.html:60
 msgid "ROLE_CHOICE_machine_bot"
 msgstr "BOT"
 
