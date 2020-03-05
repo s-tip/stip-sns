@@ -61,6 +61,7 @@ KEY_STIX2 = 'stix2'
 KEY_STIX2_TITLES = 'stix2_titles'
 KEY_STIX2_CONTENTS = 'stix2_contents'
 KEY_ATTACH_CONFIRM = 'attach_confirm'
+KEY_SCREEN_NAME = 'screen_name'
 
 PUBLICATION_VALUE_GROUP = 'group'
 PUBLICATION_VALUE_PEOPLE = 'people'
@@ -522,7 +523,7 @@ def post(request):
         csrf_token = (csrf(request)['csrf_token'])
         # postする
         post_common(request, user)
-        if check_match_query(request):
+        if check_match_query(request, str(user)):
             html = _html_feeds(last_feed_datetime, user, csrf_token)
             return HttpResponse(html)
         else:
@@ -1317,29 +1318,22 @@ def get_like_comment(request):
     return JsonResponse(rsp)
 
 
-def check_match_query(request):
-    if 'query_string' in request.POST.keys():
+def check_match_query(request, user):
+    if 'query_string' in request.POST.keys() and KEY_SCREEN_NAME in request.POST.keys():
         query_string = request.POST['query_string']
         # 空白スペース区切りで分割
         query_strings = query_string.split(' ')
         # 空白スペース区切りで検索文字列が指定されていない場合(検索対象: 投稿/タイトル・ユーザ名・スクリーン名)
         if len(query_strings) == 1:
-            # ユーザの情報を取得
-            user_infos = STIPUser.objects.all()
-            # ユーザ名とスクリーン名のlistを作成
-            user_name_list = []
-            screen_name_list = []
-            for user_info in user_infos:
-                user_name_list.append(user_info.username)
-                screen_name_list.append(user_info.screen_name)
-            if query_strings[0] in request.POST[KEY_POST] or query_strings[0] in request.POST[KEY_TITLE] or query_strings[0] in user_name_list or query_strings[0] in screen_name_list:
+            if query_strings[0] in request.POST[KEY_POST] or query_strings[0] in request.POST[KEY_TITLE] or query_strings[0] in user or query_strings[0] in request.POST[KEY_SCREEN_NAME]:
                 return True
             else:
                 return False
         # 空白スペース区切りの場合(検索対象: 投稿/タイトル)
         else:
             for q in query_strings:
-                if q in request.POST[KEY_POST] or q in request.POST[KEY_TITLE]:
-                    return True
-            return False
+                if q in request.POST[KEY_POST] or q in request.POST[KEY_TITLE] or q in user or q in request.POST[KEY_SCREEN_NAME]:
+                    continue
+                else:
+                    return False
     return True
