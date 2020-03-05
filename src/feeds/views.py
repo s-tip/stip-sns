@@ -1323,13 +1323,13 @@ def check_match_query(request, user):
         query_string = request.POST['query_string']
         # 空白スペース区切りで分割
         query_strings = query_string.split(' ')
-        # 空白スペース区切りで検索文字列が指定されていない場合(検索対象: 投稿/タイトル・ユーザ名・スクリーン名)
+        # 空白スペース区切りで検索文字列が指定されていない場合(検索対象: 投稿/タイトル/ユーザ名/スクリーン名)
         if len(query_strings) == 1:
             if query_strings[0] in request.POST[KEY_POST] or query_strings[0] in request.POST[KEY_TITLE] or query_strings[0] in user or query_strings[0] in request.POST[KEY_SCREEN_NAME]:
                 return True
             else:
                 return False
-        # 空白スペース区切りの場合(検索対象: 投稿/タイトル)
+        # 空白スペース区切りの場合(検索対象: 投稿/タイトル/ユーザ名/スクリーン名)
         else:
             for q in query_strings:
                 if q in request.POST[KEY_POST] or q in request.POST[KEY_TITLE] or q in user or q in request.POST[KEY_SCREEN_NAME]:
