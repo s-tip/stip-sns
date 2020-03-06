@@ -61,6 +61,7 @@ KEY_STIX2 = 'stix2'
 KEY_STIX2_TITLES = 'stix2_titles'
 KEY_STIX2_CONTENTS = 'stix2_contents'
 KEY_ATTACH_CONFIRM = 'attach_confirm'
+KEY_SCREEN_NAME = 'screen_name'
 
 PUBLICATION_VALUE_GROUP = 'group'
 PUBLICATION_VALUE_PEOPLE = 'people'
@@ -116,6 +117,7 @@ def load(request):
     page = int(request.GET.get('page'))
     feed_source = request.GET.get('feed_source')
     user_id = None
+    query_string = request.GET.get(key='query_string', default=None)
     if feed_source is not None:
         if feed_source != 'all':
             user_id = feed_source
@@ -135,6 +137,7 @@ def load(request):
             last_reload=last_reload,
             user_id=user_id,
             index=index,
+            query_string=query_string,
             size=FEEDS_NUM_PAGES)
     else:
         # from_feed が設定されていない場合 (投稿がない場合)
@@ -520,8 +523,11 @@ def post(request):
         csrf_token = (csrf(request)['csrf_token'])
         # postする
         post_common(request, user)
-        html = _html_feeds(last_feed_datetime, user, csrf_token)
-        return HttpResponse(html)
+        if check_match_query(request, str(user)):
+            html = _html_feeds(last_feed_datetime, user, csrf_token)
+            return HttpResponse(html)
+        else:
+            return HttpResponse('')
     except Exception as e:
         traceback.print_exc()
         return HttpResponseServerError(str(e))
@@ -1310,3 +1316,24 @@ def get_like_comment(request):
         'comments': feed.comments
     }
     return JsonResponse(rsp)
+
+
+def check_match_query(request, user):
+    if 'query_string' in request.POST.keys() and KEY_SCREEN_NAME in request.POST.keys():
+        query_string = request.POST['query_string']
+        # 空白スペース区切りで分割
+        query_strings = query_string.split(' ')
+        # 空白スペース区切りで検索文字列が指定されていない場合(検索対象: 投稿/タイトル/ユーザ名/スクリーン名)
+        if len(query_strings) == 1:
+            if query_strings[0] in request.POST[KEY_POST] or query_strings[0] in request.POST[KEY_TITLE] or query_strings[0] in user or query_strings[0] in request.POST[KEY_SCREEN_NAME]:
+                return True
+            else:
+                return False
+        # 空白スペース区切りの場合(検索対象: 投稿/タイトル/ユーザ名/スクリーン名)
+        else:
+            for q in query_strings:
+                if q in request.POST[KEY_POST] or q in request.POST[KEY_TITLE] or q in user or q in request.POST[KEY_SCREEN_NAME]:
+                    continue
+                else:
+                    return False
+    return True
