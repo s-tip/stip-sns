@@ -8,6 +8,7 @@ import codecs
 import traceback
 import datetime
 import threading
+import requests
 import zipfile
 import iocextract
 import ctirs.models.sns.feeds.rs as rs
@@ -699,10 +700,24 @@ def track_comments(request):
 @ajax_required
 def remove(request):
     # remove 処理
+    feed_file_name_id = request.POST['feed']
+    stix_file_path = Feed.get_cached_file_path(feed_file_name_id)
+    package_id = rs.convert_filename_to_package_id(feed_file_name_id)
+    sns_config = SNSConfig.objects.get()
+    rs_host = sns_config.rs_host
+
+    url = rs_host + "/api/v1/stix_files_package_id/" + package_id
+    headers = rs._get_ctirs_api_http_headers(request.user)
+    # RSへRemove処理
+    r = requests.delete(
+        url,
+        headers=headers,
+        verify=False)
+    if r.status_code != requests.codes.ok:
+        return HttpResponseServerError(r)
+
     # cache original 削除
-    # ??? attach 削除
-    # ??? comment,like削除
-    # RS から削除は必須
+    os.remove(stix_file_path)
     return HttpResponse()
 
 
