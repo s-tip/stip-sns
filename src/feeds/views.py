@@ -474,9 +474,9 @@ def get_merged_conf_list(common_config_content, personal_list_content):
     l_ = []
     # 共通設定から
     for item in common_config_content.split('\n'):
-        l = item.rstrip('\n\r')
-        if len(l) != 0:
-            l_.append(l)
+        str_ = item.rstrip('\n\r')
+        if len(str_) != 0:
+            l_.append(str_)
 
     # 個人設定から
     for personal_item in personal_list_content.split('\r\n'):
@@ -669,11 +669,11 @@ def update(request):
         api_user=request.user)
 
     if feed_source != 'all':
-        l = []
+        list_ = []
         for feed in feeds:
             if feed.package_id == feed_source:
-                l.append(feed)
-        feeds = l
+                list_.append(feed)
+        feeds = list_
     dump = {}
     for feed in feeds:
         feed = Feed.add_like_comment_info(request.user, feed)
@@ -717,7 +717,13 @@ def remove(request):
         return HttpResponseServerError(r)
 
     # cache original 削除
-    os.remove(stix_file_path)
+    try:
+        os.remove(stix_file_path)
+    # ファイルが見つからない、ディレクトリのときは無視する
+    except FileNotFoundError:
+        pass
+    except IsADirectoryError:
+        pass
     return HttpResponse()
 
 
@@ -1235,7 +1241,7 @@ def save_post(request,
                         text=slack_post,
                         channel=post_slack_channel,
                         as_user='true')
-                except Exception as _:
+                except Exception:
                     pass
 
     # 添付 ファイルstixを送る
