@@ -70,15 +70,15 @@ def get_actor_entities(actor_id):
     return request_get(attacker_entities_url)
 
 
-def search_indicator(value):
-    # URL に actor_id  を指定する
-    search_indicator_url = BASE_URL + '/intel/queries/indicators/v1?q=' + value
-    resp = request_get(search_indicator_url)
-    data = {}
-    data['ids'] = [resp['resources'][0]]
-    search_indicator_url = BASE_URL + '/intel/entities/indicators/GET/v1'
-    resp = request_post(search_indicator_url, data)
-    return resp['resources']
+#def search_indicator(value):
+#    # URL に actor_id  を指定する
+#    search_indicator_url = BASE_URL + '/intel/queries/indicators/v1?q=' + value
+#    resp = request_get(search_indicator_url)
+#    data = {}
+#    data['ids'] = [resp['resources'][0]]
+#    search_indicator_url = BASE_URL + '/intel/entities/indicators/GET/v1'
+#    resp = request_post(search_indicator_url, data)
+#    return resp['resources']
 
 
 #def query_reports(query_value):

@@ -39,7 +39,6 @@ from feeds.feed_stix_comment import FeedStixComment
 from ctirs.models import Group
 from feeds.extractor.base import Extractor
 #from feeds.adapter.crowd_strike import search_indicator, get_report_info
-from feeds.adapter.crowd_strike import search_indicator
 from feeds.adapter.phantom import call_run_phantom_playbook
 from feeds.adapter.splunk import get_sightings
 from feeds.feed_stix2 import get_stix2_bundle
@@ -1081,49 +1080,49 @@ def post_rs_indicator_matching_comment(request, feed, id_, concierge_user):
 
 
 # CrowdStrike に関連 Report を問い合わせ、結果をコメント表示
-def post_crowd_strike_indicator_matching_comment(feed, id_, concierge_user, json_indicators):
-    try:
-        realted_reports = []
-        phantom_indicators = []
-        for json_indicator in json_indicators:
-            value = json_indicator['value']
-            results = search_indicator(value)
-            for result in results:
-                if 'reports' not in result:
-                    # reports がない場合は skip
-                    continue
-                else:
-                    phantom_indicators.append(json_indicator)
-                # report を追加する
-                for report in result['reports']:
-                    realted_reports.append(report)
-        # 重複を取り除く
-        realted_reports = list(set(realted_reports))
-        if len(realted_reports) == 0:
-            # 存在しない場合はコメントしない
-            return
+#def post_crowd_strike_indicator_matching_comment(feed, id_, concierge_user, json_indicators):
+#    try:
+#        realted_reports = []
+#        phantom_indicators = []
+#        for json_indicator in json_indicators:
+#            value = json_indicator['value']
+#            results = search_indicator(value)
+#            for result in results:
+#                if 'reports' not in result:
+#                    # reports がない場合は skip
+#                    continue
+#                else:
+#                    phantom_indicators.append(json_indicator)
+#                # report を追加する
+#                for report in result['reports']:
+#                    realted_reports.append(report)
+#        # 重複を取り除く
+#        realted_reports = list(set(realted_reports))
+#        if len(realted_reports) == 0:
+#            # 存在しない場合はコメントしない
+#            return
 
-        # 存在する場合
-        msg = str(len(realted_reports))
-        msg += ' '
-        msg += 'related report(s) are found.'
-        msg += '\n<br/>\n'
-        msg += 'Reports: <br/>'
-        for realted_report in realted_reports:
-            # report id から report title と URL を取得する
-            report_title, url = get_report_info(realted_report)
-            msg += ('<a href="%s" target="_blank">%s</a><br/>' % (url, report_title))
+#        # 存在する場合
+#        msg = str(len(realted_reports))
+#        msg += ' '
+#        msg += 'related report(s) are found.'
+#        msg += '\n<br/>\n'
+#        msg += 'Reports: <br/>'
+#        for realted_report in realted_reports:
+#            # report id から report title と URL を取得する
+#            report_title, url = get_report_info(realted_report)
+#            msg += ('<a href="%s" target="_blank">%s</a><br/>' % (url, report_title))
 
-        if len(phantom_indicators) != 0:
-            # phantom 連携できる indicator あり
-            msg += ('<a class="anchor-phantom-run-playbook" data-id="%s">Run Phantom Playbook</a>' % (id_))
-            for phantom_indicator in phantom_indicators:
-                msg += '<div id="%s" data-type="%s" data-value="%s"></div>' % ('phantom-data-' + id_, phantom_indicator['type'], phantom_indicator['value'])
-        # 指定User で投稿
-        post_comment(concierge_user, id_, msg, concierge_user)
-    except Exception:
-        # traceback.print_exc()
-        pass
+#        if len(phantom_indicators) != 0:
+#            # phantom 連携できる indicator あり
+#            msg += ('<a class="anchor-phantom-run-playbook" data-id="%s">Run Phantom Playbook</a>' % (id_))
+#            for phantom_indicator in phantom_indicators:
+#                msg += '<div id="%s" data-type="%s" data-value="%s"></div>' % ('phantom-data-' + id_, phantom_indicator['type'], phantom_indicator['value'])
+#        # 指定User で投稿
+#        post_comment(concierge_user, id_, msg, concierge_user)
+#    except Exception:
+#        # traceback.print_exc()
+#        pass
 
 
 # feedを保存する
