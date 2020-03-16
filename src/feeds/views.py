@@ -38,7 +38,8 @@ from feeds.feed_stix_like import FeedStixLike
 from feeds.feed_stix_comment import FeedStixComment
 from ctirs.models import Group
 from feeds.extractor.base import Extractor
-from feeds.adapter.crowd_strike import search_indicator, get_report_info
+#from feeds.adapter.crowd_strike import search_indicator, get_report_info
+from feeds.adapter.crowd_strike import search_indicator
 from feeds.adapter.phantom import call_run_phantom_playbook
 from feeds.adapter.splunk import get_sightings
 from feeds.feed_stix2 import get_stix2_bundle
@@ -1258,15 +1259,15 @@ def save_post(request,
                 matching_comment_th.start()
             except Exception:
                 pass
-        if const.SNS_FALCON_CONCIERGE_ACCOUNT is not None:
-            try:
-                concierge_user = STIPUser.objects.get(username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
-                # 非同期で CrowdStrike から indicator に該当する report を取得しコメントをつける
-                crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment, args=(feed, feed_stix.get_stix_package().id_, concierge_user, json_indicators))
-                crowd_strike_report_th.daemon = True
-                crowd_strike_report_th.start()
-            except Exception:
-                pass
+#        if const.SNS_FALCON_CONCIERGE_ACCOUNT is not None:
+#            try:
+#                concierge_user = STIPUser.objects.get(username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
+#                # 非同期で CrowdStrike から indicator に該当する report を取得しコメントをつける
+#                crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment, args=(feed, feed_stix.get_stix_package().id_, concierge_user, json_indicators))
+#                crowd_strike_report_th.daemon = True
+#                crowd_strike_report_th.start()
+#            except Exception:
+#                pass
 
     return
 
