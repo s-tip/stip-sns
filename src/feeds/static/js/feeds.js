@@ -3,7 +3,7 @@ $(function () {
     var slideTime = 100;
 
     //新規投稿とキャンセルを入れ替える
-    function toggle_new_cancle_button() {
+    function toggle_new_cancel_button() {
         $('#button-new').toggle();
         $('#button-cancel').toggle();
     }
@@ -88,7 +88,7 @@ $(function () {
 
     $(".btn-compose").click(function () {
         //New button→Cancel button
-        toggle_new_cancle_button();
+        toggle_new_cancel_button();
         if ($(".compose").hasClass("composing")) {
             $(".compose").removeClass("composing");
             $(".compose").slideUp();
@@ -169,7 +169,7 @@ $(function () {
     });
 
     $(".btn-cancel-compose").click(function () {
-        toggle_new_cancle_button();
+        toggle_new_cancel_button();
         $(".compose").removeClass("composing");
         $(".compose").slideUp();
     });
@@ -626,7 +626,6 @@ $(function () {
             }
         }
         var button = $(".btn-post");
-
         $.ajax({
             url: '/feeds/confirm_indicator/',
             method: 'post',
@@ -687,16 +686,17 @@ $(function () {
                     $(".compose").slideUp();
                     $(".compose").removeClass("composing");
                     hide_stream_update();
+                    toggle_new_cancel_button();
                 }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
                     var msg = XMLHttpRequest.statusText + ': ' + XMLHttpRequest.responseText;
                     alert(msg);
                 }).always(function () {
                     button.prop('disabled', false);
-                    toggle_new_cancle_button();
                 });
             }
 
         }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+            remove_processing_animation();
             var msg = XMLHttpRequest.statusText + ': ' + XMLHttpRequest.responseText;
             alert(msg);
         }).always(function () {
@@ -840,6 +840,7 @@ $(function () {
             $(".compose").slideUp();
             $(".compose").removeClass("composing");
             hide_stream_update();
+            toggle_new_cancel_button();
         }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
             var msg = XMLHttpRequest.statusText + ': ' + XMLHttpRequest.responseText;
             alert(msg);
@@ -847,7 +848,6 @@ $(function () {
             //button toggle 処理はこの呼び出し元で行うため、ここでは実施しない
             remove_processing_animation();
             button.prop('disabled', false);
-            toggle_new_cancle_button();
         });
     });
 
