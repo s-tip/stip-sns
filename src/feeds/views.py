@@ -1234,7 +1234,8 @@ def save_post(request,
         slack_post = slack_post.replace('&gt;', '%amp;gt;')
 
         # Slack 投稿用の添付ファイル作成
-        from daemon.slack.receive import wc
+        from boot_sns import StipSnsBoot
+        wc = StipSnsBoot.get_slack_web_client()
         if wc is not None:
             post_slack_channel = SNSConfig.get_slack_bot_chnnel()
             if temp is not None:

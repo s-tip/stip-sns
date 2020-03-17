@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from ctirs.models import STIPUser, SNSConfig
 from management.forms import SNSConfigForm
 from feeds.mongo import Attck
+from boot_sns import StipSnsBoot
 from daemon.slack.receive import restart_receive_slack_thread
 
 
@@ -38,7 +39,11 @@ def reboot_slack_thread(request):
     if not request.user.is_admin:
         return HttpResponseForbidden('You have no permission.')
     # thread 再起動
-    restart_receive_slack_thread()
+    slack_web_client, slack_rtm_client, th = restart_receive_slack_thread()
+    StipSnsBoot.slack_web_client = slack_web_client
+    StipSnsBoot.slack_rtm_client = slack_rtm_client
+    StipSnsBoot.th = th
+
     # その後は config 画面に遷移
     return sns_config(request)
 
