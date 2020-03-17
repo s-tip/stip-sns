@@ -722,9 +722,9 @@ def remove(request):
         remove_package_ids = body.get("remove_package_ids")
     if remove_package_ids:
         for remove_package_id in remove_package_ids:
+            remove_file_name_id = rs.convert_package_id_to_filename(remove_package_id)
+            remove_path = Feed.get_cached_file_path(remove_file_name_id)
             try:
-                remove_file_name_id = rs.convert_package_id_to_filename(remove_package_id)
-                remove_path = Feed.get_cached_file_path(remove_file_name_id)
                 os.remove(remove_path)
             # ファイルが見つからない、ディレクトリのときは無視する
             except FileNotFoundError:
