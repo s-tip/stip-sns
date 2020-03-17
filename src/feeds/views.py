@@ -723,12 +723,9 @@ def remove(request):
     if remove_package_ids:
         for remove_package_id in remove_package_ids:
             try:
-                print(remove_package_id)
                 remove_file_name_id = rs.convert_package_id_to_filename(remove_package_id)
                 remove_path = Feed.get_cached_file_path(remove_file_name_id)
-                print(remove_path)
                 os.remove(remove_path)
-                print("removed")
             # ファイルが見つからない、ディレクトリのときは無視する
             except FileNotFoundError:
                 pass
