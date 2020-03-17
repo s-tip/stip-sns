@@ -8,6 +8,7 @@ import codecs
 import traceback
 import datetime
 import threading
+import requests
 import zipfile
 import iocextract
 import ctirs.models.sns.feeds.rs as rs
@@ -476,9 +477,9 @@ def get_merged_conf_list(common_config_content, personal_list_content):
     l_ = []
     # 共通設定から
     for item in common_config_content.split('\n'):
-        l = item.rstrip('\n\r')
-        if len(l) != 0:
-            l_.append(l)
+        str_ = item.rstrip('\n\r')
+        if len(str_) != 0:
+            l_.append(str_)
 
     # 個人設定から
     for personal_item in personal_list_content.split('\r\n'):
@@ -674,11 +675,11 @@ def update(request):
         api_user=request.user)
 
     if feed_source != 'all':
-        l = []
+        list_ = []
         for feed in feeds:
             if feed.package_id == feed_source:
-                l.append(feed)
-        feeds = l
+                list_.append(feed)
+        feeds = list_
     dump = {}
     for feed in feeds:
         feed = Feed.add_like_comment_info(request.user, feed)
@@ -705,10 +706,37 @@ def track_comments(request):
 @ajax_required
 def remove(request):
     # remove 処理
+    feed_file_name_id = request.POST['feed']
+    package_id = rs.convert_filename_to_package_id(feed_file_name_id)
+    sns_config = SNSConfig.objects.get()
+    rs_host = sns_config.rs_host
+    remove_package_ids = None
+
+    url = rs_host + "/api/v1/stix_files_package_id/" + package_id
+    headers = rs._get_ctirs_api_http_headers(request.user)
+    # RSへRemove処理
+    r = requests.delete(
+        url,
+        headers=headers,
+        verify=False)
+    if r.status_code != requests.codes.ok:
+        return HttpResponseServerError(r)
+
     # cache original 削除
-    # ??? attach 削除
-    # ??? comment,like削除
-    # RS から削除は必須
+    if r.text:
+        body = json.loads(r.text)
+        remove_package_ids = body.get("remove_package_ids")
+    if remove_package_ids:
+        for remove_package_id in remove_package_ids:
+            remove_file_name_id = rs.convert_package_id_to_filename(remove_package_id)
+            remove_path = Feed.get_cached_file_path(remove_file_name_id)
+            try:
+                os.remove(remove_path)
+            # ファイルが見つからない、ディレクトリのときは無視する
+            except FileNotFoundError:
+                pass
+            except IsADirectoryError:
+                pass
     return HttpResponse()
 
 
@@ -1226,7 +1254,7 @@ def save_post(request,
                         text=slack_post,
                         channel=post_slack_channel,
                         as_user='true')
-                except Exception as _:
+                except Exception:
                     pass
 
     # 添付 ファイルstixを送る
