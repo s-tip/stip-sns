@@ -8,8 +8,9 @@ import codecs
 import traceback
 import datetime
 import threading
+import requests
 import zipfile
-import ioc_fanger
+import iocextract
 import urllib
 import ctirs.models.sns.feeds.rs as rs
 import stip.common.const as const
@@ -39,7 +40,7 @@ from feeds.feed_stix_like import FeedStixLike
 from feeds.feed_stix_comment import FeedStixComment
 from ctirs.models import Group
 from feeds.extractor.base import Extractor
-from feeds.adapter.crowd_strike import search_indicator, get_report_info
+#from feeds.adapter.crowd_strike import search_indicator, get_report_info
 from feeds.adapter.phantom import call_run_phantom_playbook
 from feeds.adapter.splunk import get_sightings
 from feeds.feed_stix2 import get_stix2_bundle
@@ -62,6 +63,7 @@ KEY_STIX2 = 'stix2'
 KEY_STIX2_TITLES = 'stix2_titles'
 KEY_STIX2_CONTENTS = 'stix2_contents'
 KEY_ATTACH_CONFIRM = 'attach_confirm'
+KEY_SCREEN_NAME = 'screen_name'
 
 PUBLICATION_VALUE_GROUP = 'group'
 PUBLICATION_VALUE_PEOPLE = 'people'
@@ -117,6 +119,7 @@ def load(request):
     page = int(request.GET.get('page'))
     feed_source = request.GET.get('feed_source')
     user_id = None
+    query_string = request.GET.get(key='query_string', default=None)
     if feed_source is not None:
         if feed_source != 'all':
             user_id = feed_source
@@ -136,6 +139,7 @@ def load(request):
             last_reload=last_reload,
             user_id=user_id,
             index=index,
+            query_string=query_string,
             size=FEEDS_NUM_PAGES)
     else:
         # from_feed が設定されていない場合 (投稿がない場合)
@@ -474,9 +478,9 @@ def get_merged_conf_list(common_config_content, personal_list_content):
     l_ = []
     # 共通設定から
     for item in common_config_content.split('\n'):
-        l = item.rstrip('\n\r')
-        if len(l) != 0:
-            l_.append(l)
+        str_ = item.rstrip('\n\r')
+        if len(str_) != 0:
+            l_.append(str_)
 
     # 個人設定から
     for personal_item in personal_list_content.split('\r\n'):
@@ -521,8 +525,11 @@ def post(request):
         csrf_token = (csrf(request)['csrf_token'])
         # postする
         post_common(request, user)
-        html = _html_feeds(last_feed_datetime, user, csrf_token)
-        return HttpResponse(html)
+        if check_match_query(request, str(user)):
+            html = _html_feeds(last_feed_datetime, user, csrf_token)
+            return HttpResponse(html)
+        else:
+            return HttpResponse('')
     except Exception as e:
         traceback.print_exc()
         return HttpResponseServerError(str(e))
@@ -670,11 +677,11 @@ def update(request):
         api_user=request.user)
 
     if feed_source != 'all':
-        l = []
+        list_ = []
         for feed in feeds:
             if feed.package_id == feed_source:
-                l.append(feed)
-        feeds = l
+                list_.append(feed)
+        feeds = list_
     dump = {}
     for feed in feeds:
         feed = Feed.add_like_comment_info(request.user, feed)
@@ -701,10 +708,37 @@ def track_comments(request):
 @ajax_required
 def remove(request):
     # remove 処理
+    feed_file_name_id = request.POST['feed']
+    package_id = rs.convert_filename_to_package_id(feed_file_name_id)
+    sns_config = SNSConfig.objects.get()
+    rs_host = sns_config.rs_host
+    remove_package_ids = None
+
+    url = rs_host + "/api/v1/stix_files_package_id/" + package_id
+    headers = rs._get_ctirs_api_http_headers(request.user)
+    # RSへRemove処理
+    r = requests.delete(
+        url,
+        headers=headers,
+        verify=False)
+    if r.status_code != requests.codes.ok:
+        return HttpResponseServerError(r)
+
     # cache original 削除
-    # ??? attach 削除
-    # ??? comment,like削除
-    # RS から削除は必須
+    if r.text:
+        body = json.loads(r.text)
+        remove_package_ids = body.get("remove_package_ids")
+    if remove_package_ids:
+        for remove_package_id in remove_package_ids:
+            remove_file_name_id = rs.convert_package_id_to_filename(remove_package_id)
+            remove_path = Feed.get_cached_file_path(remove_file_name_id)
+            try:
+                os.remove(remove_path)
+            # ファイルが見つからない、ディレクトリのときは無視する
+            except FileNotFoundError:
+                pass
+            except IsADirectoryError:
+                pass
     return HttpResponse()
 
 
@@ -1076,49 +1110,49 @@ def post_rs_indicator_matching_comment(request, feed, id_, concierge_user):
 
 
 # CrowdStrike に関連 Report を問い合わせ、結果をコメント表示
-def post_crowd_strike_indicator_matching_comment(feed, id_, concierge_user, json_indicators):
-    try:
-        realted_reports = []
-        phantom_indicators = []
-        for json_indicator in json_indicators:
-            value = json_indicator['value']
-            results = search_indicator(value)
-            for result in results:
-                if 'reports' not in result:
-                    # reports がない場合は skip
-                    continue
-                else:
-                    phantom_indicators.append(json_indicator)
-                # report を追加する
-                for report in result['reports']:
-                    realted_reports.append(report)
-        # 重複を取り除く
-        realted_reports = list(set(realted_reports))
-        if len(realted_reports) == 0:
-            # 存在しない場合はコメントしない
-            return
+#def post_crowd_strike_indicator_matching_comment(feed, id_, concierge_user, json_indicators):
+#    try:
+#        realted_reports = []
+#        phantom_indicators = []
+#        for json_indicator in json_indicators:
+#            value = json_indicator['value']
+#            results = search_indicator(value)
+#            for result in results:
+#                if 'reports' not in result:
+#                    # reports がない場合は skip
+#                    continue
+#                else:
+#                    phantom_indicators.append(json_indicator)
+#                # report を追加する
+#                for report in result['reports']:
+#                    realted_reports.append(report)
+#        # 重複を取り除く
+#        realted_reports = list(set(realted_reports))
+#        if len(realted_reports) == 0:
+#            # 存在しない場合はコメントしない
+#            return
 
-        # 存在する場合
-        msg = str(len(realted_reports))
-        msg += ' '
-        msg += 'related report(s) are found.'
-        msg += '\n<br/>\n'
-        msg += 'Reports: <br/>'
-        for realted_report in realted_reports:
-            # report id から report title と URL を取得する
-            report_title, url = get_report_info(realted_report)
-            msg += ('<a href="%s" target="_blank">%s</a><br/>' % (url, report_title))
+#        # 存在する場合
+#        msg = str(len(realted_reports))
+#        msg += ' '
+#        msg += 'related report(s) are found.'
+#        msg += '\n<br/>\n'
+#        msg += 'Reports: <br/>'
+#        for realted_report in realted_reports:
+#            # report id から report title と URL を取得する
+#            report_title, url = get_report_info(realted_report)
+#            msg += ('<a href="%s" target="_blank">%s</a><br/>' % (url, report_title))
 
-        if len(phantom_indicators) != 0:
-            # phantom 連携できる indicator あり
-            msg += ('<a class="anchor-phantom-run-playbook" data-id="%s">Run Phantom Playbook</a>' % (id_))
-            for phantom_indicator in phantom_indicators:
-                msg += '<div id="%s" data-type="%s" data-value="%s"></div>' % ('phantom-data-' + id_, phantom_indicator['type'], phantom_indicator['value'])
-        # 指定User で投稿
-        post_comment(concierge_user, id_, msg, concierge_user)
-    except Exception:
-        # traceback.print_exc()
-        pass
+#        if len(phantom_indicators) != 0:
+#            # phantom 連携できる indicator あり
+#            msg += ('<a class="anchor-phantom-run-playbook" data-id="%s">Run Phantom Playbook</a>' % (id_))
+#            for phantom_indicator in phantom_indicators:
+#                msg += '<div id="%s" data-type="%s" data-value="%s"></div>' % ('phantom-data-' + id_, phantom_indicator['type'], phantom_indicator['value'])
+#        # 指定User で投稿
+#        post_comment(concierge_user, id_, msg, concierge_user)
+#    except Exception:
+#        # traceback.print_exc()
+#        pass
 
 
 # feedを保存する
@@ -1189,9 +1223,9 @@ def save_post(request,
     # slack 投稿
     if feed.user.username != const.SNS_SLACK_BOT_ACCOUNT:
         slack_post = ''
-        slack_post += '[%s]\n' % (feed.title)
+        slack_post += '[%s]\n' % (iocextract.defang(feed.title))
         slack_post += '\n'
-        slack_post += '%s\n' % (ioc_fanger.defang(feed.post))
+        slack_post += '%s\n' % (iocextract.defang(feed.post))
         slack_post += '\n'
         slack_post += '---------- S-TIP Post Info (TLP: %s) ----------\n' % (feed.tlp)
         slack_post += '%s: %s\n' % ('Account', feed.user.username)
@@ -1202,7 +1236,8 @@ def save_post(request,
         slack_post = slack_post.replace('&gt;', '%amp;gt;')
 
         # Slack 投稿用の添付ファイル作成
-        from daemon.slack.receive import wc
+        from boot_sns import StipSnsBoot
+        wc = StipSnsBoot.get_slack_web_client()
         if wc is not None:
             post_slack_channel = SNSConfig.get_slack_bot_chnnel()
             if temp is not None:
@@ -1222,7 +1257,7 @@ def save_post(request,
                         text=slack_post,
                         channel=post_slack_channel,
                         as_user='true')
-                except Exception as _:
+                except Exception:
                     pass
 
     # 添付 ファイルstixを送る
@@ -1254,15 +1289,15 @@ def save_post(request,
                 matching_comment_th.start()
             except Exception:
                 pass
-        if const.SNS_FALCON_CONCIERGE_ACCOUNT is not None:
-            try:
-                concierge_user = STIPUser.objects.get(username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
-                # 非同期で CrowdStrike から indicator に該当する report を取得しコメントをつける
-                crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment, args=(feed, feed_stix.get_stix_package().id_, concierge_user, json_indicators))
-                crowd_strike_report_th.daemon = True
-                crowd_strike_report_th.start()
-            except Exception:
-                pass
+#        if const.SNS_FALCON_CONCIERGE_ACCOUNT is not None:
+#            try:
+#                concierge_user = STIPUser.objects.get(username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
+#                # 非同期で CrowdStrike から indicator に該当する report を取得しコメントをつける
+#                crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment, args=(feed, feed_stix.get_stix_package().id_, concierge_user, json_indicators))
+#                crowd_strike_report_th.daemon = True
+#                crowd_strike_report_th.start()
+#            except Exception:
+#                pass
 
     return
 
@@ -1312,3 +1347,24 @@ def get_like_comment(request):
         'comments': feed.comments
     }
     return JsonResponse(rsp)
+
+
+def check_match_query(request, user):
+    if 'query_string' in request.POST.keys() and KEY_SCREEN_NAME in request.POST.keys():
+        query_string = request.POST['query_string']
+        # 空白スペース区切りで分割
+        query_strings = query_string.split(' ')
+        # 空白スペース区切りで検索文字列が指定されていない場合(検索対象: 投稿/タイトル/ユーザ名/スクリーン名)
+        if len(query_strings) == 1:
+            if query_strings[0] in request.POST[KEY_POST] or query_strings[0] in request.POST[KEY_TITLE] or query_strings[0] in user or query_strings[0] in request.POST[KEY_SCREEN_NAME]:
+                return True
+            else:
+                return False
+        # 空白スペース区切りの場合(検索対象: 投稿/タイトル/ユーザ名/スクリーン名)
+        else:
+            for q in query_strings:
+                if q in request.POST[KEY_POST] or q in request.POST[KEY_TITLE] or q in user or q in request.POST[KEY_SCREEN_NAME]:
+                    continue
+                else:
+                    return False
+    return True

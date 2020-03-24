@@ -111,8 +111,6 @@ msgstr ""
 
 #: src/core/templates/core/network.html:5
 #: src/core/templates/core/network.html:12
-#: src/search/templates/search/partial_results_menu.html:9
-#: src/search/templates/search/partial_users_results.html:3
 #: src/templates/base.html:40
 msgid "Users"
 msgstr ""
@@ -138,8 +136,6 @@ msgid "Default TLP"
 msgstr ""
 
 #: src/core/templates/core/network.html:53
-#: src/management/templates/management/users.html:38
-#: src/management/templates/management/users.html:82
 msgid "Role"
 msgstr ""
 
@@ -166,9 +162,6 @@ msgstr ""
 #: src/core/templates/core/password.html:43
 #: src/core/templates/core/settings.html:64
 #: src/groups/templates/groups/upsert.html:70
-#: src/management/templates/management/users.html:41
-#: src/management/templates/management/users.html:66
-#: src/management/templates/management/users.html:85
 msgid "Save"
 msgstr ""
 
@@ -223,10 +216,12 @@ msgstr ""
 #: src/feeds/models.py:101 src/feeds/templates/feeds/feed.html:7
 #: src/feeds/templates/feeds/feed.html:19
 #: src/feeds/templates/feeds/feeds.html:26
-#: src/search/templates/search/partial_feed_results.html:4
-#: src/search/templates/search/partial_results_menu.html:5
 #: src/templates/base.html:39
 msgid "Feed"
+msgstr ""
+
+#: src/search/templates/search/search.html:31
+msgid "Search"
 msgstr ""
 
 #: src/feeds/models.py:102
@@ -251,7 +246,6 @@ msgid "Latest posts"
 msgstr ""
 
 #: src/feeds/templates/feeds/feeds.html:41
-#: src/search/templates/search/partial_feed_results.html:17
 msgid "Title"
 msgstr ""
 
@@ -432,37 +426,33 @@ msgstr ""
 msgid "Group was successfully deleted."
 msgstr ""
 
-#: src/management/templates/management/users.html:15 src/templates/base.html:45
+#: src/templates/base.html:45
 msgid "User Management"
 msgstr ""
 
-#: src/management/templates/management/users.html:32
-#: src/management/templates/management/users.html:76
 msgid "Icon"
 msgstr ""
 
-#: src/management/templates/management/users.html:35
-#: src/management/templates/management/users.html:79
 msgid "Account Name"
 msgstr ""
 
-#: src/management/templates/management/users.html:57 src/settings.py:205
+#: src/settings.py:205
 msgid "ROLE_CHOICE_admin"
 msgstr "admin"
 
-#: src/management/templates/management/users.html:58 src/settings.py:206
+#: src/settings.py:206
 msgid "ROLE_CHOICE_user"
 msgstr "user"
 
-#: src/management/templates/management/users.html:59 src/settings.py:207
+#: src/settings.py:207
 msgid "ROLE_CHOICE_machine"
 msgstr "machine"
 
-#: src/management/templates/management/users.html:60 src/settings.py:208
+#: src/settings.py:208
 msgid "ROLE_CHOICE_machine_feed_only"
 msgstr "machine (feed only)"
 
-#: src/management/templates/management/users.html:61 src/settings.py:209
+#: src/settings.py:209
 msgid "ROLE_CHOICE_machine_bot"
 msgstr "BOT"
 
@@ -486,40 +476,6 @@ msgstr ""
 #: src/messenger/templates/messenger/new.html:5
 #: src/messenger/templates/messenger/new.html:7
 msgid "New message"
-msgstr ""
-
-#: src/search/templates/search/partial_articles_results.html:3
-msgid "Articles"
-msgstr ""
-
-#: src/search/templates/search/partial_articles_results.html:24
-msgid "No article found"
-msgstr ""
-
-#: src/search/templates/search/partial_feed_results.html:23
-msgid "No feed found"
-msgstr ""
-
-#: src/search/templates/search/partial_questions_results.html:4
-msgid "Questions"
-msgstr ""
-
-#: src/search/templates/search/partial_questions_results.html:22
-msgid "No question found"
-msgstr ""
-
-#: src/search/templates/search/partial_users_results.html:19
-msgid "No user found"
-msgstr ""
-
-#: src/search/templates/search/results.html:17
-#: src/search/templates/search/search.html:22 src/templates/base.html:54
-msgid "Search"
-msgstr ""
-
-#: src/search/templates/search/results.html:23
-#: src/search/templates/search/search.html:19
-msgid "Search Feed, Articles, Questions and Users"
 msgstr ""
 
 #: src/settings.py:102

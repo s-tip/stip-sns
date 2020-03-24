@@ -19,6 +19,8 @@ from ctirs.models import SNSConfig
 
 ATT_CK_REG_STR = r'\[\[\S+\|(?P<ta_name>.+?)\]\](?P<description>.+)'
 ATT_CK_PATTERN = re.compile(ATT_CK_REG_STR)
+# [TITLE](URL)形式を抽出する正規表現
+URL_PATTERN = re.compile(r'\[(.+?)\]\(([0-9A-Za-z\-\._~!#\$\&\'\*\+,/:;=?@\[\] ]+)\)')
 
 
 class FeedStix(FeedStixCommon):
@@ -112,6 +114,7 @@ class FeedStix(FeedStixCommon):
                 for alias in intrusion_set['aliases']:
                     description += ('%s, ' % (alias))
                 description = description[:-2]
+            description = self.remove_hyperlink(description)
             ta = CommonExtractor._get_threat_actor_object(ta_value, description)
             return ta
         except BaseException:
@@ -209,6 +212,18 @@ class FeedStix(FeedStixCommon):
             v += s
         return v
 
+    # リンクを外して、URLを最後に追加する
+    def remove_hyperlink(self, text):
+        # オブジェクトのタイトルを返す。URLはリストに追加する。
+        def matchurls(matchobj):
+            urls[matchobj[2]] = ''
+            return matchobj[1]
+        urls = dict()
+        out = re.sub(URL_PATTERN, matchurls, text)
+        for url in urls.keys():
+            out = out + '\n<br/>' + 'URL: ' + url
+        return out
+
     @classmethod
     def _get_value_from_address_object(cls, prop):
         # IPv4形式である
@@ -246,7 +261,16 @@ class FeedStix(FeedStixCommon):
                 if exploit_target.vulnerabilities is not None:
                     for vulnerability in exploit_target.vulnerabilities:
                         if vulnerability.cve_id is not None:
-                            lines.append((CVE_TYPE, vulnerability.cve_id, None))
+                            lines.append((CVE_TYPE, vulnerability.cve_id, vulnerability.description.value))
+        return lines
+
+    @classmethod
+    def get_threat_actors(cls, stix_package):
+        ACTORS_TYPE = 'threat_actors'
+        lines = []
+        if stix_package.threat_actors is not None:
+            for threat_actor in stix_package.threat_actors:
+                lines.append((ACTORS_TYPE, threat_actor.title, threat_actor.description))
         return lines
 
     @classmethod

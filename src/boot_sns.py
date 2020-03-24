@@ -1,14 +1,19 @@
-import threading
 from django.apps import AppConfig
 from django.core.management import call_command
 from django.utils.translation import ugettext_lazy
 from stip.common.boot import is_skip_sequence
-from django.conf import settings as django_settings
 # from daemon.email.smtp import start_mail_thread
 
 
 class StipSnsBoot(AppConfig):
     name = 'boot_sns'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        StipSnsBoot.slack_web_client = None
+        StipSnsBoot.slack_rtm_client = None
+        StipSnsBoot.th = None
+        return
 
     def ready(self):
         from ctirs.models import Region, Country, SNSConfig
@@ -62,7 +67,23 @@ class StipSnsBoot(AppConfig):
 
         # slack WebSocket start
         from daemon.slack.receive import start_receive_slack_thread
-        start_receive_slack_thread()
+        slack_web_client, slack_rtm_client, th = start_receive_slack_thread()
+        StipSnsBoot.slack_web_client = slack_web_client
+        StipSnsBoot.slack_rtm_client = slack_rtm_client
+        StipSnsBoot.th = th
+        return
+
+    @classmethod
+    def get_slack_web_client(cls):
+        return StipSnsBoot.slack_web_client
+
+    @classmethod
+    def get_slack_rtm_client(cls):
+        return StipSnsBoot.slack_rtm_client
+
+    @classmethod
+    def get_slack_thread(cls):
+        return StipSnsBoot.th
 
     def convert_country_and_region_in_japanese(self):
         # 日本語化対象

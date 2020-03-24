@@ -6,30 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 from ctirs.models import STIPUser, SNSConfig
 from management.forms import SNSConfigForm
 from feeds.mongo import Attck
+from boot_sns import StipSnsBoot
 from daemon.slack.receive import restart_receive_slack_thread
-
-
-@login_required
-def user(request):
-    ROLE_SELECT_KEY = 'role_select_'
-    ROLE_SELECT_KEY_LENGTH = len('role_select_')
-    user = request.user
-    # 管理権限以外はエラー (403)
-    if user.role != 'admin':
-        return HttpResponseForbidden()
-
-    # POST の場合はロール変更
-    if request.method == 'POST':
-        for key in request.POST:
-            if not key.startswith(ROLE_SELECT_KEY):
-                continue
-            role = request.POST[key]
-            user_id = int(key[ROLE_SELECT_KEY_LENGTH:])
-            stip_user = STIPUser.objects.get(id=user_id)
-            stip_user.role = role
-            stip_user.save()
-    users = STIPUser.objects.filter(is_active=True).order_by('username')
-    return render(request, 'management/users.html', {'users': users})
 
 
 def group(request):
@@ -47,8 +25,8 @@ def check_port(port):
 @login_required
 def modify_attck_information(request):
     # 管理権限以外はエラー (403)
-    if request.user.role != 'admin':
-        return HttpResponseForbidden()
+    if not request.user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
     # ATTCK 洗い替えと保存
     Attck.modify_save_attck_information()
     # その後は config 画面に遷移
@@ -58,10 +36,14 @@ def modify_attck_information(request):
 @login_required
 def reboot_slack_thread(request):
     # 管理権限以外はエラー (403)
-    if request.user.role != 'admin':
-        return HttpResponseForbidden()
+    if not request.user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
     # thread 再起動
-    restart_receive_slack_thread()
+    slack_web_client, slack_rtm_client, th = restart_receive_slack_thread()
+    StipSnsBoot.slack_web_client = slack_web_client
+    StipSnsBoot.slack_rtm_client = slack_rtm_client
+    StipSnsBoot.th = th
+
     # その後は config 画面に遷移
     return sns_config(request)
 
@@ -69,8 +51,8 @@ def reboot_slack_thread(request):
 @login_required
 def sns_config(request):
     # 管理権限以外はエラー (403)
-    if request.user.role != 'admin':
-        return HttpResponseForbidden()
+    if not request.user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
     sns_config = SNSConfig.objects.get()
     if request.method == 'POST':
         form = SNSConfigForm(request.POST)

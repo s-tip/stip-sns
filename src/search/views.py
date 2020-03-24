@@ -1,15 +1,23 @@
+import datetime
 from django.contrib.auth.decorators import login_required
-from ctirs.models import STIPUser as User
 from django.db.models import Q
 from django.shortcuts import redirect, render
-from ctirs.models import Feed
+from ctirs.models import Group, Feed, STIPUser as User
+
+try:
+    from jira import JIRA
+    imported_jira = True
+except ImportError:
+    imported_jira = False
+
+FEEDS_NUM_PAGES = 10
 
 
 @login_required
 def search(request):
     if 'q' in request.GET:
-        querystring = request.GET.get('q').strip()
-        if len(querystring) == 0:
+        query_string = request.GET.get('q').strip()
+        if len(query_string) == 0:
             return redirect('/search/')
         try:
             search_type = request.GET.get('type')
@@ -18,24 +26,30 @@ def search(request):
 
         except Exception:
             search_type = 'feed'
-        count = {}
-        results = {}
 
-        results['feed'] = Feed.query(request.user, querystring)
-        results['users'] = User.objects.filter(
-            Q(username__icontains=querystring)
-            | Q(screen_name__icontains=querystring)
-        )
+        feeds = Feed.query(request.user, query_string, size=FEEDS_NUM_PAGES)
 
-        count['feed'] = len(results['feed'])
-        count['users'] = results['users'].count()
-
-        return render(request, 'search/results.html', {
-            'hide_search': True,
-            'querystring': querystring,
-            'active': search_type,
-            'count': count,
-            'results': results[search_type],
-        })
+        if feeds:
+            from_feed = feeds[0].package_id
+        else:
+            from_feed = None
     else:
-        return render(request, 'search/search.html', {'hide_search': True})
+        query_string = None
+        feeds = []
+        from_feed = None
+    # 最終更新時間
+    last_reload = str(datetime.datetime.now())
+    # anonymous以外の全ユーザを返却する
+    users_list = User.objects.filter(is_active=True).exclude(username='anonymous').order_by('username')
+    r = render(request, 'search/search.html',{
+        'feeds': feeds,
+        'jira': imported_jira,
+        'from_feed': from_feed,
+        'last_reload': last_reload,
+        'page': 1,
+        'users': users_list,
+        'sharing_groups': Group.objects.all(),
+        'query_string': query_string,
+    })
+    r.set_cookie(key='username', value=str(request.user))
+    return r

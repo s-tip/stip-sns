@@ -11,6 +11,7 @@ import threading
 
 from django.http.request import HttpRequest
 from django.core.files.uploadedfile import SimpleUploadedFile
+from boot_sns import StipSnsBoot
 from ctirs.models import System, STIPUser, SNSConfig, AttachFile, Feed
 from stip.common.const import TLP_CHOICES, SNS_SLACK_BOT_ACCOUNT
 from feeds.views import get_merged_conf_list, post_common
@@ -48,48 +49,38 @@ TLP_LIST = []
 for choice in TLP_CHOICES:
     TLP_LIST.append(choice[0])
 
-proxies = System.get_request_proxies()
-wc = None
-th = None
-rtm_client = None
-slack_token = None
-
 
 class SlackThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, slack_rtm_client): 
         super().__init__()
         self.started = threading.Event()
         self.alive = True
+        self.slack_rtm_client = slack_rtm_client
         self.start()
 
     def begin(self):
         self.started.set()
 
     def end(self):
-        rtm_client._stopped = True
+        self.slack_rtm_client._stopped = True
         self.started.clear()
 
     def run(self):
         future = asyncio.ensure_future(
-            rtm_client._connect_and_read(),
-            loop=rtm_client._event_loop)
-        rtm_client._event_loop.run_until_complete(future)
-        rtm_client.stop()
+            self.slack_rtm_client._connect_and_read(),
+            loop=self.slack_rtm_client._event_loop)
+        self.slack_rtm_client._event_loop.run_until_complete(future)
+        self.slack_rtm_client.stop()
 
 
 def start_receive_slack_thread():
-    global slack_token
-    global wc
-    global th
-    global rtm_client
-
     slack_token = SNSConfig.get_slack_bot_token()
     if slack_token is None:
         print('Slack token is undefined.')
-        return
+        return None, None, None
     if len(slack_token) == 0:
         print('Slack token length is 0.')
-        return
+        return None, None, None
     # Slack ユーザがいなければ作る
     slack_users = STIPUser.objects.filter(username=SNS_SLACK_BOT_ACCOUNT)
     if len(slack_users) == 0:
@@ -100,30 +91,41 @@ def start_receive_slack_thread():
             SNS_SLACK_BOT_ACCOUNT,
             is_admin=False)
         slack_user.save()
-    wc = slack.WebClient(token=slack_token)
-    rtm_client = slack.RTMClient(token=slack_token)
-    th = SlackThread()
-    return
+    slack_web_client = slack.WebClient(
+        token=slack_token)
+    slack_rtm_client = slack.RTMClient(
+        token=slack_token)
+    th = SlackThread(slack_rtm_client)
+    return slack_web_client, slack_rtm_client, th
 
 
 def restart_receive_slack_thread():
-    global th
-    global rtm_client
-
-    el = rtm_client._event_loop
-    th.end()
-    th.join()
+    from boot_sns import StipSnsBoot
+    th = StipSnsBoot.get_slack_thread()
+    slack_rtm_client = StipSnsBoot.get_slack_rtm_client()
+    slack_web_client = StipSnsBoot.get_slack_web_client()
     slack_token = SNSConfig.get_slack_bot_token()
-    rtm_client = slack.RTMClient(
-        token=slack_token,
-        loop=el)
-    th = SlackThread()
-    return
+
+    if th:
+        th.end()
+        th.join()
+
+    if not slack_rtm_client:
+        loop = asyncio.new_event_loop()
+        slack_rtm_client = slack.RTMClient(
+            token=slack_token,
+            loop=loop)
+    else:
+        slack_rtm_client = slack.RTMClient(
+            token=slack_token,
+            loop=slack_rtm_client._event_loop)
+    th = SlackThread(slack_rtm_client)
+    return slack_web_client, slack_rtm_client, th
 
 
 # 指定の stix id を返却する
 def download_stix_id(command_stix_id):
-    global wc
+    wc = StipSnsBoot.get_slack_web_client()
     # cache の STIX を返却
     stix_file_path = Feed.get_cached_file_path(
         command_stix_id.replace(':', '--'))
@@ -158,13 +160,13 @@ def convert_user_id(post):
 
 # user_id から user_profile取得
 def get_user_profile(user_id):
-    global wc
+    wc = StipSnsBoot.get_slack_web_client()
     return wc.users_info(user=user_id)['user']['profile']
 
 
 # slack 投稿データから stip 投稿を行う
 def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
-    global wc
+    wc = StipSnsBoot.get_slack_web_client()
     POST_INDEX_TITLE = 0
 
     if 'subtype' in receive_data:
@@ -288,15 +290,17 @@ def receive_slack(**payload):
 
     try:
         post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user)
-    except BaseException as e:
+    except BaseException:
         import traceback
         traceback.print_exc()
-        raise e
+        pass
 
 
 def get_attached_file_from_slack(file_path):
+    slack_token = SNSConfig.get_slack_bot_token()
     headers = {}
     headers['Authorization'] = 'Bearer ' + slack_token
+    proxies = System.get_request_proxies()
     resp = requests.get(
         url=file_path,
         headers=headers,

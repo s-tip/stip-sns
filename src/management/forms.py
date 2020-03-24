@@ -68,12 +68,12 @@ class SNSConfigForm(forms.ModelForm):
     cs_custid = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=64,
-        label=_('X-CSIX-CUSTID for CrowdStrikeAPI'),
+        label=_('client_id for CrowdStrike API'),
         required=False)
     cs_custkey = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=64,
-        label=_('X-CSIX-CUSTkEY for CrowdStrikeAPI'),
+        label=_('client_secret for CrowdStrike API'),
         required=False)
     rs_host = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
