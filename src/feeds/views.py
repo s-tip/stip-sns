@@ -11,6 +11,7 @@ import threading
 import requests
 import zipfile
 import iocextract
+import urllib
 import ctirs.models.sns.feeds.rs as rs
 import stip.common.const as const
 import feeds.feed_stix2_sighting as stip_sighting
@@ -575,11 +576,12 @@ def like(request):
 def attach(request):
     file_id = request.POST['file_id']
     attach_file_name = Feed.get_attach_file_name(file_id)
-    attach_file_path = Feed.get_attach_file_path(file_id)
+    attach_file_path = Feed.get_attach_file_path(file_id).encode('utf-8')
     # response作成
     with open(attach_file_path, 'rb') as fp:
         response = HttpResponse(fp.read(), content_type='application/octet-stream')
-        response['Content-Disposition'] = 'attachment; filename=%s' % (attach_file_name)
+        dl_file_name = urllib.parse.quote(attach_file_name)
+        response['Content-Disposition'] = "attachment; filename='{}'; filename*=UTF-8''{}".format(dl_file_name, dl_file_name)
     return response
 
 
