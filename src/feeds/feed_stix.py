@@ -11,7 +11,6 @@ from cybox.common.properties import HexBinary
 from feeds.feed_stix_common import FeedStixCommon
 from feeds.extractor.common import CommonExtractor
 from feeds.adapter.crowd_strike import query_actors, get_actor_entities
-from feeds.adapter.att_ck import ATTCK_Taxii_Server
 # Statement Attachement の prefix
 from stip.common.const import MARKING_STRUCTURE_STIP_ATTACHEMENT_CONTENT_PREFIX, MARKING_STRUCTURE_STIP_ATTACHEMENT_FILENAME_PREFIX
 from ctirs.models import SNSConfig
@@ -103,18 +102,7 @@ class FeedStix(FeedStixCommon):
     def get_ta_from_attck(self, ta_value):
         try:
             # ATT&CK から Attacker Group 情報を取得する
-            intrusion_set = ATTCK_Taxii_Server.get_intrusion_set(ta_value)
-            if intrusion_set is None:
-                return None
-            description = ''
-            if 'description' in intrusion_set and len(intrusion_set['description']) != 0:
-                description += intrusion_set['description']
-            if 'aliases' in intrusion_set:
-                description += '\n\n<br/><br/>Aliases: '
-                for alias in intrusion_set['aliases']:
-                    description += ('%s, ' % (alias))
-                description = description[:-2]
-            description = self.remove_hyperlink(description)
+            description, _ = CommonExtractor._get_ta_description_from_attck(ta_value)
             ta = CommonExtractor._get_threat_actor_object(ta_value, description)
             return ta
         except BaseException:

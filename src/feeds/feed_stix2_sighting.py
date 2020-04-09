@@ -6,7 +6,7 @@ from stix2elevator import elevate_file
 from stix2elevator.options import initialize_options, set_option_value
 from stix2elevator.stix_stepper import step_bundle
 from stix2matcher.matcher import match
-from feeds.feed_stix2 import _get_stip_identname
+from feeds.feed_stix2 import _get_individual_identity
 
 
 def insert_sighting_object(
@@ -15,7 +15,7 @@ def insert_sighting_object(
         count, first_seen, last_seen,
         stip_user):
 
-    identity = _get_stip_identname(stip_user)
+    identity = _get_individual_identity(stip_user)
     observed_data = get_observed_data_from_value(type_, value_, identity)
     indicator = get_indicator_from_observed_data(stix2, observed_data)
     if indicator is None:

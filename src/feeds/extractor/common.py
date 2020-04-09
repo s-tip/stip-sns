@@ -16,6 +16,7 @@ from cybox.objects.domain_name_object import DomainName
 from cybox.objects.address_object import EmailAddress
 from stip.common.tld import TLD
 from feeds.mongo import Cve
+from feeds.adapter.att_ck import ATTCK_Taxii_Server
 from ctirs.models import SNSConfig
 
 # regular expression
@@ -387,6 +388,11 @@ class CommonExtractor(object):
             return JSON_OBJECT_TYPE_URI, v
 
         # hash 値は長い順番から判定する
+        # sha512か?
+        v = CommonExtractor._get_sha512_value(word)
+        if v is not None:
+            return JSON_OBJECT_TYPE_SHA512, v
+
         # sha256か?
         v = CommonExtractor._get_sha256_value(word)
         if v is not None:
@@ -492,6 +498,59 @@ class CommonExtractor(object):
         ind = CommonExtractor.get_indicator_from_object(o_, indicator_title, user_timezone)
         return ind
 
+    @staticmethod
+    def get_mitre_url_from_json(json_cve):
+        mitre_url = 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(json_cve)
+        return mitre_url
+
+    @staticmethod
+    def get_circl_url_from_json(json_cve):
+        circl_url = 'https://cve.circl.lu/cve/' + str(json_cve)
+        return circl_url
+
+    @staticmethod
+    def get_ttp_common_short_description(ttp_json):
+        json_cve = ttp_json['value']
+        mitre_url = CommonExtractor.get_mitre_url_from_json(json_cve)
+        circl_url = CommonExtractor.get_circl_url_from_json(json_cve)
+        common_short_description = '%s (<a href="%s" target="_blank">MITRE</a>, <a href="%s" target="_blank">circl.lu</a>)<br/>' % (json_cve, mitre_url, circl_url)
+        return common_short_description
+
+    @staticmethod
+    def get_cve_info(json_cve):
+        return Cve.get_cve_info(json_cve)
+
+    @staticmethod
+    def get_vul_cvss_score(cve_info):
+        try:
+            vul_cvss_score = CVSSVector()
+            vul_cvss_score.base_score = cve_info['cvss']
+        except BaseException:
+            vul_cvss_score = None
+        return vul_cvss_score
+
+    @staticmethod
+    def get_cve_info_summary(cve_info):
+        return cve_info['summary']
+
+    @staticmethod
+    def get_ttp_common_description(ttp_json):
+        json_cve = ttp_json['value']
+        circl_url = CommonExtractor.get_circl_url_from_json(json_cve)
+        cve_info = CommonExtractor.get_cve_info(json_cve)
+        vul_cvss_score = CommonExtractor.get_vul_cvss_score(cve_info)
+        common_description = CommonExtractor.get_ttp_common_short_description(ttp_json)
+
+        if vul_cvss_score is not None:
+            common_description += ('Base Score: %s<br/>' % (vul_cvss_score.base_score))
+        try:
+            common_description += ('%s<br/>' % (CommonExtractor.get_cve_info_summary(cve_info)))
+        except BaseException:
+            # 取得失敗時は circl のページの url
+            common_description += ('%s<br/>' % (circl_url))
+
+        return common_description
+
     # web 画面から取得した ttp json から stix ttp 作成する
     @staticmethod
     def get_exploit_target_from_json(ttp_json):
@@ -501,35 +560,19 @@ class CommonExtractor(object):
         # title は "%CVE番号% (index)" とする
         title = '%s (%s)' % (json_cve, json_title)
 
-        # CVE 情報を circl から取得する
-        cve_info = Cve.get_cve_info(json_cve)
+        # # CVE 情報を circl から取得する
+        cve_info = CommonExtractor.get_cve_info(json_cve)
 
-        # 各種 CVE 情報のリンクを作成
-        mitre_url = 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(json_cve)
-        circl_url = 'https://cve.circl.lu/cve/' + str(json_cve)
 
         # Expoit_Target, Vulnerability の Short Description は link
-        common_short_description = '%s (<a href="%s" target="_blank">MITRE</a>, <a href="%s" target="_blank">circl.lu</a>)<br/>' % (json_cve, mitre_url, circl_url)
+        common_short_description = CommonExtractor.get_ttp_common_short_description(ttp_json)
 
-        # base_score
-        try:
-            vul_cvss_score = CVSSVector()
-            vul_cvss_score.base_score = cve_info['cvss']
-        except BaseException:
-            vul_cvss_score = None
+        # # base_score
+        vul_cvss_score = CommonExtractor.get_vul_cvss_score(cve_info)
 
         # Expoit_Target, Vulnerability の Description 作成
-        common_decritpion = common_short_description
-        # base_score があったら追加する
-        if vul_cvss_score is not None:
-            common_decritpion += ('Base Score: %s<br/>' % (vul_cvss_score.base_score))
+        common_decritpion = CommonExtractor.get_ttp_common_description(ttp_json)
 
-        # vulnerability の description は circl から取得した description
-        try:
-            common_decritpion += ('%s<br/>' % (cve_info['summary']))
-        except BaseException:
-            # 取得失敗時は circl のページの url
-            common_decritpion += ('%s<br/>' % (circl_url))
 
         # ExploitTarget
         et = ExploitTarget()
@@ -546,6 +589,25 @@ class CommonExtractor(object):
             vulnerablity.cvss_score = vul_cvss_score
         et.add_vulnerability(vulnerablity)
         return et
+
+    @staticmethod
+    def _get_ta_description_from_attck(ta_value):
+        # ATT&CK から Attacker Group 情報を取得する
+        intrusion_set = ATTCK_Taxii_Server.get_intrusion_set(ta_value)
+        if intrusion_set is None:
+            return None, None
+        description = ''
+        if 'description' in intrusion_set and len(intrusion_set['description']) != 0:
+            description += intrusion_set['description']
+        if 'aliases' in intrusion_set:
+            description += '\n\n<br/><br/>Aliases: '
+            for alias in intrusion_set['aliases']:
+                description += ('%s, ' % (alias))
+            description = description[:-2]
+            aliases = intrusion_set['aliases']
+        else:
+            aliases = None
+        return description, aliases
 
     # value , descirption から ThreatActorObject 作成する
     @staticmethod

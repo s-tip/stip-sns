@@ -99,10 +99,17 @@
                   <span class="text">STIX</span>
                 </a>
                 <ul class="stix-download-menu-ul">
-                	<li class="stix-download-menu-li"><a class="download-stix-12" data-package-id="{{feed.package_id}}">STIX 1.2</a></li>
-                    {% if feed.stix2_package_id %}
-                	<li class="stix-download-menu-li"><a class="download-stix-21" data-package-id="{{feed.stix2_package_id}}">STIX 2.1</a></li>
-                	{% endif %}
+                  {% if feed.stix_version == "2.1" %}
+                	  <li class="stix-download-menu-li"><a class="download-stix-content" data-version="1.2" data-package-id="{{feed.package_id}}">STIX 1.2</a></li>
+                	  <li class="stix-download-menu-li"><a class="download-stix-content" data-version="{{feed.stix_version}}" data-package-id="{{feed.package_id}}">STIX {{feed.stix_version}} (Original)</a></li>
+                  {% elif feed.stix_version == "2.0" %}
+                	  <li class="stix-download-menu-li"><a class="download-stix-content" data-version="1.2" data-package-id="{{feed.package_id}}">STIX 1.2</a></li>
+                	  <li class="stix-download-menu-li"><a class="download-stix-content" data-version="{{feed.stix_version}}" data-package-id="{{feed.package_id}}">STIX {{feed.stix_version}} (Original)</a></li>
+                	  <li class="stix-download-menu-li"><a class="download-stix-content" data-version="2.1" data-package-id="{{feed.package_id}}">STIX 2.1</a></li>
+                  {% else %}
+                	  <li class="stix-download-menu-li"><a class="download-stix-content" data-version="{{feed.stix_version}}" data-package-id="{{feed.package_id}}">STIX {{feed.stix_version}} (Original)</a></li>
+                	  <li class="stix-download-menu-li"><a class="download-stix-content" data-version="2.1" data-package-id="{{feed.package_id}}">STIX 2.1</a></li>
+                  {% endif %}
                 </ul>
               </div> <!-- box -->
               <div class="box">

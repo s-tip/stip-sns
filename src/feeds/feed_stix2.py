@@ -1,28 +1,18 @@
 import datetime
+import base64
 import pytz
 import feeds.extractor.common as fec
-from stix2.properties import StringProperty, ReferenceProperty, ListProperty
+import stip.common.const as const
+from stix2.properties import StringProperty, ReferenceProperty, ListProperty, DictionaryProperty
 from stix2.v21.bundle import Bundle
-from stix2.v21.sdo import Report, CustomObject, Vulnerability, ThreatActor, Indicator
-from stix2.v21.common import LanguageContent, GranularMarking
-from stip.common.stip_stix2 import _get_stip_identname
+from stix2.v21.sdo import Report, CustomObject, Vulnerability, ThreatActor, Indicator, Identity
+from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
+from stip.common.x_stip_sns import StipSns
 
 # S-TIP オブジェクトに格納する固定値
 STIP_IDENTITY_CLASS = 'organization'
 STIP_NAME = 'Fujitsu System Integration Laboratories.'
-
-
-# S-TIP SNS 用カスタムオブジェクト
-@CustomObject('x-stip-sns', [
-    ('post_type', StringProperty(required=True)),
-    ('name', StringProperty(required=True)),
-    ('description', StringProperty(required=True)),
-    ('created_by_ref', ReferenceProperty(type='identity')),
-    ('lang', StringProperty()),
-    ('granular_markings', ListProperty(GranularMarking)),
-])
-class StipSns(object):
-    pass
+STIP_SNS_IDENTITY_VALUE = 's-tip-sns'
 
 
 # stix2_titles と stix2_contents から language_content の contents に格納する辞書を作成する
@@ -53,47 +43,58 @@ def _get_language_contents(stix2_titles, stix2_contents):
 
 
 # json データから Vulunerability 作成する
-def _get_vulnerability_object(ttp, stip_identity):
+def _get_vulnerability_object(ttp, stip_identity, tlp_marking_object):
     cve = ttp['value']
-    title = ttp['title']
-    name = '%s (%s)' % (title, cve)
+    mitre_url = fec.CommonExtractor.get_mitre_url_from_json(cve)
 
     external_references = []
     external_reference = {}
     external_reference['source_name'] = 'cve'
     external_reference['external_id'] = cve
+    external_reference['url'] = mitre_url
     external_references.append(external_reference)
 
+    description = fec.CommonExtractor.get_ttp_common_description(ttp)
     vulnerability = Vulnerability(
-        name=name,
+        name=cve,
+        description=description,
         created_by_ref=stip_identity,
+        object_marking_refs=[tlp_marking_object],
         external_references=external_references
     )
     return vulnerability
 
 
 # json データから ThreatActor 作成する
-def _get_threat_actor_object(ta, stip_identity):
+def _get_threat_actor_object(ta, stip_identity, tlp_marking_object):
     name = ta['value']
     description = ta['title']
-    threat_actor_types = 'crime-syndicate'
+    try:
+        threat_actor_types = [ta['type']]
+    except KeyError:
+        threat_actor_types = ['unknown']
+    description, aliases = fec.CommonExtractor._get_ta_description_from_attck(name)
 
     threat_actor = ThreatActor(
         name=name,
         description=description,
         created_by_ref=stip_identity,
+        object_marking_refs=[tlp_marking_object],
+        aliases=aliases,
         threat_actor_types=threat_actor_types)
     return threat_actor
 
 
 # json データから Indicator 作成する
-def _get_indicator_object(indicator, stip_identity):
+def _get_indicator_object(indicator, stip_identity, tlp_marking_object):
     name = indicator['title']
     description = indicator['title']
     type_ = indicator['type']
     value = indicator['value']
-
-    indicator_types = 'compromised'
+    try:
+        indicator_types = [indicator['stix2_indicator_types']]
+    except KeyError:
+        indicator_types = ['malicious-activity']
 
     if type_ == fec.JSON_OBJECT_TYPE_IPV4:
         pattern = '[ipv4-addr:value = \'%s\']' % (value)
@@ -115,9 +116,12 @@ def _get_indicator_object(indicator, stip_identity):
     indicator_o = Indicator(
         name=name,
         description=description,
+        created_by_ref=stip_identity,
+        object_marking_refs=[tlp_marking_object],
         indicator_types=indicator_types,
         pattern=pattern,
-        created_by_ref=stip_identity)
+        pattern_type='stix',
+        valid_from=datetime.datetime.now(tz=pytz.utc))
     return indicator_o
 
 
@@ -135,45 +139,236 @@ def _make_granular_markings(stix2_title, stix2_content, lang):
     return granular_markings
 
 
-# stix2 の Bundle 作成する
-def get_stix2_bundle(
-        indicators,
-        ttps,
-        tas,
-        title,
-        content,
-        stix2_titles=[],
-        stix2_contents=[],
-        stip_user=None):
+# stip_user から x-stip-sns-author property を作成する
+def _get_x_stip_sns_author(stip_user):
+    d = {}
+    try:
+        d[const.STIP_STIX2_SNS_AUTHOR_AFFILIATION_KEY] = stip_user.affiliation
+    except AttributeError:
+        d[const.STIP_STIX2_SNS_AUTHOR_AFFILIATION_KEY] = ''
+
+    try:
+        d[const.STIP_STIX2_SNS_AUTHOR_CI_KEY] = stip_user.ci
+    except AttributeError:
+        d[const.STIP_STIX2_SNS_AUTHOR_CI_KEY] = ''
+
+    try:
+        d[const.STIP_STIX2_SNS_AUTHOR_REGION_CODE_KEY] = stip_user.region.code
+    except AttributeError:
+        d[const.STIP_STIX2_SNS_AUTHOR_REGION_CODE_KEY] = ''
+
+    try:
+        d[const.STIP_STIX2_SNS_AUTHOR_COUNTRY_CODE_KEY] = stip_user.region.country_code
+    except AttributeError:
+        d[const.STIP_STIX2_SNS_AUTHOR_COUNTRY_CODE_KEY] = ''
+
+    d[const.STIP_STIX2_SNS_AUTHOR_SCREEN_NAME_KEY] = stip_user.screen_name
+    d[const.STIP_STIX2_SNS_AUTHOR_USER_NAME_KEY] = stip_user.username
+    return d
+
+
+# stip_user から x-stip-sns-post property を作成する
+def _get_x_stip_sns_post(
+    title, description,
+    tlp, sharing_range, referred_url
+):
+    d = {}
+    d[const.STIP_STIX2_SNS_POST_TITLE_KEY] = title
+    d[const.STIP_STIX2_SNS_POST_DECRIPTION_KEY] = description
+    dt = datetime.datetime.now(tz=pytz.utc)
+    d[const.STIP_STIX2_SNS_POST_TIMESTAMP_KEY] = format_stix2_datetime(dt)
+    d[const.STIP_STIX2_SNS_POST_TLP_KEY] = tlp
+    d[const.STIP_STIX2_SNS_POST_SHARING_RANGE_KEY] = sharing_range
+    if referred_url:
+        d[const.STIP_STIX2_SNS_POST_REFERRED_URL_KEY] = referred_url
+    else:
+        d[const.STIP_STIX2_SNS_POST_REFERRED_URL_KEY] = ''
+    return d
+
+
+def format_stix2_datetime(dt):
+    return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
+
+
+# x-stip-sns-identity property を作成する
+def _get_x_stip_sns_identity():
+    return STIP_SNS_IDENTITY_VALUE
+
+
+# x-stip-sns-tool property を作成する
+def _get_x_stip_sns_tool():
+    d = {}
+    d[const.STIP_STIX2_SNS_TOOL_NAME_KEY] = const.SNS_TOOL_NAME
+    d[const.STIP_STIX2_SNS_TOOL_VENDOR_KEY] = const.SNS_TOOL_VENDOR
+    return d
+
+
+# stip_user から identity (Individual) を作成する
+def _get_individual_identity(stip_user):
+    identity = Identity(
+        name=stip_user.username,
+        identity_class='Individual',
+        x_stip_sns_account=stip_user.username,
+        allow_custom=True
+    )
+    return identity
+
+
+def _get_organization_identity_sectors(ci):
+    ci_table = {
+        'Information and Communication Services': ['telecommunications'],
+        'Financial Services': ['financial-services'],
+        'Aviation Services': ['aerospace'],
+        'Railway Services': ['transportation'],
+        'Electric Power Supply Services': ['utilities'],
+        'Gas Supply Services': ['utilities'],
+        'Government and Administrative Services (Including Municipal Government)': ['government-national', 'government-regioanl', 'government-local', 'government-public-services'],
+        'Medical Services': ['healthcare'],
+        'Water Services': ['utilities'],
+        'Logistics Services': ['transportation'],
+        'Chemical Industries': ['technology'],
+        'Credit Card Services': ['financial-services'],
+        'Petroleum Industries': ['energy'],
+    }
+
+    if ci is None:
+        return None
+    if ci == 'Other':
+        return None
+    if ci in ci_table:
+        return ci_table[ci]
+    else:
+        return None
+
+
+# stip_user から identity (Organization) を作成する
+def _get_organization_identity(stip_user):
+    if stip_user.affiliation is None or len(stip_user.affiliation) == 0:
+        return None
+    sectors = _get_organization_identity_sectors(stip_user.ci)
+    identity = Identity(
+        name=stip_user.affiliation,
+        identity_class='Organization',
+        sectors=sectors,
+        x_stip_sns_account=stip_user.username,
+        allow_custom=True
+    )
+    return identity
+
+
+# stix2 の Bundle 作成する (post)
+def get_post_stix2_bundle(
+    indicators,
+    ttps,
+    tas,
+    title,
+    content,
+    tlp,
+    referred_url,
+    sharing_range,
+    stix2_titles=[],
+    stix2_contents=[],
+    x_stip_sns_attachment_refs=None,
+    stip_user=None
+):
 
     # S-TIP Identity 作成する
-    stip_identity = _get_stip_identname(stip_user)
+    individual_identity = _get_individual_identity(stip_user)
+    organization_identity = _get_organization_identity(stip_user)
 
-    # Report と StipSns に格納する granular_markings を取得する
-    granular_markings = _make_granular_markings(stix2_titles[0], stix2_contents[0], stip_user.language)
+    # x_stip_sns_author
+    x_stip_sns_author = _get_x_stip_sns_author(stip_user)
+
+    # x_stip_sns_post
+    x_stip_sns_post = _get_x_stip_sns_post(
+        title,
+        content,
+        tlp,
+        sharing_range,
+        referred_url)
+
+    # x_stip_sns_object_ref
+    x_stip_sns_object_ref = None
+    # x_stip_sns_tags
+    x_stip_sns_tags = None
+    # x_stip_sns_indicators
+    x_stip_sns_indicators = None
+    # x_stip_sns_identity
+    x_stip_sns_identity = _get_x_stip_sns_identity()
+    # x_stip_sns_tool
+    x_stip_sns_tool = _get_x_stip_sns_tool()
+
+    # Report Object 用 object_refs
+    report_object_refs = []
+
+    # TLP marking_object 取得
+    tlp_marking_object = _get_tlp_markings(tlp)
+
+    # bundle 作成
+    bundle = Bundle(individual_identity, tlp_marking_object)
+    if organization_identity:
+        bundle.objects.append(organization_identity)
+
+    # objects に Vulnerability 追加
+    for ttp in ttps:
+        vulnerablity_object = _get_vulnerability_object(ttp, individual_identity, tlp_marking_object)
+        bundle.objects.append(vulnerablity_object)
+        report_object_refs.append(vulnerablity_object)
+
+    # objects に ThreatActor 追加
+    for ta in tas:
+        ta_object = _get_threat_actor_object(ta, individual_identity, tlp_marking_object)
+        bundle.objects.append(ta_object)
+        report_object_refs.append(ta_object)
+
+    # objects に Indicator 追加
+    for indicator in indicators:
+        indicator_o = _get_indicator_object(indicator, individual_identity, tlp_marking_object)
+        if indicator_o is not None:
+            bundle.objects.append(indicator_o)
+            report_object_refs.append(indicator_o)
 
     # 共通 lang
     common_lang = stip_user.language
+    # Report と StipSns に格納する granular_markings を取得する
+    if len(stix2_titles) > 0 and len(stix2_contents) > 0:
+        granular_markings = _make_granular_markings(stix2_titles[0], stix2_contents[0], stip_user.language)
+    else:
+        granular_markings = None
 
     # StipSns Object (Custom Object)
     stip_sns = StipSns(
         lang=common_lang,
         granular_markings=granular_markings,
-        post_type='post',
-        created_by_ref=stip_identity,
+        object_marking_refs=[tlp_marking_object],
+        created_by_ref=individual_identity,
         name=title,
-        description=content)
+        description=content,
+        x_stip_sns_type='post',
+        x_stip_sns_author=x_stip_sns_author,
+        x_stip_sns_post=x_stip_sns_post,
+        x_stip_sns_attachment_refs=x_stip_sns_attachment_refs,
+        x_stip_sns_object_ref=x_stip_sns_object_ref,
+        x_stip_sns_tags=x_stip_sns_tags,
+        x_stip_sns_indicators=x_stip_sns_indicators,
+        x_stip_sns_identity=x_stip_sns_identity,
+        x_stip_sns_tool=x_stip_sns_tool)
+    report_object_refs.append(stip_sns)
+    bundle.objects.append(stip_sns)
 
     # ReportObject
+    published = format_stix2_datetime(datetime.datetime.now(tz=pytz.utc))
     report = Report(
         lang=common_lang,
         granular_markings=granular_markings,
+        object_marking_refs=[tlp_marking_object],
         name=title,
         description=content,
-        created_by_ref=stip_identity,
-        published=datetime.datetime.now(tz=pytz.utc),
+        created_by_ref=individual_identity,
+        published=published,
         report_types=['threat-report'],
-        object_refs=[stip_sns])
+        object_refs=report_object_refs)
+    bundle.objects.append(report)
 
     # language-content 作成
     if granular_markings is None:
@@ -182,38 +377,227 @@ def get_stix2_bundle(
         if common_lang in language_contents:
             del language_contents[common_lang]
 
-        s_tip_lc = LanguageContent(
-            created_by_ref=stip_identity,
-            object_ref=stip_sns,
-            object_modified=stip_sns.created,
-            contents=language_contents
-        )
+        if language_contents != {}:
+            s_tip_lc = LanguageContent(
+                created_by_ref=individual_identity,
+                object_ref=stip_sns,
+                object_modified=stip_sns.created,
+                contents=language_contents
+            )
+            bundle.objects.append(s_tip_lc)
 
-        # Report オブジェクト用の language-content 作成
-        report_lc = LanguageContent(
-            object_ref=report,
-            created_by_ref=stip_identity,
-            object_modified=report.created,
-            contents=language_contents
-        )
-        # bundle 作成
-        bundle = Bundle(stip_identity, report, stip_sns, s_tip_lc, report_lc)
+            # Report オブジェクト用の language-content 作成
+            report_lc = LanguageContent(
+                object_ref=report,
+                created_by_ref=individual_identity,
+                object_modified=report.created,
+                contents=language_contents
+            )
+            bundle.objects.append(report_lc)
+    return bundle
+
+
+# stix2 の Bundle 作成する (attach)
+def get_attach_stix2_bundle(
+    tlp,
+    referred_url,
+    sharing_range,
+    request_file,
+    stip_user=None
+):
+
+    # S-TIP Identity 作成する
+    individual_identity = _get_individual_identity(stip_user)
+    organization_identity = _get_organization_identity(stip_user)
+    # x_stip_sns_author
+    x_stip_sns_author = _get_x_stip_sns_author(stip_user)
+
+    # x_stip_sns_identity
+    x_stip_sns_identity = _get_x_stip_sns_identity()
+    # x_stip_sns_tool
+    x_stip_sns_tool = _get_x_stip_sns_tool()
+    # TLP marking_object 取得
+    tlp_marking_object = _get_tlp_markings(tlp)
+    # 共通 lang
+    common_lang = stip_user.language
+
+    title = request_file.name
+    content = 'File "%s" encoded in BASE64.' % (request_file.name)
+    x_stip_sns_attachment = _get_x_stip_sns_attachment(request_file)
+
+    # x_stip_sns_post
+    x_stip_sns_post = _get_x_stip_sns_post(
+        title,
+        content,
+        tlp,
+        sharing_range,
+        referred_url)
+
+    stip_sns = StipSns(
+        lang=common_lang,
+        object_marking_refs=[tlp_marking_object],
+        created_by_ref=individual_identity,
+        name=title,
+        description=content,
+        x_stip_sns_type=const.STIP_STIX2_SNS_POST_TYPE_ATTACHMENT,
+        x_stip_sns_author=x_stip_sns_author,
+        x_stip_sns_post=x_stip_sns_post,
+        x_stip_sns_attachment=x_stip_sns_attachment,
+        x_stip_sns_identity=x_stip_sns_identity,
+        x_stip_sns_tool=x_stip_sns_tool)
+
+    # bundle 作成
+    bundle = Bundle(
+        individual_identity,
+        tlp_marking_object,
+        stip_sns)
+    if organization_identity:
+        bundle.objects.append(organization_identity)
+    return bundle, stip_sns.id
+
+
+# feed_file から x-stip-sns-attachment property を作成する
+def _get_x_stip_sns_attachment(request_file):
+    d = {}
+    d[const.STIP_STIX2_SNS_ATTACHMENT_FILENAME_KEY] = request_file.name
+    content = base64.b64encode(request_file.read())
+    d[const.STIP_STIX2_SNS_ATTACHMENT_CONTENT_KEY] = content.decode('utf-8')
+    return d
+
+
+# stix2 の x-stip-sns を作成する (attachment)
+def _get_attach_stix2_bundle(stip_sns, tlp_marking_object, feed_file):
+    title = feed_file
+    content = 'File "%s" encoded in BASE64.' % (feed_file.file_name)
+    x_stip_sns_attachment = _get_x_stip_sns_attachment(feed_file)
+
+    stip_sns = StipSns(
+        lang=stip_sns.lang,
+        object_marking_refs=[tlp_marking_object],
+        created_by_ref=stip_sns.created_by_ref,
+        name=title,
+        description=content,
+        x_stip_sns_type=const.STIP_STIX2_SNS_POST_TYPE_ATTACHMENT,
+        x_stip_sns_author=stip_sns.x_stip_sns_author,
+        x_stip_sns_attachment=x_stip_sns_attachment,
+        x_stip_sns_identity=stip_sns.x_stip_sns_identity,
+        x_stip_sns_tool=stip_sns.x_stip_sns_tool)
+    return stip_sns
+
+
+# TLP 文字列に合わせた marking-definition を返却する
+def _get_tlp_markings(tlp):
+    tlp_table = {
+        'WHITE': TLP_WHITE,
+        'GREEN': TLP_GREEN,
+        'AMBER': TLP_AMBER,
+        'RED': TLP_RED
+    }
+    try:
+        return tlp_table[tlp.upper()]
+    except KeyError:
+        return None
+
+
+# stix2 の Bundle 作成する (comment)
+def get_comment_stix2_bundle(
+    x_stip_sns_object_ref,
+    x_stip_sns_object_ref_version,
+    description,
+    tlp,
+    stip_user=None
+):
+
+    # S-TIP Identity 作成する
+    individual_identity = _get_individual_identity(stip_user)
+    organization_identity = _get_organization_identity(stip_user)
+    # x_stip_sns_author
+    x_stip_sns_author = _get_x_stip_sns_author(stip_user)
+    # x_stip_sns_identity
+    x_stip_sns_identity = _get_x_stip_sns_identity()
+    # x_stip_sns_tool
+    x_stip_sns_tool = _get_x_stip_sns_tool()
+    # TLP marking_object 取得
+    tlp_marking_object = _get_tlp_markings(tlp)
+    # 共通 lang
+    common_lang = stip_user.language
+
+    title = 'Comment to %s' % (x_stip_sns_object_ref)
+    stip_sns = StipSns(
+        lang=common_lang,
+        object_marking_refs=[tlp_marking_object],
+        created_by_ref=individual_identity,
+        name=title,
+        description=description,
+        x_stip_sns_type=const.STIP_STIX2_SNS_POST_TYPE_COMMENT,
+        x_stip_sns_author=x_stip_sns_author,
+        x_stip_sns_object_ref=x_stip_sns_object_ref,
+        x_stip_sns_object_ref_version=x_stip_sns_object_ref_version,
+        x_stip_sns_identity=x_stip_sns_identity,
+        x_stip_sns_tool=x_stip_sns_tool)
+
+    # bundle 作成
+    bundle = Bundle(
+        individual_identity,
+        tlp_marking_object,
+        stip_sns)
+    if organization_identity:
+        bundle.objects.append(organization_identity)
+    return bundle
+
+
+# stix2 の Bundle 作成する (like)
+def get_like_stix2_bundle(
+    x_stip_sns_object_ref,
+    x_stip_sns_object_ref_version,
+    like,
+    tlp,
+    stip_user=None
+):
+
+    # S-TIP Identity 作成する
+    individual_identity = _get_individual_identity(stip_user)
+    organization_identity = _get_organization_identity(stip_user)
+    # x_stip_sns_author
+    x_stip_sns_author = _get_x_stip_sns_author(stip_user)
+    # x_stip_sns_identity
+    x_stip_sns_identity = _get_x_stip_sns_identity()
+    # x_stip_sns_tool
+    x_stip_sns_tool = _get_x_stip_sns_tool()
+    # TLP marking_object 取得
+    tlp_marking_object = _get_tlp_markings(tlp)
+    # 共通 lang
+    common_lang = stip_user.language
+
+    if like:
+        # like -> unlike
+        x_stip_sns_type = const.STIP_STIX2_SNS_POST_TYPE_UNLIKE
+        title = 'Unlike to %s' % (x_stip_sns_object_ref)
+        description = 'Unlike to %s' % (x_stip_sns_object_ref)
     else:
-        # granular_markings が存在するときは language-content は作成しない
-        # bundle 作成
-        bundle = Bundle(stip_identity, report, stip_sns)
+        # unlike -> like
+        x_stip_sns_type = const.STIP_STIX2_SNS_POST_TYPE_LIKE
+        title = 'Like to %s' % (x_stip_sns_object_ref)
+        description = 'Like to %s' % (x_stip_sns_object_ref)
 
-    # objects に Vulnerability 追加
-    for ttp in ttps:
-        bundle.objects.append(_get_vulnerability_object(ttp, stip_identity))
+    stip_sns = StipSns(
+        lang=common_lang,
+        object_marking_refs=[tlp_marking_object],
+        created_by_ref=individual_identity,
+        name=title,
+        description=description,
+        x_stip_sns_type=x_stip_sns_type,
+        x_stip_sns_author=x_stip_sns_author,
+        x_stip_sns_object_ref=x_stip_sns_object_ref,
+        x_stip_sns_object_ref_version=x_stip_sns_object_ref_version,
+        x_stip_sns_identity=x_stip_sns_identity,
+        x_stip_sns_tool=x_stip_sns_tool)
 
-    # objects に ThreatActor 追加
-    for ta in tas:
-        bundle.objects.append(_get_threat_actor_object(ta, stip_identity))
-
-    # objects に Indicator 追加
-    for indicator in indicators:
-        indicator_o = _get_indicator_object(indicator, stip_identity)
-        if indicator_o is not None:
-            bundle.objects.append(indicator_o)
+    # bundle 作成
+    bundle = Bundle(
+        individual_identity,
+        tlp_marking_object,
+        stip_sns)
+    if organization_identity:
+        bundle.objects.append(organization_identity)
     return bundle
