@@ -1594,12 +1594,12 @@ $(function () {
 
   $("ul.stream").on("click", ".remove-feed", function () {
     var li = $(this).closest("li");
-    var feed = $(li).attr("feed-id");
+    var package_id = $(li).attr("package-id");
     var csrf = $(li).attr("csrf");
     $.ajax({
       url: '/feeds/remove/',
       data: {
-        'feed': feed,
+        'package_id': package_id,
         'csrfmiddlewaretoken': csrf
       },
       type: 'post',
