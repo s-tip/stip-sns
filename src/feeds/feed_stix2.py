@@ -3,11 +3,11 @@ import base64
 import pytz
 import feeds.extractor.common as fec
 import stip.common.const as const
-from stix2.properties import StringProperty, ReferenceProperty, ListProperty, DictionaryProperty
 from stix2.v21.bundle import Bundle
-from stix2.v21.sdo import Report, CustomObject, Vulnerability, ThreatActor, Indicator, Identity
+from stix2.v21.sdo import Report, Vulnerability, ThreatActor, Indicator, Identity
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
 from stip.common.x_stip_sns import StipSns
+from ctirs.models import SNSConfig
 
 # S-TIP オブジェクトに格納する固定値
 STIP_IDENTITY_CLASS = 'organization'
@@ -73,7 +73,13 @@ def _get_threat_actor_object(ta, stip_identity, tlp_marking_object):
         threat_actor_types = [ta['type']]
     except KeyError:
         threat_actor_types = ['unknown']
-    description, aliases = fec.CommonExtractor._get_ta_description_from_attck(name)
+
+    if SNSConfig.get_cs_custid() and SNSConfig.get_cs_custkey():
+        description, aliases = fec.CommonExtractor._get_ta_description_from_crowd_strike(name)
+        if not description:
+            description, aliases = fec.CommonExtractor._get_ta_description_from_attck(name)
+    else:
+        description, aliases = fec.CommonExtractor._get_ta_description_from_attck(name)
 
     threat_actor = ThreatActor(
         name=name,

@@ -17,6 +17,7 @@ from cybox.objects.address_object import EmailAddress
 from stip.common.tld import TLD
 from feeds.mongo import Cve
 from feeds.adapter.att_ck import ATTCK_Taxii_Server
+from feeds.adapter.crowd_strike import query_actors, get_actor_entities
 from ctirs.models import SNSConfig
 
 # regular expression
@@ -563,7 +564,6 @@ class CommonExtractor(object):
         # # CVE 情報を circl から取得する
         cve_info = CommonExtractor.get_cve_info(json_cve)
 
-
         # Expoit_Target, Vulnerability の Short Description は link
         common_short_description = CommonExtractor.get_ttp_common_short_description(ttp_json)
 
@@ -572,7 +572,6 @@ class CommonExtractor(object):
 
         # Expoit_Target, Vulnerability の Description 作成
         common_decritpion = CommonExtractor.get_ttp_common_description(ttp_json)
-
 
         # ExploitTarget
         et = ExploitTarget()
@@ -608,6 +607,43 @@ class CommonExtractor(object):
         else:
             aliases = None
         return description, aliases
+
+    @staticmethod
+    def _get_ta_description_from_crowd_strike(ta_value):
+        try:
+            response = query_actors(ta_value)
+            if len(response['resources']) == 0:
+                return None, None
+            actor_id = response['resources'][0]
+            attackers_entities = get_actor_entities(actor_id)
+            if len(attackers_entities['resources']) == 0:
+                return None, None
+            attacker_entity = attackers_entities['resources'][0]
+
+            description = '<br/>'
+            description += ('%s: %s<br/>' % ('Threat Actor', ta_value))
+            if 'known_as' in attacker_entity:
+                aliases = attacker_entity['known_as']
+                description += ('%s: %s<br/>' % ('Known As', attacker_entity['known_as']))
+            if 'motivations' in attacker_entity:
+                ta_motivations = attacker_entity['motivations']
+                description += ('%s: ' % ('Motivation'))
+                for ta_motivation in ta_motivations:
+                    description += ('%s,' % (ta_motivation['value']))
+                description = description[:-1]
+                description += '<br/>'
+            else:
+                ta_motivations = []
+            if 'short_description' in attacker_entity:
+                description += ('%s: %s<br/>' % ('Short Description', attacker_entity['short_description']))
+            if 'url' in attacker_entity:
+                url = attacker_entity['url']
+                if url.startswith('https://falcon.crowdstrike.com/actors/'):
+                    url = url.replace('https://falcon.crowdstrike.com/actors/', 'https://falcon.crowdstrike.com/intelligence/actors/')
+                description += ('%s: <a href="%s" target="_blank">%s</a><br/>' % ('Report URL', url, url))
+            return description, aliases
+        except BaseException:
+            return None, None
 
     # value , descirption から ThreatActorObject 作成する
     @staticmethod
