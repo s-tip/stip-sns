@@ -733,7 +733,6 @@ $(function () {
     	   		alert(msg);
     	   	}).always(function(){
     	   		button.prop('disabled',false);
-                toggle_new_cancel_button();
     	   	});
     	}
 
