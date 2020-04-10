@@ -51,7 +51,7 @@ def request_post(url, data):
     else:
         access_token = access_token_rsp.json()['access_token']
     resp = requests.post(
-        url, 
+        url,
         headers=get_crowd_strike_request_header(access_token),
         json=data,
         proxies=proxies)
@@ -66,5 +66,5 @@ def query_actors(query_value):
 
 def get_actor_entities(actor_id):
     # URL に actor_id  を指定する
-    attacker_entities_url = BASE_URL + '/intel/entities/actors/v1?ids='  + actor_id
+    attacker_entities_url = BASE_URL + '/intel/entities/actors/v1?ids=' + actor_id
     return request_get(attacker_entities_url)
