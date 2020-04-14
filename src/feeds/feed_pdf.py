@@ -3,6 +3,7 @@ import datetime
 import pytz
 import iocextract
 from django.conf import settings as django_settings
+from stix2 import parse
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import pagesizes, colors, fonts
@@ -14,6 +15,93 @@ from reportlab.platypus import Paragraph, PageBreak, Spacer
 from reportlab.platypus.tables import Table, TableStyle
 from feeds.feed_stix import FeedStix
 
+
+class FeedPDFStixBase(object):
+    def __init__(self, feed):
+        pass
+
+    def get_timestamp(self):
+        raise NotImplementedError
+
+    def get_indicators(self):
+        raise NotImplementedError
+
+    def get_exploit_targets(self):
+        raise NotImplementedError
+
+    def get_threat_actors(self):
+        raise NotImplementedError
+
+
+class FeedPDFStixV1(FeedPDFStixBase):
+    def __init__(self, feed):
+        super().__init__(feed)
+        feed_stix = FeedStix(stix_file_path=feed.stix_file_path)
+        self.stix_package = feed_stix.stix_package
+ 
+    def get_timestamp(self):
+        return str(self.stix_package.timestamp)
+
+    def get_indicators(self):
+        return FeedStix.get_indicators(self.stix_package)
+
+    def get_exploit_targets(self):
+        return FeedStix.get_exploit_targets(self.stix_package)
+
+    def get_threat_actors(self):
+        return FeedStix.get_threat_actors(self.stix_package)
+
+
+class FeedPDFStixV2(FeedPDFStixBase):
+    def __init__(self, feed):
+        from feeds.views import get_csv_from_bundle_id
+        super().__init__(feed)
+        with open(feed.stix_file_path, 'r') as fp:
+            self.stix_package = parse(fp.read(), allow_custom=True)
+            self.package_id = feed.package_id
+        self.indicators = []
+        self.exploit_targets = []
+        self.threat_actors = []
+        for item in get_csv_from_bundle_id(self.package_id, threat_actors=True):
+            (type_, value, description) = item
+            if type_ == 'cve':
+                self.exploit_targets.append(item)
+            elif type_ == 'threat_actor':
+                self.threat_actors.append(item)
+            else:
+                self.indicators.append(item)
+ 
+    def get_timestamp(self):
+        ts = None
+        for o_ in self.stix_package.objects:
+            if 'modified' in o_:
+                o_dt = o_['modified']
+            else:
+                o_dt = o_['created']
+            if ts:
+                if o_dt > ts:
+                    ts = o_dt
+            else:
+                ts = o_dt
+        return str(ts)
+
+    def get_indicators(self):
+        return self.indicators
+
+    def get_exploit_targets(self):
+        return self.exploit_targets
+
+    def get_threat_actors(self):
+        return self.threat_actors
+
+
+def _get_feed_pdf_stix(feed):
+    if feed.stix_version.startswith('1.'):
+        return FeedPDFStixV1(feed)
+    elif feed.stix_version.startswith('2.'):
+        return FeedPDFStixV2(feed)
+    return None
+ 
 
 class FeedPDF(object):
 
@@ -29,37 +117,37 @@ class FeedPDF(object):
     fonts.addMapping(FONT_MEIRYO, 1, 0, FONT_MEIRYO + '-Bold')  # bold
     fonts.addMapping(FONT_MEIRYO, 1, 1, FONT_MEIRYO + '-BoldItalic')  # italic and bold
 
-    def __init__(self, feed, stix_package):
-        self.feed = feed
-        self.stix_package = stix_package
+    def __init__(self):
+        self.package_id = None
+        self.tlp = None
 
     # Header文字列を取得する
-    def set_header_string(self):
-        if self.stix_package is not None:
-            return 'S-TIP CTI PDF Report: %s' % (self.stix_package.id_)
+    def _set_header_string(self):
+        if self.package_id is not None: 
+            return 'S-TIP CTI PDF Report: %s' % (self.package_id)
         else:
             return 'S-TIP CTI PDF Report'
 
     # Footer文字列を取得する
-    def set_footer_string(self):
+    def _set_footer_string(self):
         t_format = '%B %-d, %Y %H:%M%z'
         d = datetime.datetime.now(pytz.timezone(django_settings.TIME_ZONE))
         return 'CTI Converted to PDF by S-TIP - %s' % (d.strftime(t_format))
 
     # 各ページ共通描画
-    def set_common_per_page(self, canvas, doc):
+    def _set_common_per_page(self, canvas, doc):
         PAGE_WIDTH, PAGE_HEIGHT = pagesizes.A4
         PDF_HEADER_FONT_SIZE = 8
 
         canvas.saveState()
 
         # header
-        string = self.set_header_string()
+        string = self._set_header_string()
         canvas.setFont(self.FONT_MEIRYO, PDF_HEADER_FONT_SIZE)
         canvas.drawCentredString((PAGE_WIDTH / 2.0), (PAGE_HEIGHT - 32), string)
 
         # footer
-        string = self.set_footer_string()
+        string = self._set_footer_string()
         canvas.setFont(self.FONT_MEIRYO, PDF_HEADER_FONT_SIZE)
         canvas.drawCentredString((PAGE_WIDTH / 2.0), 24, string)
 
@@ -68,15 +156,15 @@ class FeedPDF(object):
         canvas.drawImage(image_path, 8.4*mm, 273.6*mm, width=15*mm, height=15*mm, preserveAspectRatio=True, mask=[0, 0, 0, 0, 0, 0])
         # 297(A4)-15(image)-8.4mm(margin)
         # 右上: TLP表記
-        string = 'TLP: %s' % (self.feed.tlp.upper())
+        string = 'TLP: %s' % (self.tlp.upper())
         # Tableにて実装
         data = [[string], ]
         table = Table(data)
-        if self.feed.tlp.upper() == 'RED':
+        if self.tlp.upper() == 'RED':
             color = '#FF0033'
-        elif self.feed.tlp.upper() == 'AMBER':
+        elif self.tlp.upper() == 'AMBER':
             color = '#FFC000'
-        elif self.feed.tlp.upper() == 'GREEN':
+        elif self.tlp.upper() == 'GREEN':
             color = '#33FF00'
         else:
             color = '#FFFFFF'
@@ -102,14 +190,14 @@ class FeedPDF(object):
 
         canvas.restoreState()
 
-    def first_page(self, canvas, doc):
-        self.set_common_per_page(canvas, doc)
+    def _first_page(self, canvas, doc):
+        self._set_common_per_page(canvas, doc)
 
-    def last_page(self, canvas, doc):
-        self.set_common_per_page(canvas, doc)
+    def _last_page(self, canvas, doc):
+        self._set_common_per_page(canvas, doc)
 
     # テーブル作成
-    def create_table(self, d, row_num, col_widths):
+    def _create_table(self, d, row_num, col_widths):
         HEADER_BACKGROUND_COLOR = colors.HexColor('#48ACC6')
         EVEN_BACKGROUND_COLOR = colors.HexColor('#DAEEF3')
         ODD_BACKGROUND_COLOR = colors.white
@@ -148,7 +236,7 @@ class FeedPDF(object):
         return table
 
     # <A>タグを除外して、最後にURLを追記
-    def html_text(self, text):
+    def _html_text(self, text):
         text = text.replace('<br>', '\n')
         text = text.replace('<br/>', '\n')
         soup = BeautifulSoup(text, 'html.parser')
@@ -162,6 +250,9 @@ class FeedPDF(object):
 
     # PDF作成
     def make_pdf_content(self, response, feed):
+        self.package_id = feed.package_id
+        self.tlp = feed.tlp
+        feed_pdf_stix = _get_feed_pdf_stix(feed)
         # style変更
         styles = getSampleStyleSheet()
         for name in ('Normal', 'BodyText', 'Title', 'Heading1', 'Heading2', 'Heading3', 'Heading4', 'Heading5', 'Heading6', 'Bullet', 'Definition', 'Code'):
@@ -192,12 +283,12 @@ class FeedPDF(object):
         story.append(Paragraph(txt, styles['Normal']))
 
         # Produced Time
-        string = str(self.stix_package.timestamp)
-        txt = '<b>Produced Time:</b> %s' % (string)
+        ts = feed_pdf_stix.get_timestamp()
+        txt = '<b>Produced Time:</b> %s' % (ts)
         story.append(Paragraph(txt, styles['Normal']))
 
         # STIX Package ID
-        string = str(self.stix_package.id_)
+        string = str(feed.package_id)
         txt = '<b>STIX Package ID:</b> %s' % (string)
         story.append(Paragraph(txt, styles['Normal']))
 
@@ -207,7 +298,6 @@ class FeedPDF(object):
         # content
         txt = '<b>Content:</b>'
         story.append(Paragraph(txt, styles['Normal']))
-        # txt = feed.post.value.encode('utf-8')
         txt = iocextract.defang(feed.post)
         story.append(Paragraph(txt, styles['Normal']))
 
@@ -218,7 +308,7 @@ class FeedPDF(object):
         style = ParagraphStyle(name='Normal', fontName=self.FONT_MEIRYO, fontSize=9, leading=9)
 
         # indicators
-        indicators = FeedStix.get_indicators(self.stix_package)
+        indicators = feed_pdf_stix.get_indicators()
         if len(indicators) == 0:
             txt = '<b>Indicators:</b> No Data'
             story.append(Paragraph(txt, styles['Normal']))
@@ -252,14 +342,14 @@ class FeedPDF(object):
                 d.append(item)
 
             # テーブル作成とスタイル設定
-            indicators_table = self.create_table(d, len(indicators), (20*mm, 135*mm))
+            indicators_table = self._create_table(d, len(indicators), (20*mm, 135*mm))
             story.append(indicators_table)
 
         # 空行
         story.append(Spacer(1, 1.0*cm))
 
         # Exploit Targets
-        exploit_targets = FeedStix.get_exploit_targets(self.stix_package)
+        exploit_targets = feed_pdf_stix.get_exploit_targets()
         if len(exploit_targets) == 0:
             txt = '<b>Exploit Targets:</b> No Data'
             story.append(Paragraph(txt, styles['Normal']))
@@ -278,20 +368,20 @@ class FeedPDF(object):
             for item in exploit_targets:
                 (_, cve, value) = item
                 item = []
-                value = self.html_text(value)
+                value = self._html_text(value)
                 item.append(Paragraph(cve, style))
                 item.append(Paragraph(value, style))
                 d.append(item)
 
             # テーブル作成とスタイル設定
-            cve_table = self.create_table(d, len(exploit_targets), (30*mm, 125*mm))
+            cve_table = self._create_table(d, len(exploit_targets), (30*mm, 125*mm))
             story.append(cve_table)
 
         # 空行
         story.append(Spacer(1, 1.0*cm))
 
         # Threat Actors
-        threat_actors = FeedStix.get_threat_actors(self.stix_package)
+        threat_actors = feed_pdf_stix.get_threat_actors()
         if len(threat_actors) == 0:
             txt = '<b>Threat Actors:</b> No Data'
             story.append(Paragraph(txt, styles['Normal']))
@@ -315,11 +405,11 @@ class FeedPDF(object):
                 d.append(item)
 
             # テーブル作成とスタイル設定
-            actors_table = self.create_table(d, len(threat_actors), (30*mm, 125*mm))
+            actors_table = self._create_table(d, len(threat_actors), (30*mm, 125*mm))
             story.append(actors_table)
 
         # 改ページ
         story.append(PageBreak())
 
         # PDF 作成
-        doc.build(story, onFirstPage=self.first_page, onLaterPages=self.last_page)
+        doc.build(story, onFirstPage=self._first_page, onLaterPages=self._last_page)

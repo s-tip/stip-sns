@@ -32,20 +32,16 @@ from django.template.context_processors import csrf
 from django.template.loader import render_to_string
 
 from ctirs.models import AttachFile, Feed, Group, SNSConfig, STIPUser, System
-# from feeds.adapter.crowd_strike import get_report_info, search_indicator
 from feeds.adapter.phantom import call_run_phantom_playbook
 from feeds.adapter.splunk import get_sightings
 from feeds.extractor.base import Extractor
 from feeds.feed_pdf import FeedPDF
 from feeds.feed_stix import FeedStix
 from feeds.feed_stix2 import get_post_stix2_bundle, get_attach_stix2_bundle, get_comment_stix2_bundle, get_like_stix2_bundle
-# from feeds.feed_stix_comment import FeedStixComment
 from feeds.feed_stix_common import FeedStixCommon
-# from feeds.feed_stix_like import FeedStixLike
 from stix.core.stix_package import STIXPackage
-# from stix.extensions.marking.ais import AISMarkingStructure  # @UnusedImport
 from stix2 import parse
-from stix2.v21.sdo import Indicator, Vulnerability
+from stix2.v21.sdo import Indicator, Vulnerability, ThreatActor
 
 
 FEEDS_NUM_PAGES = 10
@@ -934,11 +930,11 @@ def _set_jira_param_v2(feed, feed_file_name_id, j, issue):
         attachment=feed.stix_file_path,
         filename=stix_file_name)
 
-    indicators = _get_csv_from_bundle_id(feed_file_name_id)
+    indicators = get_csv_from_bundle_id(feed_file_name_id)
     if len(indicators) > 0:
         content = ''
         for indicator in indicators:
-            type_, value = indicator
+            type_, value, _ = indicator
             content += '%s,%s\n' % (type_, value)
         csv_attachment = io.StringIO()
         csv_attachment.write(content)
@@ -982,7 +978,7 @@ def _set_jira_param_v1(feed, feed_file_name_id, j, issue):
         filename=csv_file_name)
 
     # PDF添付
-    feed_pdf = FeedPDF(feed, stix_package)
+    feed_pdf = FeedPDF()
     pdf_attachment = io.BytesIO()
     feed_pdf.make_pdf_content(pdf_attachment, feed)
     pdf_file_name = '%s.pdf' % (package_id)
@@ -1024,21 +1020,33 @@ def _get_bundle_from_bundle_id(bundle_id):
     return bundle
 
 
-def _get_csv_from_bundle_id(bundle_id):
+def get_csv_from_bundle_id(bundle_id, threat_actors=False):
     bundle = _get_bundle_from_bundle_id(bundle_id)
     ret = []
     for o_ in bundle['objects']:
         if isinstance(o_, Indicator):
             type_, value = _get_indicator_from_pattern(o_)
             if type_:
-                ret.append((type_, value))
+                ret.append((type_, value, _get_description(o_)))
         elif isinstance(o_, Vulnerability):
-            type_, value = _get_cve_from_pattern(o_)
-            print(type_)
-            print(value)
+            if 'external_references' not in o_:
+                continue
+            for er in o_.external_references:
+                type_, value = _get_cve_from_external_reference(er)
             if type_:
-                ret.append((type_, value))
+                ret.append((type_, value, _get_description(o_)))
+        elif isinstance(o_, ThreatActor):
+            if not threat_actors:
+                continue
+            ret.append(('threat_actor', o_.name, _get_description(o_)))
     return ret
+
+
+def _get_description(o_):
+    if 'description' in o_:
+        return o_['description']
+    else:
+        return ''
 
 
 stix2_pattern_ipv4_reg_str = "ipv4-addr:value\s*=\s*'?(.+)'"
@@ -1055,14 +1063,14 @@ stix2_pattern_sha256_reg_str = "file:hashes.'SHA256'\s*=\s*'?(.+)'"
 stix2_pattern_sha256_reg = re.compile(stix2_pattern_sha256_reg_str)
 stix2_pattern_sha512_reg_str = "file:hashes.'SHA512'\s*=\s*'?(.+)'"
 stix2_pattern_sha512_reg = re.compile(stix2_pattern_sha512_reg_str)
+stix2_pattern_domain_reg_str = "domain-name:value\s*=\s*'?(.+)'"
+stix2_pattern_domain_reg = re.compile(stix2_pattern_domain_reg_str)
+stix2_pattern_email_reg_str = "email-addr:value\s*=\s*'?(.+)'"
+stix2_pattern_email_reg = re.compile(stix2_pattern_email_reg_str)
 
 
-def _get_cve_from_pattern(vulenerability):
-    try:
-        for er in vulenerability.external_references:
-            return ('cve', er['external_id'])
-    except Exception:
-        return (None, None)
+def _get_cve_from_external_reference(er):
+    return ('cve', er['external_id'])
 
 
 def _get_indicator_from_pattern(indicator):
@@ -1075,6 +1083,8 @@ def _get_indicator_from_pattern(indicator):
         ('sha1', stix2_pattern_sha1_reg),
         ('sha256', stix2_pattern_sha256_reg),
         ('sha512', stix2_pattern_sha512_reg),
+        ('e-mail', stix2_pattern_email_reg),
+        ('domain', stix2_pattern_domain_reg),
     ]
     for stix2_pattern in stix2_patterns:
         type_ = stix2_pattern[0]
@@ -1089,17 +1099,17 @@ def _get_indicator_from_pattern(indicator):
 @ajax_required
 def is_exist_indicator(request):
     feed_file_name_id = request.POST['feed_id']
-    indicators = _get_csv_from_bundle_id(feed_file_name_id)
+    indicators = get_csv_from_bundle_id(feed_file_name_id)
     return HttpResponse(len(indicators) != 0)
 
 
 @login_required
 def download_csv(request):
     feed_file_name_id = request.POST['feed_id']
-    indicators = _get_csv_from_bundle_id(feed_file_name_id)
+    indicators = get_csv_from_bundle_id(feed_file_name_id)
     content = ''
     for indicator in indicators:
-        type_, value = indicator
+        type_, value, _ = indicator
         content += '%s,%s\n' % (type_, value)
     file_name = '%s.csv' % feed_file_name_id
     output = io.StringIO()
@@ -1126,10 +1136,9 @@ def download_pdf(request):
     package_id = request.POST['package_id']
 
     # STIX 情報作成
-    feed_stix = get_feed_stix(feed_file_name_id)
     feed = Feed.get_feeds_from_package_id(request.user, package_id)
     # PDF 情報作成
-    feed_pdf = FeedPDF(feed, feed_stix.stix_package)
+    feed_pdf = FeedPDF()
 
     # HttpResponse作成
     file_name = '%s.pdf' % (feed_file_name_id)

@@ -116,6 +116,10 @@ def _get_indicator_object(indicator, stip_identity, tlp_marking_object):
         pattern = '[file:hashes.\'SHA512\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_FILE_NAME:
         pattern = '[file:name = \'%s\']' % (value)
+    elif type_ == fec.JSON_OBJECT_TYPE_DOMAIN:
+        pattern = '[domain-name:value = \'%s\']' % (value)
+    elif type_ == fec.JSON_OBJECT_TYPE_EMAIL_ADDRESS:
+        pattern = '[email-addr:value = \'%s\']' % (value)
     else:
         return None
 
