@@ -41,7 +41,7 @@ from feeds.feed_stix2 import get_post_stix2_bundle, get_attach_stix2_bundle, get
 from feeds.feed_stix_common import FeedStixCommon
 from stix.core.stix_package import STIXPackage
 from stix2 import parse
-from stix2.v21.sdo import Indicator, Vulnerability, ThreatActor
+from stix2.v21.sdo import Indicator, Vulnerability, ThreatActor, ObservedData
 
 
 FEEDS_NUM_PAGES = 10
@@ -1020,35 +1020,6 @@ def _get_bundle_from_bundle_id(bundle_id):
     return bundle
 
 
-def get_csv_from_bundle_id(bundle_id, threat_actors=False):
-    bundle = _get_bundle_from_bundle_id(bundle_id)
-    ret = []
-    for o_ in bundle['objects']:
-        if isinstance(o_, Indicator):
-            type_, value = _get_indicator_from_pattern(o_)
-            if type_:
-                ret.append((type_, value, _get_description(o_)))
-        elif isinstance(o_, Vulnerability):
-            if 'external_references' not in o_:
-                continue
-            for er in o_.external_references:
-                type_, value = _get_cve_from_external_reference(er)
-            if type_:
-                ret.append((type_, value, _get_description(o_)))
-        elif isinstance(o_, ThreatActor):
-            if not threat_actors:
-                continue
-            ret.append(('threat_actor', o_.name, _get_description(o_)))
-    return ret
-
-
-def _get_description(o_):
-    if 'description' in o_:
-        return o_['description']
-    else:
-        return ''
-
-
 stix2_pattern_ipv4_reg_str = "ipv4-addr:value\s*=\s*'?(.+)'"
 stix2_pattern_ipv4_reg = re.compile(stix2_pattern_ipv4_reg_str)
 stix2_pattern_url_reg_str = "url:value\s*=\s*'?(.+)'"
@@ -1067,6 +1038,84 @@ stix2_pattern_domain_reg_str = "domain-name:value\s*=\s*'?(.+)'"
 stix2_pattern_domain_reg = re.compile(stix2_pattern_domain_reg_str)
 stix2_pattern_email_reg_str = "email-addr:value\s*=\s*'?(.+)'"
 stix2_pattern_email_reg = re.compile(stix2_pattern_email_reg_str)
+CYBOX_OBJECT_TYPE_LIST = ['ipv4-addr', 'url', 'domain-name', 'email-addr', 'file']
+
+
+def _get_csv_from_cybox(cybox):
+    if cybox.type == 'ipv4-addr':
+        return [('ipv4', cybox.value)]
+    if cybox.type == 'url':
+        return [('url', cybox.value)]
+    if cybox.type == 'domain-name':
+        return [('domain', cybox.value)]
+    if cybox.type == 'email-addr':
+        return [('e-mail', cybox.value)]
+    if cybox.type == 'file':
+        ret = []
+        if 'name' in cybox:
+            ret.append(('file_name', cybox.name))
+        if 'hashes' in cybox:
+            hashes = cybox.hashes
+            if 'MD5' in hashes:
+                ret.append(('md5', hashes['MD5']))
+            if 'SHA-1' in hashes:
+                ret.append(('sha1', hashes['SHA-1']))
+            if 'SHA-256' in hashes:
+                ret.append(('sha256', hashes['SHA-256']))
+            if 'SHA-512' in hashes:
+                ret.append(('sha512', hashes['SHA-512']))
+        return ret
+    return [(None, None)]
+
+
+def get_csv_from_bundle_id(bundle_id, threat_actors=False):
+    bundle = _get_bundle_from_bundle_id(bundle_id)
+    ret = []
+    for o_ in bundle['objects']:
+        if isinstance(o_, Indicator):
+            type_, value = _get_indicator_from_pattern(o_)
+            if type_:
+                ret.append((type_, value, _get_description(o_)))
+        elif isinstance(o_, Vulnerability):
+            if 'external_references' not in o_:
+                continue
+            for er in o_.external_references:
+                type_, value = _get_cve_from_external_reference(er)
+            if type_:
+                ret.append((type_, value, _get_description(o_)))
+        elif isinstance(o_, ObservedData):
+            if 'objects' not in o_:
+                continue
+            for key in o_.objects.keys():
+                cybox = o_.objects[key]
+                if cybox.type not in CYBOX_OBJECT_TYPE_LIST:
+                    continue
+                ret = _append_cybox_csv(ret, cybox)
+        elif isinstance(o_, ThreatActor):
+            if not threat_actors:
+                continue
+            ret.append(('threat_actor', o_.name, _get_description(o_)))
+        else:
+            if o_.type not in CYBOX_OBJECT_TYPE_LIST:
+                continue
+            ret = _append_cybox_csv(ret, o_)
+    return ret
+
+
+def _append_cybox_csv(csv_list, cybox):
+    cybox_list = _get_csv_from_cybox(cybox)
+    for cybox in cybox_list:
+        type_, value = cybox
+        if type_:
+            csv_list.append((type_, value, ''))
+    return csv_list
+
+
+def _get_description(o_):
+    if 'description' in o_:
+        return o_['description']
+    else:
+        return ''
 
 
 def _get_cve_from_external_reference(er):
