@@ -786,13 +786,21 @@ def share_misp(request):
         return HttpResponseServerError(str(e))
 
 
+def _get_indicators_from_feed_id(feed_id):
+    feed = Feed.objects.get(filename_pk=feed_id)
+    if feed.stix_version.startswith('1.'):
+        feed_stix = get_feed_stix(feed_id)
+        return FeedStix.get_indicators(feed_stix.stix_package, indicator_only=True)
+    else:
+        return get_csv_from_bundle_id(feed_id, indicators=True, vulnerabilities=False, threat_actors=False)
+
+
 @login_required
 @ajax_required
 def sighting_splunk(request):
     try:
         feed_file_name_id = request.GET['feed_id']
-        feed_stix = get_feed_stix(feed_file_name_id)
-        indicators = FeedStix.get_indicators(feed_stix.stix_package, indicator_only=True)
+        indicators = _get_indicators_from_feed_id(feed_file_name_id)
         # user は STIPUser
         stip_user = request.user
         sightings = get_sightings(stip_user, indicators)
@@ -850,8 +858,7 @@ def create_sighting_object(request):
 def run_phantom_playbook(request):
     try:
         feed_file_name_id = request.GET['feed_id']
-        feed_stix = get_feed_stix(feed_file_name_id)
-        indicators = FeedStix.get_indicators(feed_stix.stix_package)
+        indicators = _get_indicators_from_feed_id(feed_file_name_id)
         # user は STIPUser
         stip_user = request.user
         container_id = call_run_phantom_playbook(stip_user, indicators)
@@ -914,8 +921,6 @@ def call_jira(request):
 def _set_jira_param_v2(feed, feed_file_name_id, j, issue):
     for attach_file in feed.files.all():
         attach_file_path = Feed.get_attach_file_path(attach_file.package_id)
-        print(attach_file_path)
-        print(attach_file.file_name)
         j.add_attachment(
             issue=issue,
             attachment=attach_file_path,
@@ -930,7 +935,11 @@ def _set_jira_param_v2(feed, feed_file_name_id, j, issue):
         attachment=feed.stix_file_path,
         filename=stix_file_name)
 
-    indicators = get_csv_from_bundle_id(feed_file_name_id)
+    indicators = get_csv_from_bundle_id(
+        feed.package_id,
+        indicators=True,
+        vulnerabilities=True,
+        threat_actors=False)
     if len(indicators) > 0:
         content = ''
         for indicator in indicators:
@@ -945,6 +954,14 @@ def _set_jira_param_v2(feed, feed_file_name_id, j, issue):
             filename=csv_file_name)
 
     # PDF
+    feed_pdf = FeedPDF()
+    pdf_attachment = io.BytesIO()
+    feed_pdf.make_pdf_content(pdf_attachment, feed)
+    pdf_file_name = '%s.pdf' % (package_id)
+    j.add_attachment(
+        issue=issue,
+        attachment=pdf_attachment,
+        filename=pdf_file_name)
     return j
 
 
@@ -1068,15 +1085,19 @@ def _get_csv_from_cybox(cybox):
     return [(None, None)]
 
 
-def get_csv_from_bundle_id(bundle_id, threat_actors=False):
+def get_csv_from_bundle_id(bundle_id, indicators=True, vulnerabilities=True, threat_actors=False):
     bundle = _get_bundle_from_bundle_id(bundle_id)
     ret = []
     for o_ in bundle['objects']:
         if isinstance(o_, Indicator):
+            if not indicators:
+                continue
             type_, value = _get_indicator_from_pattern(o_)
             if type_:
                 ret.append((type_, value, _get_description(o_)))
         elif isinstance(o_, Vulnerability):
+            if not vulnerabilities:
+                continue
             if 'external_references' not in o_:
                 continue
             for er in o_.external_references:
@@ -1084,6 +1105,8 @@ def get_csv_from_bundle_id(bundle_id, threat_actors=False):
             if type_:
                 ret.append((type_, value, _get_description(o_)))
         elif isinstance(o_, ObservedData):
+            if not indicators:
+                continue
             if 'objects' not in o_:
                 continue
             for key in o_.objects.keys():
@@ -1096,6 +1119,8 @@ def get_csv_from_bundle_id(bundle_id, threat_actors=False):
                 continue
             ret.append(('threat_actor', o_.name, _get_description(o_)))
         else:
+            if not indicators:
+                continue
             if o_.type not in CYBOX_OBJECT_TYPE_LIST:
                 continue
             ret = _append_cybox_csv(ret, o_)
@@ -1148,14 +1173,14 @@ def _get_indicator_from_pattern(indicator):
 @ajax_required
 def is_exist_indicator(request):
     feed_file_name_id = request.POST['feed_id']
-    indicators = get_csv_from_bundle_id(feed_file_name_id)
+    indicators = _get_indicators_from_feed_id(feed_file_name_id)
     return HttpResponse(len(indicators) != 0)
 
 
 @login_required
 def download_csv(request):
     feed_file_name_id = request.POST['feed_id']
-    indicators = get_csv_from_bundle_id(feed_file_name_id)
+    indicators = _get_indicators_from_feed_id(feed_file_name_id)
     content = ''
     for indicator in indicators:
         type_, value, _ = indicator
