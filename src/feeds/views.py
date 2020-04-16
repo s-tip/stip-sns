@@ -41,7 +41,8 @@ from feeds.feed_stix2 import get_post_stix2_bundle, get_attach_stix2_bundle, get
 from feeds.feed_stix_common import FeedStixCommon
 from stix.core.stix_package import STIXPackage
 from stix2 import parse
-from stix2.v21.sdo import Indicator, Vulnerability, ThreatActor, ObservedData
+import stix2.v21.sdo as sdo_21
+import stix2.v20.sdo as sdo_20
 
 
 FEEDS_NUM_PAGES = 10
@@ -825,7 +826,15 @@ def create_sighting_object(request):
         stip_user = request.user
         feed = Feed.get_feeds_from_package_id(stip_user, package_id)
         stix_file_path = Feed.get_cached_file_path(feed_id)
-        stix2 = stip_sighting.convert_to_stix2_from_stix_file_path(stix_file_path)
+        if feed.stix_version.startswith('1.'):
+            stix2 = stip_sighting.convert_to_stix_1x_to_21(stix_file_path)
+        elif feed.stix_version == '2.0':
+            with open(stix_file_path, 'r') as fp:
+                stix20_json = json.load(fp)
+            stix2 = stip_sighting.convert_to_stix_20_to_21(stix20_json)
+        else:
+            with open(stix_file_path, 'r') as fp:
+                stix2 = parse(fp.read(), allow_custom=True)
 
         stix2 = stip_sighting.insert_sighting_object(
             stix2,
@@ -985,7 +994,8 @@ def _set_jira_param_v1(feed, feed_file_name_id, j, issue):
 
     # CSV添付
     # CSVの中身を取得する
-    content = get_csv_content(feed_file_name_id)
+    indicators = _get_indicators_from_feed_id(feed_file_name_id)
+    content = _get_csv_content_from_indicators(indicators)
     csv_attachment = io.StringIO()
     csv_attachment.write(content)
     csv_file_name = '%s.csv' % (package_id)
@@ -1089,13 +1099,13 @@ def get_csv_from_bundle_id(bundle_id, indicators=True, vulnerabilities=True, thr
     bundle = _get_bundle_from_bundle_id(bundle_id)
     ret = []
     for o_ in bundle['objects']:
-        if isinstance(o_, Indicator):
+        if isinstance(o_, sdo_20.Indicator) or isinstance(o_, sdo_21.Indicator):
             if not indicators:
                 continue
             type_, value = _get_indicator_from_pattern(o_)
             if type_:
                 ret.append((type_, value, _get_description(o_)))
-        elif isinstance(o_, Vulnerability):
+        elif isinstance(o_, sdo_20.Vulnerability) or isinstance(o_, sdo_21.Vulnerability):
             if not vulnerabilities:
                 continue
             if 'external_references' not in o_:
@@ -1104,7 +1114,7 @@ def get_csv_from_bundle_id(bundle_id, indicators=True, vulnerabilities=True, thr
                 type_, value = _get_cve_from_external_reference(er)
             if type_:
                 ret.append((type_, value, _get_description(o_)))
-        elif isinstance(o_, ObservedData):
+        elif isinstance(o_, sdo_20.ObservedData) or isinstance(o_, sdo_21.ObservedData):
             if not indicators:
                 continue
             if 'objects' not in o_:
@@ -1114,7 +1124,7 @@ def get_csv_from_bundle_id(bundle_id, indicators=True, vulnerabilities=True, thr
                 if cybox.type not in CYBOX_OBJECT_TYPE_LIST:
                     continue
                 ret = _append_cybox_csv(ret, cybox)
-        elif isinstance(o_, ThreatActor):
+        elif isinstance(o_, sdo_20.ThreatActor) or isinstance(o_, sdo_21.ThreatActor):
             if not threat_actors:
                 continue
             ret.append(('threat_actor', o_.name, _get_description(o_)))
@@ -1181,10 +1191,7 @@ def is_exist_indicator(request):
 def download_csv(request):
     feed_file_name_id = request.POST['feed_id']
     indicators = _get_indicators_from_feed_id(feed_file_name_id)
-    content = ''
-    for indicator in indicators:
-        type_, value, _ = indicator
-        content += '%s,%s\n' % (type_, value)
+    content = _get_csv_content_from_indicators(indicators)
     file_name = '%s.csv' % feed_file_name_id
     output = io.StringIO()
     output.write(content)
@@ -1193,13 +1200,11 @@ def download_csv(request):
     return response
 
 
-# feed情報からcsv contentを取得する
-def get_csv_content(feed_file_name_id):
-    feed_stix = get_feed_stix(feed_file_name_id)
-    # csv 作成
-    content = feed_stix.get_csv_content()
-    # CSVデータの先頭にBOMを付与
-    content = codecs.BOM_UTF8.decode('utf-8') + content
+def _get_csv_content_from_indicators(indicators):
+    content = ''
+    for indicator in indicators:
+        type_, value, _ = indicator
+        content += '%s,%s\n' % (type_, value)
     return content
 
 

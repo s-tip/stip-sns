@@ -16,11 +16,11 @@ def insert_sighting_object(
         stip_user):
 
     identity = _get_individual_identity(stip_user)
-    observed_data = get_observed_data_from_value(type_, value_, identity)
-    indicator = get_indicator_from_observed_data(stix2, observed_data)
+    observed_data = _get_observed_data_from_value(type_, value_, identity)
+    indicator = _get_indicator_from_observed_data(stix2, observed_data)
     if indicator is None:
         return stix2
-    external_references = [get_external_reference(indicator.description, observable_id)]
+    external_references = [_get_external_reference(indicator.description, observable_id)]
     if len(first_seen) == 0:
         first_seen = None
     if len(last_seen) == 0:
@@ -38,29 +38,62 @@ def insert_sighting_object(
     return stix2
 
 
-def get_external_reference(title, observable_id):
+def _get_external_reference(title, observable_id):
     return {
         'source_name': title,
         'external_id': observable_id
     }
 
 
-def convert_to_stix2_from_stix_file_path(stix_file_path):
+def convert_to_stix_1x_to_21(stix_file_path):
     # 1.x -> 2.0
     initialize_options()
     set_option_value('validator_args', '--silent')
     set_option_value('silent', 'True')
     stix20_str = elevate_file(stix_file_path)
-    stix20 = parse(replace_stix2_tlp(stix20_str))
+    stix20 = _replace_stix2_tlp(stix20_str)
+    # for stix2-elevator issue
+    stix20_new = {}
+    stix20_new['id'] = stix20['id']
+    stix20_new['spec_version'] = stix20['spec_version']
+    stix20_new['type'] = stix20['type']
+    stix20_new['objects'] = []
+    for o_ in stix20['objects']:
+        if o_['type'] == 'identity':
+            if 'identity_class' not in o_:
+                o_['identity_class'] = 'unknown'
+        stix20_new['objects'].append(o_)
+    stix20_str = json.dumps(stix20_new)
+    stix20_o = parse(stix20_str)
+    stix20_json = json.loads(str(stix20_o))
+    return convert_to_stix_20_to_21(stix20_json)
 
+
+def convert_to_stix_20_to_21(stix20_json):
     # 2.0 -> 2.1
-    stix20_json = json.loads(str(stix20))
-    stix21_json_str = step_bundle(stix20_json)
-    stix2 = parse(stix21_json_str)
+    initialize_options()
+    set_option_value('validator_args', '--silent')
+    set_option_value('silent', 'True')
+    stix21 = step_bundle(stix20_json)
+
+    # for stix2-elevator issue
+    stix21_new = {}
+    stix21_new['id'] = stix21['id']
+    stix21_new['type'] = stix21['type']
+    stix21_new['objects'] = []
+    for o_ in stix21['objects']:
+        if o_['type'] == 'indicator':
+            if 'pattern_type' not in o_:
+                o_['pattern_type'] = 'stix'
+        if o_['type'] == 'malware':
+            if 'is_family' not in o_:
+                o_['is_family'] = False
+        stix21_new['objects'].append(o_)
+    stix2 = parse(stix21_new, allow_custom=True)
     return stix2
 
 
-def replace_stix2_tlp(stix2_str):
+def _replace_stix2_tlp(stix2_str):
     stix2 = json.loads(stix2_str)
     modified_refs = {}
     objects = []
@@ -70,7 +103,7 @@ def replace_stix2_tlp(stix2_str):
             if object_['type'] == 'marking-definition':
                 if object_['definition_type'] == 'tlp':
                     color = object_['definition']['tlp'].lower()
-                    stix_tlp = get_stix2_tlp(color)
+                    stix_tlp = _get_stix2_tlp(color)
                     objects.append(stix_tlp)
                     modified_refs[object_['id']] = stix_tlp['id']
                     continue
@@ -101,19 +134,19 @@ def replace_stix2_tlp(stix2_str):
     return stix2
 
 
-def get_stix2_tlp(color):
+def _get_stix2_tlp(color):
     if color == 'white':
-        return get_stix2_tlp_white()
+        return _get_stix2_tlp_white()
     if color == 'green':
-        return get_stix2_tlp_green()
+        return _get_stix2_tlp_green()
     if color == 'amber':
-        return get_stix2_tlp_amber()
+        return _get_stix2_tlp_amber()
     if color == 'red':
-        return get_stix2_tlp_red()
+        return _get_stix2_tlp_red()
     return None
 
 
-def get_stix2_marking_definition():
+def _get_stix2_marking_definition():
     d = {}
     d['type'] = 'marking-definition'
     d['created'] = '2017-01-20T00:00:00.000Z'
@@ -121,39 +154,39 @@ def get_stix2_marking_definition():
     return d
 
 
-def get_stix2_tlp_white():
-    d = get_stix2_marking_definition()
+def _get_stix2_tlp_white():
+    d = _get_stix2_marking_definition()
     d['id'] = 'marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9'
     tlp = {'tlp': 'white'}
     d['definition'] = tlp
     return d
 
 
-def get_stix2_tlp_green():
-    d = get_stix2_marking_definition()
+def _get_stix2_tlp_green():
+    d = _get_stix2_marking_definition()
     d['id'] = 'marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da'
     tlp = {'tlp': 'green'}
     d['definition'] = tlp
     return d
 
 
-def get_stix2_tlp_amber():
-    d = get_stix2_marking_definition()
+def _get_stix2_tlp_amber():
+    d = _get_stix2_marking_definition()
     d['id'] = 'marking-definition--f88d31f6-486f-44da-b317-01333bde0b82'
     tlp = {'tlp': 'amber'}
     d['definition'] = tlp
     return d
 
 
-def get_stix2_tlp_red():
-    d = get_stix2_marking_definition()
+def _get_stix2_tlp_red():
+    d = _get_stix2_marking_definition()
     d['id'] = 'marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed'
     tlp = {'tlp': 'red'}
     d['definition'] = tlp
     return d
 
 
-def get_observed_data_from_value(type_, value_, identity):
+def _get_observed_data_from_value(type_, value_, identity):
     od_time_property = str(identity.created)
     objects = {}
     observed_data_object = None
@@ -182,7 +215,7 @@ def get_observed_data_from_value(type_, value_, identity):
     return observed_data
 
 
-def get_indicator_from_observed_data(stix2, observed_data):
+def _get_indicator_from_observed_data(stix2, observed_data):
     stix2_json = json.loads(str(observed_data))
 
     for object_ in stix2.objects:

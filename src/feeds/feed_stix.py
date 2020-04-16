@@ -186,20 +186,6 @@ class FeedStix(FeedStixCommon):
         stix_package.stix_header = stix_header
         return stix_package
 
-    # STIXのコンテンツからCSVファイルのイメージを作成して文字列を返却する
-    def get_csv_content(self):
-        lines = []
-        lines.extend(FeedStix.get_indicators(self.stix_package))
-        lines.extend(FeedStix.get_exploit_targets(self.stix_package))
-        # 1カラム目が種別
-        # 2カラム目が値
-        v = ''
-        for line in lines:
-            (type_, value, _) = line
-            s = '%s,%s\n' % (type_, value)
-            v += s
-        return v
-
     # リンクを外して、URLを最後に追加する
     def remove_hyperlink(self, text):
         # オブジェクトのタイトルを返す。URLはリストに追加する。
