@@ -997,20 +997,6 @@ $(function () {
   
   //CTIM-GV クリック
   $(document).on("click",".share-ctim-gv",function () {
-	  if ($(this).hasClass('selected') == true){
-		  //menu 非表示
-		  $(this).removeClass('selected')
-		  $(this).next('.share-ctim-gv-menu-ul').slideUp('fast');
-		  
-	  }else{
-		  //menu 表示
-		  $(this).addClass('selected');
-		  $(this).next('.share-ctim-gv-menu-ul').slideDown('fast');
-	  }
-  });
-
-  //CTIM-GV の 1.2 or 2.1 クリック
-  $(document).on("click",".share-ctim-gv-12,.share-ctim-gv-21",function () {
 	    $.ajax({
 	        url: '/feeds/get_ctim_gv_url/',
 	        data: {
@@ -1027,8 +1013,9 @@ $(function () {
 	    }).fail(function(XMLHttpRequest, textStatus, errorThrown){
 	   		var msg = XMLHttpRequest.statusText+ ': ' + XMLHttpRequest.responseText;
 	   		alert(msg);
-	   	});
+	   	})
   });
+
   
   //MISP クリック
   $(document).on("click",".share-misp",function () {
