@@ -109,11 +109,11 @@ def _get_indicator_object(indicator, stip_identity, tlp_marking_object):
     elif type_ == fec.JSON_OBJECT_TYPE_MD5:
         pattern = '[file:hashes.\'MD5\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_SHA1:
-        pattern = '[file:hashes.\'SHA1\' = \'%s\']' % (value)
+        pattern = '[file:hashes.\'SHA-1\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_SHA256:
-        pattern = '[file:hashes.\'SHA256\' = \'%s\']' % (value)
+        pattern = '[file:hashes.\'SHA-256\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_SHA512:
-        pattern = '[file:hashes.\'SHA512\' = \'%s\']' % (value)
+        pattern = '[file:hashes.\'SHA-512\' = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_FILE_NAME:
         pattern = '[file:name = \'%s\']' % (value)
     elif type_ == fec.JSON_OBJECT_TYPE_DOMAIN:
