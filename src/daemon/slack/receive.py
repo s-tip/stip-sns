@@ -5,8 +5,9 @@ import datetime
 import pytz
 import re
 import tempfile
-import slack
 import asyncio
+import nest_asyncio
+import slack
 import threading
 
 from django.http.request import HttpRequest
@@ -24,6 +25,8 @@ from feeds.views import KEY_INDICATORS as STIP_PARAMS_INDEX_INDICATORS
 from feeds.views import KEY_TTPS as STIP_PARAMS_INDEX_TTPS
 from feeds.views import KEY_TAS as STIP_PARAMS_INDEX_TAS
 from feeds.views import KEY_USERNAME as STIP_PARAMS_INDEX_USER_NAME
+
+nest_asyncio.apply()
 
 TLP_REGEX_PATTERN_STR = r'^.*{TLP:\s*([a-zA-Z]+)}.*$'
 TLP_REGEX_PATTERN = re.compile(
@@ -289,7 +292,9 @@ def receive_slack(**payload):
     receive_data = payload['data']
 
     try:
+        print('>>>post_stip_from_slack start')
         post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user)
+        print('>>>post_stip_from_slack end')
     except BaseException:
         import traceback
         traceback.print_exc()
