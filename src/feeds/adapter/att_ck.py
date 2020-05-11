@@ -1,5 +1,5 @@
 from stix2 import TAXIICollectionSource, Filter
-from taxii2client import Server, Collection
+from taxii2client.v20 import Server, Collection
 from feeds.mongo import Attck
 from ctirs.models import System
 
@@ -31,6 +31,7 @@ class ATTCK_Taxii_Server(object):
         try:
             proxies = System.get_request_proxies()
             attck_txs = Server("%s/taxii/" % (cls.ATT_CK_TAXII_SERVER), proxies=proxies)
+            print('>>> attck_txs: ' + str(attck_txs))
             api_root = attck_txs.api_roots[0]
             for collection in api_root.collections:
                 if collection.title == cls.COLLCETION_TITLE:
