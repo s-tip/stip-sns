@@ -53,6 +53,23 @@ class FeedStixCommon(object):
         marking_specification.controlled_structure = controlled_structure
         return marking_specification
 
+    @staticmethod
+    def _make_sharing_range_value(feed):
+        # Sharing Range
+        if feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_ALL:
+            sharing_range = 'CIC Community'
+        elif feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_GROUP:
+            sharing_range = 'Group: %s' % (feed.sharing_group.en_name)
+        elif feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_PEOPLE:
+            sharing_range = 'People: '
+            feed.save()
+            for sharing_stip_user in feed.tmp_sharing_people:
+                sharing_range += sharing_stip_user.username
+                sharing_range += ','
+            # 最後の改行を取り除く
+            sharing_range = sharing_range[:-1]
+        return sharing_range
+ 
     # STIX Header に Marking 情報を追加する
     def _get_stix_header_marking(self, feed, creator=None):
         if creator is None:
@@ -115,20 +132,7 @@ class FeedStixCommon(object):
             marking_region_code = self._make_marking_specification_statement(const.STIP_SNS_REGION_CODE_KEY, user.region.code)
             marking.add_marking(marking_region_code)
 
-        # Sharing Range
-        if feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_ALL:
-            sharing_range = 'CIC Community'
-        elif feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_GROUP:
-            sharing_range = 'Group: %s' % (feed.sharing_group.en_name)
-        elif feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_PEOPLE:
-            sharing_range = 'People: '
-            feed.save()
-            for sharing_stip_user in feed.tmp_sharing_people:
-                sharing_range += sharing_stip_user.username
-                sharing_range += ','
-            # 最後の改行を取り除く
-            sharing_range = sharing_range[:-1]
-        marking_sharing_range = self._make_marking_specification_statement('Sharing Range', sharing_range)
+        marking_sharing_range = self._make_marking_specification_statement('Sharing Range', FeedStixCommon._make_sharing_range_value(feed))
         marking.add_marking(marking_sharing_range)
 
         # referred_url

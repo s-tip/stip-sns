@@ -17,7 +17,6 @@ urlpatterns = [
     url(r'^track_comments/$', views.track_comments, name='track_comments'),
     url(r'^remove/$', views.remove, name='remove_feed'),
     url(r'^download_stix/$', views.download_stix, name='download_stix'),
-    url(r'^download_stix2/$', views.download_stix2, name='download_stix2'),
     url(r'^is_exist_indicator/$', views.is_exist_indicator, name='is_exist_indicator'),
     url(r'^download_csv/$', views.download_csv, name='download_csv'),
     url(r'^download_pdf/$', views.download_pdf, name='download_pdf'),

@@ -1,49 +1,49 @@
-import io
-import os
-import pytz
-import json
-import hashlib
-import tempfile
+import re
 import codecs
-import traceback
 import datetime
+import hashlib
+import io
+import json
+import os
+import tempfile
 import threading
 import requests
 import zipfile
+import traceback
 import iocextract
 import urllib
-import ctirs.models.sns.feeds.rs as rs
-import stip.common.const as const
-import feeds.feed_stix2_sighting as stip_sighting
-
-from decorators import ajax_required
+import pytz
 try:
     from jira import JIRA
     imported_jira = True
 except ImportError:
     imported_jira = False
 
-from stix.core.stix_package import STIXPackage
-from stix.extensions.marking.ais import AISMarkingStructure  # @UnusedImport
+import stip.common.const as const
+import ctirs.models.sns.feeds.rs as rs
+import feeds.feed_stix2_sighting as stip_sighting
+
+from decorators import ajax_required
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseServerError
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.context_processors import csrf
 from django.template.loader import render_to_string
-from django.http.response import JsonResponse
 
-from ctirs.models import STIPUser
-from ctirs.models import Feed, AttachFile, SNSConfig, System
-from feeds.feed_stix import FeedStix
-from feeds.feed_pdf import FeedPDF
-from feeds.feed_stix_like import FeedStixLike
-from feeds.feed_stix_comment import FeedStixComment
-from ctirs.models import Group
-from feeds.extractor.base import Extractor
-#from feeds.adapter.crowd_strike import search_indicator, get_report_info
+from ctirs.models import AttachFile, Feed, Group, SNSConfig, STIPUser, System
 from feeds.adapter.phantom import call_run_phantom_playbook
 from feeds.adapter.splunk import get_sightings
-from feeds.feed_stix2 import get_stix2_bundle
+from feeds.extractor.base import Extractor
+from feeds.feed_pdf import FeedPDF
+from feeds.feed_stix import FeedStix
+from feeds.feed_stix2 import get_post_stix2_bundle, get_attach_stix2_bundle, get_comment_stix2_bundle, get_like_stix2_bundle
+from feeds.feed_stix_common import FeedStixCommon
+from stix.core.stix_package import STIXPackage
+from stix2 import parse
+import stix2.v21.sdo as sdo_21
+import stix2.v20.sdo as sdo_20
+
 
 FEEDS_NUM_PAGES = 10
 
@@ -59,7 +59,7 @@ KEY_PEOPLE = 'people'
 KEY_INDICATORS = 'indicators'
 KEY_TTPS = 'ttps'
 KEY_TAS = 'tas'
-KEY_STIX2 = 'stix2'
+KEY_MULTI_LANGUAGE = 'multi_language'
 KEY_STIX2_TITLES = 'stix2_titles'
 KEY_STIX2_CONTENTS = 'stix2_contents'
 KEY_ATTACH_CONFIRM = 'attach_confirm'
@@ -216,7 +216,10 @@ def check(request):
     if feed_source != 'all':
         user = feed_source
     # 引数 rs 呼び出し用api_user,user(全員の場合はNone,それ以外はid STIP UserのID数値文字列)
-    feeds = Feed.get_feeds_after(last_feed_datetime=last_feed_datetime, api_user=request.user, user_id=user)
+    feeds = Feed.get_feeds_after(
+        last_feed_datetime=last_feed_datetime,
+        api_user=request.user,
+        user_id=user)
     count = len(feeds)
     return HttpResponse(count)
 
@@ -268,8 +271,7 @@ def post_common(request, user):
         raise Exception('No TLP.')
     feed.tlp = request.POST[KEY_TLP]
 
-    # stix2 投稿か？
-    is_stix2 = is_stix2_post(request)
+    # multi language 投稿か？
     stix2_titles = []
     stix2_contents = []
     if KEY_STIX2_TITLES in request.POST:
@@ -341,12 +343,6 @@ def post_common(request, user):
     # Sharing Rangeがall
     elif publication == PUBLICATION_VALUE_ALL:
         feed.sharing_range_type = const.SHARING_RANGE_TYPE_KEY_ALL
-    feed.save()
-
-    # ファイル添付対応
-    for f in request.FILES.values():
-        attach_file = save_attach_file(f.name, f, feed.package_id)
-        feed.files.add(attach_file)
 
     # indicators があるか
     if KEY_INDICATORS in request.POST:
@@ -373,19 +369,21 @@ def post_common(request, user):
         indicators,
         ttps,
         tas,
-        is_stix2,
+        request.FILES.values(),
         stix2_titles,
         stix2_contents)
+
+    feed.save()
     return feed
 
 
-# stix2 の投稿か?
-def is_stix2_post(request):
-    stix2 = False
-    if KEY_STIX2 in request.POST:
-        if request.POST[KEY_STIX2] == 'true':
-            stix2 = True
-    return stix2
+# Multi Language の投稿か?
+def is_multi_language(request):
+    is_multi_language = False
+    if KEY_MULTI_LANGUAGE in request.POST:
+        if request.POST[KEY_MULTI_LANGUAGE] == 'true':
+            is_multi_language = True
+    return is_multi_language
 
 
 @login_required
@@ -412,12 +410,12 @@ def confirm_indicator(request):
     else:
         attach_confirm = True
 
-    # stix2 の投稿可？
-    stix2 = is_stix2_post(request)
+    # Multi Language の投稿可？
+    multi_language = is_multi_language(request)
 
     # posts 取得
     posts = []
-    if stix2:
+    if multi_language:
         # STIX2.x の場合は post が複数ある
         if KEY_STIX2_CONTENTS in request.POST:
             stix2_contents = json.loads(request.POST[KEY_STIX2_CONTENTS])
@@ -552,7 +550,15 @@ def like(request):
     myliker = '%s %s' % (SNSConfig.get_sns_identity_name(), stip_user.username)
     like = myliker in likers
     # Like/Unlike 用の STIX イメージ作成
-    feed_stix_like = FeedStixLike(feed, like, creator=stip_user)
+    x_stip_sns_object_ref_version = '1.2'
+    bundle = get_like_stix2_bundle(
+        package_id,
+        x_stip_sns_object_ref_version,
+        like,
+        feed.tlp,
+        stip_user
+    )
+    _regist_bundle(stip_user, bundle)
 
     if like:
         # notify の unlike処理
@@ -560,13 +566,6 @@ def like(request):
     else:
         # notify の like処理
         stip_user.notify_liked(package_id, feed.user)
-
-    # 一時ファイルにstixの中身を書き出す
-    tmp_file_path = write_like_comment_attach_stix(feed_stix_like.get_xml_content())
-    # RS に登録する
-    rs.regist_ctim_rs(stip_user, feed_stix_like.file_name, tmp_file_path)
-    os.remove(tmp_file_path)
-
     # 現在の Like 情報を取得する
     likers = rs.get_likers_from_rs(stip_user, package_id)
     return HttpResponse(len(likers))
@@ -623,13 +622,18 @@ def post_comment(api_user, original_package_id, post, comment_user):
     if len(post) > 0:
         post = post[:10240]
     # Comment 用の STIX イメージ作成
-    feed_stix_comment = FeedStixComment(origin_feed, post, api_user)
-    # 一時ファイルにstixの中身を書き出す
-    tmp_file_path = write_like_comment_attach_stix(feed_stix_comment.get_xml_content())
-    # RS に登録する
-    rs.regist_ctim_rs(api_user, feed_stix_comment.file_name, tmp_file_path)
-    # 一時ファイルは削除
-    os.remove(tmp_file_path)
+    origin_stix_file = rs.get_package_info_from_package_id(
+        api_user, original_package_id
+    )
+    origin_stix_version = origin_stix_file['version']
+    bundle = get_comment_stix2_bundle(
+        original_package_id,
+        origin_stix_version,
+        post,
+        origin_feed.tlp,
+        comment_user
+    )
+    _regist_bundle(api_user, bundle)
     # 通知
     comment_user.notify_commented(original_package_id, origin_feed.user)
     notify_also_commented(original_package_id, origin_feed.user, comment_user)
@@ -708,13 +712,12 @@ def track_comments(request):
 @ajax_required
 def remove(request):
     # remove 処理
-    feed_file_name_id = request.POST['feed']
-    package_id = rs.convert_filename_to_package_id(feed_file_name_id)
+    package_id = request.POST['package_id']
     sns_config = SNSConfig.objects.get()
     rs_host = sns_config.rs_host
     remove_package_ids = None
 
-    url = rs_host + "/api/v1/stix_files_package_id/" + package_id
+    url = rs_host + '/api/v1/stix_files_package_id/' + package_id
     headers = rs._get_ctirs_api_http_headers(request.user)
     # RSへRemove処理
     r = requests.delete(
@@ -727,7 +730,7 @@ def remove(request):
     # cache original 削除
     if r.text:
         body = json.loads(r.text)
-        remove_package_ids = body.get("remove_package_ids")
+        remove_package_ids = body.get('remove_package_ids')
     if remove_package_ids:
         for remove_package_id in remove_package_ids:
             remove_file_name_id = rs.convert_package_id_to_filename(remove_package_id)
@@ -784,13 +787,21 @@ def share_misp(request):
         return HttpResponseServerError(str(e))
 
 
+def _get_indicators_from_feed_id(feed_id):
+    feed = Feed.objects.get(filename_pk=feed_id)
+    if feed.stix_version.startswith('1.'):
+        feed_stix = get_feed_stix(feed_id)
+        return FeedStix.get_indicators(feed_stix.stix_package, indicator_only=True)
+    else:
+        return get_csv_from_bundle_id(feed_id, indicators=True, vulnerabilities=False, threat_actors=False)
+
+
 @login_required
 @ajax_required
 def sighting_splunk(request):
     try:
         feed_file_name_id = request.GET['feed_id']
-        feed_stix = get_feed_stix(feed_file_name_id)
-        indicators = FeedStix.get_indicators(feed_stix.stix_package, indicator_only=True)
+        indicators = _get_indicators_from_feed_id(feed_file_name_id)
         # user は STIPUser
         stip_user = request.user
         sightings = get_sightings(stip_user, indicators)
@@ -815,7 +826,15 @@ def create_sighting_object(request):
         stip_user = request.user
         feed = Feed.get_feeds_from_package_id(stip_user, package_id)
         stix_file_path = Feed.get_cached_file_path(feed_id)
-        stix2 = stip_sighting.convert_to_stix2_from_stix_file_path(stix_file_path)
+        if feed.stix_version.startswith('1.'):
+            stix2 = stip_sighting.convert_to_stix_1x_to_21(stix_file_path)
+        elif feed.stix_version == '2.0':
+            with open(stix_file_path, 'r') as fp:
+                stix20_json = json.load(fp)
+            stix2 = stip_sighting.convert_to_stix_20_to_21(stix20_json)
+        else:
+            with open(stix_file_path, 'r') as fp:
+                stix2 = parse(fp.read(), allow_custom=True)
 
         stix2 = stip_sighting.insert_sighting_object(
             stix2,
@@ -848,8 +867,7 @@ def create_sighting_object(request):
 def run_phantom_playbook(request):
     try:
         feed_file_name_id = request.GET['feed_id']
-        feed_stix = get_feed_stix(feed_file_name_id)
-        indicators = FeedStix.get_indicators(feed_stix.stix_package)
+        indicators = _get_indicators_from_feed_id(feed_file_name_id)
         # user は STIPUser
         stip_user = request.user
         container_id = call_run_phantom_playbook(stip_user, indicators)
@@ -890,31 +908,12 @@ def call_jira(request):
             issuetype={
                 'name': SNSConfig.get_jira_type()
             })
-        # 添付があればそれもつける
-        for attach_file in feed.files.all():
-            file_path = Feed.get_attach_file_path(attach_file.package_id)
-            j.add_attachment(issue=issue, attachment=file_path, filename=str(attach_file.file_name))
-
-        # STIX添付
-        stix_package = STIXPackage.from_xml(feed.stix_file_path)
-        package_id = stix_package.id_
-        stix_file_name = '%s.xml' % (package_id)
-        j.add_attachment(issue=issue, attachment=feed.stix_file_path, filename=stix_file_name)
-
-        # CSV添付
-        # CSVの中身を取得する
-        content = get_csv_content(feed_file_name_id)
-        csv_attachment = io.StringIO()
-        csv_attachment.write(content)
-        csv_file_name = '%s.csv' % (package_id)
-        j.add_attachment(issue=issue, attachment=csv_attachment, filename=csv_file_name)
-
-        # PDF添付
-        feed_pdf = FeedPDF(feed, stix_package)
-        pdf_attachment = io.BytesIO()
-        feed_pdf.make_pdf_content(pdf_attachment, feed)
-        pdf_file_name = '%s.pdf' % (package_id)
-        j.add_attachment(issue=issue, attachment=pdf_attachment, filename=pdf_file_name)
+        if feed.stix_version.startswith('1.'):
+            j = _set_jira_param_v1(feed, feed_file_name_id, j, issue)
+        elif feed.stix_version.startswith('2.'):
+            j = _set_jira_param_v2(feed, feed_file_name_id, j, issue)
+        else:
+            return HttpResponseServerError('Invalid Stix Version')
 
         # isssue番号返却
         url = SNSConfig.get_jira_host() + '/projects/' + SNSConfig.get_jira_project() + '/issues/' + str(issue)
@@ -928,32 +927,111 @@ def call_jira(request):
         return HttpResponseServerError(str(e))
 
 
+def _set_jira_param_v2(feed, feed_file_name_id, j, issue):
+    for attach_file in feed.files.all():
+        attach_file_path = Feed.get_attach_file_path(attach_file.package_id)
+        j.add_attachment(
+            issue=issue,
+            attachment=attach_file_path,
+            filename=attach_file.file_name)
+
+    with open(feed.stix_file_path, 'r') as fp:
+        bundle = json.load(fp)
+    package_id = bundle['id']
+    stix_file_name = '%s.json' % (package_id)
+    j.add_attachment(
+        issue=issue,
+        attachment=feed.stix_file_path,
+        filename=stix_file_name)
+
+    indicators = get_csv_from_bundle_id(
+        feed.package_id,
+        indicators=True,
+        vulnerabilities=True,
+        threat_actors=False)
+    if len(indicators) > 0:
+        content = ''
+        for indicator in indicators:
+            type_, value, _ = indicator
+            content += '%s,%s\n' % (type_, value)
+        csv_attachment = io.StringIO()
+        csv_attachment.write(content)
+        csv_file_name = '%s.csv' % (package_id)
+        j.add_attachment(
+            issue=issue,
+            attachment=csv_attachment,
+            filename=csv_file_name)
+
+    # PDF
+    feed_pdf = FeedPDF()
+    pdf_attachment = io.BytesIO()
+    feed_pdf.make_pdf_content(pdf_attachment, feed)
+    pdf_file_name = '%s.pdf' % (package_id)
+    j.add_attachment(
+        issue=issue,
+        attachment=pdf_attachment,
+        filename=pdf_file_name)
+    return j
+
+
+def _set_jira_param_v1(feed, feed_file_name_id, j, issue):
+    # 添付があればそれもつける
+    for attach_file in feed.files.all():
+        file_path = Feed.get_attach_file_path(attach_file.package_id)
+        j.add_attachment(
+            issue=issue,
+            attachment=file_path,
+            filename=str(attach_file.file_name))
+
+    # STIX添付
+    stix_package = STIXPackage.from_xml(feed.stix_file_path)
+    package_id = stix_package.id_
+    stix_file_name = '%s.xml' % (package_id)
+    j.add_attachment(
+        issue=issue,
+        attachment=feed.stix_file_path,
+        filename=stix_file_name)
+
+    # CSV添付
+    # CSVの中身を取得する
+    indicators = _get_indicators_from_feed_id(feed_file_name_id)
+    content = _get_csv_content_from_indicators(indicators)
+    csv_attachment = io.StringIO()
+    csv_attachment.write(content)
+    csv_file_name = '%s.csv' % (package_id)
+    j.add_attachment(
+        issue=issue,
+        attachment=csv_attachment,
+        filename=csv_file_name)
+
+    # PDF添付
+    feed_pdf = FeedPDF()
+    pdf_attachment = io.BytesIO()
+    feed_pdf.make_pdf_content(pdf_attachment, feed)
+    pdf_file_name = '%s.pdf' % (package_id)
+    j.add_attachment(
+        issue=issue,
+        attachment=pdf_attachment,
+        filename=pdf_file_name)
+    return j
+
+
 @login_required
 def download_stix(request):
-    feed_file_name_id = request.GET['feed_id']
-    # cache の STIX を返却
-    stix_file_path = Feed.get_cached_file_path(feed_file_name_id)
-    # response作成
-    file_name = '%s.xml' % (feed_file_name_id)
-    with open(stix_file_path, 'r', encoding='utf-8') as fp:
-        output = io.StringIO()
-        output.write(fp.read())
-        response = HttpResponse(output.getvalue(), content_type='application/xml')
-        response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
-    return response
+    package_id = request.GET['package_id']
+    version = request.GET['version']
 
+    # rs から stix の中身を取得
+    content = rs.get_content_from_rs(
+        request.user, package_id, version)
 
-@login_required
-def download_stix2(request):
-    feed_file_name_id = request.POST['feed_id']
-    stix_file_path = rs.get_stix_file_path(request.user, feed_file_name_id)
-    # response作成
-    file_name = '%s.json' % (feed_file_name_id)
-    with open(stix_file_path, 'r', encoding='utf-8') as fp:
-        output = io.StringIO()
-        output.write(fp.read())
-        response = HttpResponse(output.getvalue(), content_type='application/json')
-        response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
+    if version.startswith('2.'):
+        response = HttpResponse(content, content_type='application/json')
+        file_name = '%s.json' % (package_id)
+    else:
+        response = HttpResponse(content, content_type='application/xml')
+        file_name = '%s.xml' % (package_id)
+    response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
     return response
 
 
@@ -962,24 +1040,159 @@ def get_feed_stix(feed_file_name_id):
     return FeedStix(stix_file_path=stix_file_path)
 
 
+def _get_bundle_from_bundle_id(bundle_id):
+    stix_file_path = Feed.get_cached_file_path(bundle_id)
+    with open(stix_file_path, 'r') as fp:
+        bundle = parse(fp.read(), allow_custom=True)
+    return bundle
+
+
+stix2_pattern_ipv4_reg_str = "ipv4-addr:value\s*=\s*'?(.+)'"
+stix2_pattern_ipv4_reg = re.compile(stix2_pattern_ipv4_reg_str)
+stix2_pattern_url_reg_str = "url:value\s*=\s*'?(.+)'"
+stix2_pattern_url_reg = re.compile(stix2_pattern_url_reg_str)
+stix2_pattern_filename_reg_str = "file:name\s*=\s*'?(.+)'"
+stix2_pattern_filename_reg = re.compile(stix2_pattern_filename_reg_str)
+stix2_pattern_md5_reg_str = "file:hashes.'MD5'\s*=\s*'?(.+)'"
+stix2_pattern_md5_reg = re.compile(stix2_pattern_md5_reg_str)
+stix2_pattern_sha1_reg_str = "file:hashes.'SHA1'\s*=\s*'?(.+)'"
+stix2_pattern_sha1_reg = re.compile(stix2_pattern_sha1_reg_str)
+stix2_pattern_sha256_reg_str = "file:hashes.'SHA256'\s*=\s*'?(.+)'"
+stix2_pattern_sha256_reg = re.compile(stix2_pattern_sha256_reg_str)
+stix2_pattern_sha512_reg_str = "file:hashes.'SHA512'\s*=\s*'?(.+)'"
+stix2_pattern_sha512_reg = re.compile(stix2_pattern_sha512_reg_str)
+stix2_pattern_domain_reg_str = "domain-name:value\s*=\s*'?(.+)'"
+stix2_pattern_domain_reg = re.compile(stix2_pattern_domain_reg_str)
+stix2_pattern_email_reg_str = "email-addr:value\s*=\s*'?(.+)'"
+stix2_pattern_email_reg = re.compile(stix2_pattern_email_reg_str)
+CYBOX_OBJECT_TYPE_LIST = ['ipv4-addr', 'url', 'domain-name', 'email-addr', 'file']
+
+
+def _get_csv_from_cybox(cybox):
+    if cybox.type == 'ipv4-addr':
+        return [('ipv4', cybox.value)]
+    if cybox.type == 'url':
+        return [('url', cybox.value)]
+    if cybox.type == 'domain-name':
+        return [('domain', cybox.value)]
+    if cybox.type == 'email-addr':
+        return [('e-mail', cybox.value)]
+    if cybox.type == 'file':
+        ret = []
+        if 'name' in cybox:
+            ret.append(('file_name', cybox.name))
+        if 'hashes' in cybox:
+            hashes = cybox.hashes
+            if 'MD5' in hashes:
+                ret.append(('md5', hashes['MD5']))
+            if 'SHA-1' in hashes:
+                ret.append(('sha1', hashes['SHA-1']))
+            if 'SHA-256' in hashes:
+                ret.append(('sha256', hashes['SHA-256']))
+            if 'SHA-512' in hashes:
+                ret.append(('sha512', hashes['SHA-512']))
+        return ret
+    return [(None, None)]
+
+
+def get_csv_from_bundle_id(bundle_id, indicators=True, vulnerabilities=True, threat_actors=False):
+    bundle = _get_bundle_from_bundle_id(bundle_id)
+    ret = []
+    for o_ in bundle['objects']:
+        if isinstance(o_, sdo_20.Indicator) or isinstance(o_, sdo_21.Indicator):
+            if not indicators:
+                continue
+            type_, value = _get_indicator_from_pattern(o_)
+            if type_:
+                ret.append((type_, value, _get_description(o_)))
+        elif isinstance(o_, sdo_20.Vulnerability) or isinstance(o_, sdo_21.Vulnerability):
+            if not vulnerabilities:
+                continue
+            if 'external_references' not in o_:
+                continue
+            for er in o_.external_references:
+                type_, value = _get_cve_from_external_reference(er)
+            if type_:
+                ret.append((type_, value, _get_description(o_)))
+        elif isinstance(o_, sdo_20.ObservedData) or isinstance(o_, sdo_21.ObservedData):
+            if not indicators:
+                continue
+            if 'objects' not in o_:
+                continue
+            for key in o_.objects.keys():
+                cybox = o_.objects[key]
+                if cybox.type not in CYBOX_OBJECT_TYPE_LIST:
+                    continue
+                ret = _append_cybox_csv(ret, cybox)
+        elif isinstance(o_, sdo_20.ThreatActor) or isinstance(o_, sdo_21.ThreatActor):
+            if not threat_actors:
+                continue
+            ret.append(('threat_actor', o_.name, _get_description(o_)))
+        else:
+            if not indicators:
+                continue
+            if o_.type not in CYBOX_OBJECT_TYPE_LIST:
+                continue
+            ret = _append_cybox_csv(ret, o_)
+    return ret
+
+
+def _append_cybox_csv(csv_list, cybox):
+    cybox_list = _get_csv_from_cybox(cybox)
+    for cybox in cybox_list:
+        type_, value = cybox
+        if type_:
+            csv_list.append((type_, value, ''))
+    return csv_list
+
+
+def _get_description(o_):
+    if 'description' in o_:
+        return o_['description']
+    else:
+        return ''
+
+
+def _get_cve_from_external_reference(er):
+    return ('cve', er['external_id'])
+
+
+def _get_indicator_from_pattern(indicator):
+    pattern_str = indicator.pattern
+    stix2_patterns = [
+        ('ipv4', stix2_pattern_ipv4_reg),
+        ('url', stix2_pattern_url_reg),
+        ('file_name', stix2_pattern_filename_reg),
+        ('md5', stix2_pattern_md5_reg),
+        ('sha1', stix2_pattern_sha1_reg),
+        ('sha256', stix2_pattern_sha256_reg),
+        ('sha512', stix2_pattern_sha512_reg),
+        ('e-mail', stix2_pattern_email_reg),
+        ('domain', stix2_pattern_domain_reg),
+    ]
+    for stix2_pattern in stix2_patterns:
+        type_ = stix2_pattern[0]
+        pattern = stix2_pattern[1]
+        result = pattern.search(pattern_str)
+        if result:
+            return (type_, result[1])
+    return (None, None)
+
+
 @login_required
 @ajax_required
 def is_exist_indicator(request):
     feed_file_name_id = request.POST['feed_id']
-    feed_stix = get_feed_stix(feed_file_name_id)
-    # csv 作成
-    content = feed_stix.get_csv_content()
-    # 長さが0ならば存在しない
-    return HttpResponse(len(content) != 0)
+    indicators = _get_indicators_from_feed_id(feed_file_name_id)
+    return HttpResponse(len(indicators) != 0)
 
 
 @login_required
 def download_csv(request):
     feed_file_name_id = request.POST['feed_id']
-    # CSVの中身を取得する
-    content = get_csv_content(feed_file_name_id)
-    # response作成
-    file_name = '%s.csv' % (rs.convert_package_id_to_filename(feed_file_name_id))
+    indicators = _get_indicators_from_feed_id(feed_file_name_id)
+    content = _get_csv_content_from_indicators(indicators)
+    file_name = '%s.csv' % feed_file_name_id
     output = io.StringIO()
     output.write(content)
     response = HttpResponse(output.getvalue(), content_type='text/csv')
@@ -987,13 +1200,11 @@ def download_csv(request):
     return response
 
 
-# feed情報からcsv contentを取得する
-def get_csv_content(feed_file_name_id):
-    feed_stix = get_feed_stix(feed_file_name_id)
-    # csv 作成
-    content = feed_stix.get_csv_content()
-    # CSVデータの先頭にBOMを付与
-    content = codecs.BOM_UTF8.decode('utf-8') + content
+def _get_csv_content_from_indicators(indicators):
+    content = ''
+    for indicator in indicators:
+        type_, value, _ = indicator
+        content += '%s,%s\n' % (type_, value)
     return content
 
 
@@ -1004,10 +1215,9 @@ def download_pdf(request):
     package_id = request.POST['package_id']
 
     # STIX 情報作成
-    feed_stix = get_feed_stix(feed_file_name_id)
     feed = Feed.get_feeds_from_package_id(request.user, package_id)
     # PDF 情報作成
-    feed_pdf = FeedPDF(feed, feed_stix.stix_package)
+    feed_pdf = FeedPDF()
 
     # HttpResponse作成
     file_name = '%s.pdf' % (feed_file_name_id)
@@ -1076,7 +1286,11 @@ def save_attach_file(filename, content, id_):
         md5 = hashlib.md5(v).hexdigest()
 
     # rename
-    file_path = attach_dir + md5
+    if attach_dir[-1] == '/':
+        d_dir = attach_dir[:-1]
+    else:
+        d_dir = attach_dir
+    file_path = d_dir + md5
     os.rename(tmp_file_path, file_path)
 
     # ファイルパスを保存
@@ -1110,7 +1324,7 @@ def post_rs_indicator_matching_comment(request, feed, id_, concierge_user):
 
 
 # CrowdStrike に関連 Report を問い合わせ、結果をコメント表示
-#def post_crowd_strike_indicator_matching_comment(feed, id_, concierge_user, json_indicators):
+# def post_crowd_strike_indicator_matching_comment(feed, id_, concierge_user, json_indicators):
 #    try:
 #        realted_reports = []
 #        phantom_indicators = []
@@ -1155,6 +1369,34 @@ def post_rs_indicator_matching_comment(request, feed, id_, concierge_user):
 #        pass
 
 
+def _get_package_name_from_bundle(bundle):
+    try:
+        for o_ in bundle['objects']:
+            if o_['type'] == const.STIP_STIX2_X_STIP_SNS_TYPE:
+                return o_['name']
+        return bundle.id
+    except Exception:
+        return bundle.id
+
+
+def _regist_bundle(feed_user, bundle):
+    _, stix2_file_path = tempfile.mkstemp()
+    with open(stix2_file_path, 'w', encoding='utf-8') as fp:
+        fp.write(bundle.serialize(True, ensure_ascii=False))
+    # RS に登録する
+    package_name = _get_package_name_from_bundle(bundle)
+    rs.regist_ctim_rs(feed_user, package_name, stix2_file_path)
+    os.remove(stix2_file_path)
+    return
+
+
+def get_produced_str(bundle):
+    for o_ in bundle['objects']:
+        if o_['type'] == const.STIP_STIX2_X_STIP_SNS_TYPE:
+            return o_['created'].strftime('%Y-%m-%d %H:%M:%S.%f')
+    return None
+
+
 # feedを保存する
 def save_post(request,
               feed,
@@ -1162,65 +1404,98 @@ def save_post(request,
               json_indicators=[],
               ttps=[],
               tas=[],
-              is_stix2=False,
+              request_files=[],
               stix2_titles=[],
               stix2_contents=[]):
     if len(post) == 0:
         return None
 
     feed.post = post[:10240]
+    sharing_range = FeedStixCommon._make_sharing_range_value(feed)
 
-    # STIX 2.x 出力の場合は RS 登録する　
-    if is_stix2:
-        bundle = get_stix2_bundle(json_indicators,
-                                  ttps,
-                                  tas,
-                                  feed.title,
-                                  post,
-                                  stix2_titles,
-                                  stix2_contents,
-                                  request.user)
-        feed.stix2_package_id = bundle.id
-        _, stix2_file_path = tempfile.mkstemp()
-        with open(stix2_file_path, 'w', encoding='utf-8') as fp:
-            fp.write(bundle.serialize(True, ensure_ascii=False))
-        # RS に登録する
-        rs.regist_ctim_rs(feed.user, bundle.id, stix2_file_path)
-        os.remove(stix2_file_path)
+    tmp_feed_files = []
+    x_stip_sns_attachment_refs = []
+    for feed_file in request_files:
+        x_stip_sns_attachment_bundle, x_stip_sns_attachment_id = get_attach_stix2_bundle(
+            feed.tlp,
+            feed.referred_url,
+            sharing_range,
+            feed_file,
+            request.user)
+        d = {}
+        d[const.STIP_STIX2_SNS_ATTACHMENT_BUNDLE] = x_stip_sns_attachment_bundle.id
+        d[const.STIP_STIX2_SNS_ATTACHMENT_STIP_SNS] = x_stip_sns_attachment_id
 
-    # stixファイルを作成する
-    feed_stix = FeedStix(
-        feed=feed,
-        indicators=json_indicators,
-        ttps=ttps,
-        tas=tas
-    )
+        x_stip_sns_attachment_refs.append(d)
+        # StixFiles register
+        _regist_bundle(feed.user, x_stip_sns_attachment_bundle)
 
-    # Slack 投稿用の添付ファイル作成
-    if feed.files.count() > 1:
+        feed_file.produced_str = get_produced_str(x_stip_sns_attachment_bundle)
+        feed_file.bundle_id = x_stip_sns_attachment_bundle.id
+        tmp_feed_files.append(feed_file)
+    if len(x_stip_sns_attachment_refs) == 0:
+        x_stip_sns_attachment_refs = None
+
+    bundle = get_post_stix2_bundle(
+        json_indicators,
+        ttps,
+        tas,
+        feed.title,
+        post,
+        feed.tlp,
+        feed.referred_url,
+        sharing_range,
+        stix2_titles,
+        stix2_contents,
+        x_stip_sns_attachment_refs,
+        request.user)
+
+    feed.stix2_package_id = bundle.id
+    feed.package_id = bundle.id
+
+    for feed_file in tmp_feed_files:
+        Feed.create_feeds_record_v2(
+            feed.user,
+            feed_file.bundle_id,
+            feed.user.id,
+            feed_file.produced_str,
+            '2.1')
+
+    _regist_bundle(feed.user, bundle)
+    produced_str = get_produced_str(bundle)
+    feed = Feed.create_feeds_record_v2(
+        feed.user,
+        bundle.id,
+        feed.user.id,
+        produced_str,
+        '2.1',
+        feed)
+    resp = rs.get_package_info_from_package_id(feed.user, bundle.id)
+
+    feed.date = Feed.get_datetime_from_string(resp['produced'])
+    feed.stix_file_path = _write_stix_file(bundle)
+    feed.save()
+
+    if len(tmp_feed_files) > 1:
         # ファイルが複数
         # ファイルが添付されている場合は file upload をコメント付きで
         temp = tempfile.NamedTemporaryFile()
         with zipfile.ZipFile(temp.name, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
-            for file_ in feed.files.all():
-                new_zip.write(file_.file_path, arcname=file_.file_name)
-        upploaded_filename = 'uploaded_files.zip'
-    elif feed.files.count() == 1:
+            for file_ in tmp_feed_files:
+                file_.seek(0)
+                new_zip.writestr(file_.name, file_.read())
+        uploaded_filename = 'uploaded_files.zip'
+    elif len(tmp_feed_files) == 1:
         # ファイルが単数
-        temp = tempfile.NamedTemporaryFile()
-        file_ = feed.files.get()
-        with open(file_.file_path, 'rb') as fp:
-            temp.write(fp.read())
-            temp.seek(0)
-        upploaded_filename = file_.file_name
+        temp = tempfile.NamedTemporaryFile(delete=False)
+        input_file = tmp_feed_files[0]
+        input_file.seek(0)
+        with open(temp.name, 'wb') as fp:
+            fp.write(input_file.read())
+        uploaded_filename = input_file.name
     else:
         temp = None
 
-    feed.stix_file_path = write_stix_file(feed, feed_stix)
-    # package_id取得
-    feed.package_id = feed_stix.get_stix_package().id_
-
-    # slack 投稿
     if feed.user.username != const.SNS_SLACK_BOT_ACCOUNT:
         slack_post = ''
         slack_post += '[%s]\n' % (iocextract.defang(feed.title))
@@ -1247,7 +1522,7 @@ def save_post(request,
                         initial_comment=slack_post,
                         channels=post_slack_channel,
                         file=open(temp.name, 'rb'),
-                        filename=upploaded_filename)
+                        filename=uploaded_filename)
                 finally:
                     # 閉じると同時に削除される
                     temp.close()
@@ -1260,56 +1535,46 @@ def save_post(request,
                 except Exception:
                     pass
 
-    # 添付 ファイルstixを送る
-    for attachment_file in feed_stix.attachment_files:
-        file_name = attachment_file.stix_header.title
-        # 一時ファイルにstixの中身を書き出す
-        tmp_file_path = write_like_comment_attach_stix(attachment_file.to_xml())
-        # RS に登録する
-        rs.regist_ctim_rs(feed.user, file_name, tmp_file_path)
-        # 登録後にファイルは削除
-        os.remove(tmp_file_path)
-    # 添付ファイル STIX を　RS に登録後、投稿 STIX を送る
-    rs.regist_ctim_rs(feed.user, feed.title, feed.stix_file_path)
-
-    # 添付ファイル削除
-    for file_ in feed.files.all():
-        os.remove(file_.file_path)
-
-    # indicatorが存在していれば chatbot 起動する
-    indicators = feed_stix.get_stix_package().indicators
-    if indicators is not None and len(indicators) != 0:
-        # chatbot指定があれば起動する
-        if const.SNS_GV_CONCIERGE_ACCOUNT is not None:
-            try:
-                concierge_user = STIPUser.objects.get(username=const.SNS_GV_CONCIERGE_ACCOUNT)
-                # 非同期で RS から matching 情報を取得しコメントをつける
-                matching_comment_th = threading.Thread(target=post_rs_indicator_matching_comment, args=(request, feed, feed_stix.get_stix_package().id_, concierge_user))
-                matching_comment_th.daemon = True
-                matching_comment_th.start()
-            except Exception:
-                pass
-#        if const.SNS_FALCON_CONCIERGE_ACCOUNT is not None:
-#            try:
-#                concierge_user = STIPUser.objects.get(username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
-#                # 非同期で CrowdStrike から indicator に該当する report を取得しコメントをつける
-#                crowd_strike_report_th = threading.Thread(target=post_crowd_strike_indicator_matching_comment, args=(feed, feed_stix.get_stix_package().id_, concierge_user, json_indicators))
-#                crowd_strike_report_th.daemon = True
-#                crowd_strike_report_th.start()
-#            except Exception:
-#                pass
-
+    if len(json_indicators) > 0:
+        run_gv_concierge_bot(request, bundle)
+        # run_falcon_concierge_bot(request, bundle)
+        # run_falcon_concierge_bot(bundle, json_indicators)
     return
 
 
-# feedの中身からSTIX contentを作成し、ファイル出力する
-# filepathを返却する
-def write_stix_file(feed, feed_stix):
-    stix_file_path = '%s%s%s' % (const.STIX_FILE_DIR, str(feed.filename_pk), '.xml')
+# def run_falcon_concierge_bot(bundle, json_indicators):
+#     if const.SNS_FALCON_CONCIERGE_ACCOUNT is not None:
+#         try:
+#             concierge_user = STIPUser.objects.get(
+#                 username=const.SNS_FALCON_CONCIERGE_ACCOUNT)
+#             crowd_strike_report_th = threading.Thread(
+#                 target=post_crowd_strike_indicator_matching_comment,
+#                 args=(feed, bundle.id, concierge_user, json_indicators))
+#             crowd_strike_report_th.daemon = True
+#             crowd_strike_report_th.start()
+#         except Exception:
+#             import traceback
+#             traceback.print_exc()
+
+
+def run_gv_concierge_bot(request, bundle):
+    if const.SNS_GV_CONCIERGE_ACCOUNT is not None:
+        try:
+            concierge_user = STIPUser.objects.get(
+                username=const.SNS_GV_CONCIERGE_ACCOUNT)
+            matching_comment_th = threading.Thread(
+                target=post_rs_indicator_matching_comment,
+                args=(request, feed, bundle.id, concierge_user))
+            matching_comment_th.daemon = True
+            matching_comment_th.start()
+        except Exception:
+            pass
+
+
+def _write_stix_file(bundle):
+    stix_file_path = '%s%s%s' % (const.STIX_FILE_DIR, bundle.id, '.json')
     with open(stix_file_path, 'w', encoding='utf-8') as fp:
-        # STIXの中身を追加
-        stix_content = feed_stix.get_xml_content()
-        fp.write(stix_content.decode())
+        fp.write(str(bundle))
     return stix_file_path
 
 
