@@ -18,7 +18,6 @@ def notifications(request):
                   {'notifications': notifications})
 
 
-@login_required
 @ajax_required
 def last_notifications(request):
     user = request.user
@@ -33,7 +32,6 @@ def last_notifications(request):
                   {'notifications': notifications})
 
 
-@login_required
 @ajax_required
 def check_notifications(request):
     user = request.user
