@@ -302,7 +302,6 @@ def save_uploaded_picture(request):
     return redirect('/settings/picture/')
 
 
-@login_required
 @ajax_required
 # country_code からadministrative_area情報を返却する
 def get_administrative_area(request):
