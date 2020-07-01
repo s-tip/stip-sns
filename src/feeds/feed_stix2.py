@@ -156,10 +156,14 @@ def _get_x_stip_sns_author(stip_user):
         d[const.STIP_STIX2_SNS_AUTHOR_AFFILIATION_KEY] = stip_user.affiliation
     except AttributeError:
         d[const.STIP_STIX2_SNS_AUTHOR_AFFILIATION_KEY] = ''
+    if not d[const.STIP_STIX2_SNS_AUTHOR_AFFILIATION_KEY]:
+        d[const.STIP_STIX2_SNS_AUTHOR_AFFILIATION_KEY] = ''
 
     try:
         d[const.STIP_STIX2_SNS_AUTHOR_CI_KEY] = stip_user.ci
     except AttributeError:
+        d[const.STIP_STIX2_SNS_AUTHOR_CI_KEY] = ''
+    if not d[const.STIP_STIX2_SNS_AUTHOR_CI_KEY]:
         d[const.STIP_STIX2_SNS_AUTHOR_CI_KEY] = ''
 
     try:
