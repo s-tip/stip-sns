@@ -821,7 +821,7 @@ def create_sighting_object(request):
                 stix20_json = json.load(fp)
             stix2 = stip_sighting.convert_to_stix_20_to_21(stix20_json)
         else:
-            with open(stix_file_path, 'r') as fp:
+            with open(stix_file_path, 'rb') as fp:
                 stix2 = parse(fp.read(), allow_custom=True)
 
         stix2 = stip_sighting.insert_sighting_object(
@@ -1028,7 +1028,7 @@ def get_feed_stix(feed_file_name_id):
 
 def _get_bundle_from_bundle_id(bundle_id):
     stix_file_path = Feed.get_cached_file_path(bundle_id)
-    with open(stix_file_path, 'r') as fp:
+    with open(stix_file_path, 'rb') as fp:
         bundle = parse(fp.read(), allow_custom=True)
     return bundle
 
