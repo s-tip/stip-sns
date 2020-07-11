@@ -5,6 +5,7 @@ import feeds.extractor.common as fec
 import stip.common.const as const
 from stix2.v21.bundle import Bundle
 from stix2.v21.sdo import Report, Vulnerability, ThreatActor, Indicator, Identity
+from stix2.v21.sro import Relationship
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
 from stip.common.x_stip_sns import StipSns
 from ctirs.models import SNSConfig
@@ -224,6 +225,15 @@ def _get_individual_identity(stip_user):
     return identity
 
 
+def _get_relationship_between_individual_to_organization(individual, organization):
+    relationship = Relationship(
+        relationship_type='belongs_to',
+        source_ref=individual,
+        target_ref=organization
+    )
+    return relationship
+
+
 def _get_organization_identity_sectors(ci):
     ci_table = {
         'Information and Communication Services': ['telecommunications'],
@@ -318,6 +328,10 @@ def get_post_stix2_bundle(
     bundle = Bundle(individual_identity, tlp_marking_object)
     if organization_identity:
         bundle.objects.append(organization_identity)
+        bundle.objects.append(
+            _get_relationship_between_individual_to_organization(
+                individual_identity,
+                organization_identity))
 
     # objects に Vulnerability 追加
     for ttp in ttps:
@@ -463,6 +477,10 @@ def get_attach_stix2_bundle(
         stip_sns)
     if organization_identity:
         bundle.objects.append(organization_identity)
+        bundle.objects.append(
+            _get_relationship_between_individual_to_organization(
+                individual_identity,
+                organization_identity))
     return bundle, stip_sns.id
 
 
@@ -553,6 +571,10 @@ def get_comment_stix2_bundle(
         stip_sns)
     if organization_identity:
         bundle.objects.append(organization_identity)
+        bundle.objects.append(
+            _get_relationship_between_individual_to_organization(
+                individual_identity,
+                organization_identity))
     return bundle
 
 
@@ -610,4 +632,8 @@ def get_like_stix2_bundle(
         stip_sns)
     if organization_identity:
         bundle.objects.append(organization_identity)
+        bundle.objects.append(
+            _get_relationship_between_individual_to_organization(
+                individual_identity,
+                organization_identity))
     return bundle
