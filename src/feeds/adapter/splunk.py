@@ -84,6 +84,16 @@ def get_splunk_timestamp(dt):
     return s
 
 
+LANG_DICT = {
+        'en': 'en-US',
+        'pt-br': 'en-US',
+        'es': 'en-US',
+        'ja': 'ja-JP',
+        'fr': 'fr-FR',
+        'zh-cn': 'zh-CN',
+}
+
+
 def get_sighting(stip_user, type_, value, id_, earliest_dt=None, latest_dt=None):
     kwargs = {
         'earliest_time': '' if earliest_dt is None else get_splunk_timestamp(earliest_dt),
@@ -95,7 +105,8 @@ def get_sighting(stip_user, type_, value, id_, earliest_dt=None, latest_dt=None)
     web_query = sns_profile.splunk_query.replace('%s', value)
     api_query = web_query + STATS_QUERY
     sighting = get_oneshot_query_count(con, api_query, stip_user.timezone, **kwargs)
-    sighting['url'] = '%s://%s:%d/app/search/search?q=%s' % (sns_profile.splunk_scheme, sns_profile.splunk_host, sns_profile.splunk_web_port, urllib.parse.quote(web_query))
+    sighting['url'] = '%s://%s:%d/%s/app/search/search?q=%s' % (sns_profile.splunk_scheme, sns_profile.splunk_host, sns_profile.splunk_web_port, LANG_DICT[stip_user.language], urllib.parse.quote(web_query))
+
     sighting['type'] = type_
     sighting['value'] = value
     sighting['observable_id'] = id_
