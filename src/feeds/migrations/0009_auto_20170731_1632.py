@@ -26,6 +26,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='feed',
             name='sharing_range_type',
-            field=models.CharField(choices=[(b'all', b'With the CSC Community'), (b'group', b'With a group'), (b'people', b'With people')], default=b'all', max_length=10),
+            field=models.CharField(choices=[(b'all', b'With All'), (b'group', b'With a group'), (b'people', b'With people')], default=b'all', max_length=10),
         ),
     ]

@@ -370,8 +370,8 @@ msgid "Comment"
 msgstr "コメント"
 
 #: src/feeds/templates/feeds/partial_feed.html:147
-msgid "CSC Community"
-msgstr "CSC コミュニティ"
+msgid "All"
+msgstr "全ユーザ"
 
 #: src/feeds/templates/feeds/partial_feed.html:150
 #, fuzzy
@@ -1944,8 +1944,8 @@ msgstr "ログアウト"
 #~ msgid "Sector"
 #~ msgstr "業種"
 
-#~ msgid "With the CSC Community"
-#~ msgstr "CSC コミュニティ"
+#~ msgid "With All"
+#~ msgstr "全ユーザ"
 
 #~ msgid "SHARING_GROUP_Commercial Facilities"
 #~ msgstr "コマーシャル"
