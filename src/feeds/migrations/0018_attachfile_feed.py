@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                 ('title', models.TextField(default=None, max_length=1024, null=True)),
                 ('stix_file_path', models.FilePathField(default=None, max_length=1024, null=True)),
                 ('tlp', models.CharField(choices=[(b'RED', b'RED'), (b'AMBER', b'AMBER'), (b'GREEN', b'GREEN'), (b'WHITE', b'WHITE')], default='AMBER', max_length=10)),
-                ('sharing_range_type', models.CharField(choices=[(b'all', b'With All'), (b'group', b'With a group'), (b'people', b'With people')], default=b'all', max_length=10)),
+                ('sharing_range_type', models.CharField(choices=[(b'all', b'With the CSC Community'), (b'group', b'With a group'), (b'people', b'With people')], default=b'all', max_length=10)),
                 ('filename_pk', models.CharField(default='undefined', max_length=128)),
                 ('screen_name', models.CharField(default='', max_length=128)),
                 ('screen_affiliation', models.CharField(default='', max_length=50)),
