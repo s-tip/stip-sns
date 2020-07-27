@@ -57,7 +57,7 @@ class FeedStixCommon(object):
     def _make_sharing_range_value(feed):
         # Sharing Range
         if feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_ALL:
-            sharing_range = 'CIC Community'
+            sharing_range = 'All'
         elif feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_GROUP:
             sharing_range = 'Group: %s' % (feed.sharing_group.en_name)
         elif feed.sharing_range_type == const.SHARING_RANGE_TYPE_KEY_PEOPLE:
