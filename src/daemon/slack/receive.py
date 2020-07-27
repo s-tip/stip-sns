@@ -98,7 +98,6 @@ def start_receive_slack_thread():
     slack_rtm_client = slack.RTMClient(
         token=slack_token)
     th = SlackThread(slack_rtm_client)
-    print('th: ' + str(th))
     return slack_web_client, slack_rtm_client, th
 
 
