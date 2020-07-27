@@ -149,7 +149,7 @@ $(function () {
  	  $('#attach-file-root').empty()
  	  $('#attach-file-root').append(append_div);
  	  
- 	  //Sharing Rangeは With the CSC community
+ 	  //Sharing Rangeは With All
       $('#publication-all').prop("checked",true);
 
       //peoples詳細設定初期化

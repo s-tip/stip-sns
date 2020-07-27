@@ -294,7 +294,7 @@ msgstr ""
 
 #: src/feeds/templates/feeds/feeds.html:154
 #: src/feeds/templates/feeds/partial_feed.html:138
-msgid "CSC Community"
+msgid "All"
 msgstr ""
 
 #: src/feeds/templates/feeds/feeds.html:168
