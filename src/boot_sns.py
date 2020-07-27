@@ -26,6 +26,10 @@ class StipSnsBoot(AppConfig):
             # collectstatic
             call_command('collectstatic', '--noinput')
 
+            # makemigrations/migrate
+            call_command('makemigrations')
+            call_command('migrate')
+
             # loaddata (region)
             region_count = Region.objects.count()
             print('>>> region record count: ' + str(region_count))
