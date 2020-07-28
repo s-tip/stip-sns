@@ -69,10 +69,9 @@ class SlackThread(threading.Thread):
         self.started.clear()
 
     def run(self):
-        future = asyncio.ensure_future(
+        asyncio.ensure_future(
             self.slack_rtm_client._connect_and_read(),
             loop=self.slack_rtm_client._event_loop)
-        self.slack_rtm_client._event_loop.run_until_complete(future)
         self.slack_rtm_client.stop()
 
 
