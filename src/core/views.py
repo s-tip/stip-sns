@@ -26,6 +26,7 @@ DEFAULT_CODE = 'JP-13'
 
 
 def login(request):
+    replace_dict = {}
     auth_views.login(request, template_name='cover.html')
     if request.user.is_authenticated():
         stip_user = request.user
@@ -35,6 +36,9 @@ def login(request):
         if not request.user.is_modified_password:
             # 初回ログイン時はパスワード変更画面に飛ばす
             return redirect('password_modified')
+    else:
+        replace_dict['error_msg'] = 'Login Failed'
+        return render(request, 'cover.html', replace_dict)
     return feeds(request)
 
 
