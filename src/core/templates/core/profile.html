@@ -70,7 +70,7 @@
           <img src="{% static 'img/loading.gif' %}">
         </div>
         <div class="more-link">
-        	<a class="more-link">More feeds</a>
+        	{% trans 'Last post.' %} <a class="more-link">{% trans 'Check new posts.' %}</a>
         </div>
         <form method="get" action="{% url 'load' %}" id="load_feed" autocomplete="off">
           <input type="hidden" name="feed_source" id="feed_source" value="{{ page_user.pk }}">
