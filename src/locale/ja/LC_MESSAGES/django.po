@@ -349,6 +349,18 @@ msgstr "投稿する"
 msgid "new posts"
 msgstr "新着投稿"
 
+#: src/feeds/templates/feeds/feeds.html:279
+#: src/feeds/templates/core/profile.html:73
+#: src/feeds/templates/search/search.html:280
+msgid "End of Feed."
+msgstr "フィードの最後 -"
+
+#: src/feeds/templates/feeds/feeds.html:279
+#: src/feeds/templates/core/profile.html:73
+#: src/feeds/templates/search/search.html:280
+msgid "Reload"
+msgstr "再取得"
+
 #: src/feeds/templates/feeds/partial_feed.html:54
 msgid "Click to remove this feed"
 msgstr "クリックでフィード削除"
