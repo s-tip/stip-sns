@@ -352,13 +352,13 @@ msgstr "新着投稿"
 #: src/feeds/templates/feeds/feeds.html:279
 #: src/feeds/templates/core/profile.html:73
 #: src/feeds/templates/search/search.html:280
-msgid "Last post."
+msgid "End of Feed."
 msgstr "フィードの最後 -"
 
 #: src/feeds/templates/feeds/feeds.html:279
 #: src/feeds/templates/core/profile.html:73
 #: src/feeds/templates/search/search.html:280
-msgid "Check new posts."
+msgid "Reload"
 msgstr "再取得"
 
 #: src/feeds/templates/feeds/partial_feed.html:54
