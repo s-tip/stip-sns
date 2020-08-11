@@ -9,7 +9,8 @@ import django.views.i18n
 
 urlpatterns = [
     url(r'^$', core_views.home, name='home'),
-    url(r'^login', core_views.login, name='login'),
+    url(r'^login/', core_views.login, name='login'),
+    url(r'^login_totp/', core_views.login_totp, name='login_totp'),
     url(r'^logout', auth_views.logout, {'next_page': '/'}, name='logout'),
     # url(r'^signup/$', bootcamp_auth_views.signup, name='signup'),
     url(r'^settings/$', core_views.settings, name='settings'),
