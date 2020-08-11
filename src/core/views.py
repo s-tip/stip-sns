@@ -1,5 +1,6 @@
 import os
 import json
+import pyotp
 
 from PIL import Image
 from decorators import ajax_required
@@ -19,7 +20,6 @@ from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
 from feeds.views import FEEDS_NUM_PAGES, feeds
 from core.common import get_text_field_value
-import pyotp
 
 # Japan
 DEFAULT_COUNTRY = 'JP'
