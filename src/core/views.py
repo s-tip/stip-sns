@@ -1,21 +1,22 @@
 import os
 import json
-import pyotp
+# import pyotp
 
 from PIL import Image
 from decorators import ajax_required
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http.response import HttpResponse
 from django.utils import translation
-from django.contrib.auth import views as auth_views
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
-from stip.common import get_text_field_value
+import stip.common.login as login_views
+from stip.common.login import set_language_setting
 from ctirs.models import STIPUser as User
 from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
@@ -24,53 +25,21 @@ from feeds.views import FEEDS_NUM_PAGES, feeds
 DEFAULT_COUNTRY = 'JP'
 DEFAULT_CODE = 'JP-13'
 
-
-def get_login_authcode(request):
-    return get_text_field_value(request, 'authcode', default_value='')
+REDIRECT_TO = 'feeds'
 
 
 def login(request):
-    replace_dict = {}
-    auth_views.login(request, template_name='cover.html')
-    if request.user.is_authenticated():
-        stip_user = request.user
-        lang = stip_user.language
-        request.session['_language'] = lang
-        request.session['username'] = str(stip_user)
-        translation.activate(lang)
-        if not request.user.is_modified_password:
-            return redirect('password_modified')
-        else:
-            user = User.objects.get(username=stip_user)
-            if user.totp_secret is None:
-                return redirect('feeds')
-            else:
-                return render(request, 'cover_totp.html')
-    else:
-        replace_dict['error_msg'] = 'Login Failed'
-        return render(request, 'cover.html', replace_dict)
+    return login_views.login(request, REDIRECT_TO)
 
 
 def login_totp(request):
-    replace_dict = {}
-    username = request.session['username']
-    authcode = get_login_authcode(request)
-    user = User.objects.get(username=username)
-    totp = pyotp.TOTP(user.totp_secret)
-    
-    if totp.verify(authcode):
-        return redirect('feeds')
-    else:
-        replace_dict['error_msg'] = 'Two-factor authentication failed.'
-        return render(request, 'cover_totp.html', replace_dict)
+    return login_views.login_totp(request, REDIRECT_TO)
 
 
 def home(request):
     if request.user.is_authenticated():
         stip_user = request.user
-        lang = stip_user.language
-        request.session['_language'] = lang
-        translation.activate(lang)
+        request = set_language_setting(request, stip_user)
         return feeds(request)
     else:
         lang = 'en'
