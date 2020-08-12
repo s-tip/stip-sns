@@ -15,11 +15,11 @@ from django.utils import translation
 from django.contrib.auth import views as auth_views
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
+from stip.common import get_text_field_value
 from ctirs.models import STIPUser as User
 from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
 from feeds.views import FEEDS_NUM_PAGES, feeds
-from core.common import get_text_field_value
 
 DEFAULT_COUNTRY = 'JP'
 DEFAULT_CODE = 'JP-13'
