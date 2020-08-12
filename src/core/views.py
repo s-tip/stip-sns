@@ -1,5 +1,6 @@
 import os
 import json
+import pyotp
 
 from PIL import Image
 from decorators import ajax_required
@@ -18,12 +19,15 @@ from ctirs.models import STIPUser as User
 from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
 from feeds.views import FEEDS_NUM_PAGES, feeds
+from core.common import get_text_field_value
 
 # Japan
 DEFAULT_COUNTRY = 'JP'
 # Tokyo
 DEFAULT_CODE = 'JP-13'
 
+def get_login_authcode(request):
+    return get_text_field_value(request, 'authcode', default_value='')
 
 def login(request):
     replace_dict = {}
@@ -32,15 +36,42 @@ def login(request):
         stip_user = request.user
         lang = stip_user.language
         request.session['_language'] = lang
+        request.session['username'] = str(stip_user)
         translation.activate(lang)
         if not request.user.is_modified_password:
             # 初回ログイン時はパスワード変更画面に飛ばす
             return redirect('password_modified')
+        else:
+            # 認証成功
+            user = User.objects.get(username=stip_user)
+            if user.totp_secret is None:
+                # 初期画面の feeds へ
+                return feeds(request)
+            else:
+                # Authentication Code 入力画面へ
+                return render(request, 'cover_totp.html')
     else:
         replace_dict['error_msg'] = 'Login Failed'
         return render(request, 'cover.html', replace_dict)
-    return feeds(request)
 
+def login_totp(request):
+    replace_dict = {}
+    # session から Username 取得
+    username = request.session['username']
+    # テキストフィールドから Authentication Code 取得
+    authcode = get_login_authcode(request)
+    # 共通鍵の取得・設定
+    user = User.objects.get(username=username)
+    totp = pyotp.TOTP(user.totp_secret)
+    
+    # 認証
+    if totp.verify(authcode):
+        # 認証成功(初期画面の feeds へ)
+        return feeds(request)
+    else:
+        # 認証失敗( Authentication Code 入力画面を表示)
+        replace_dict['error_msg'] = 'Two-factor authentication failed.'
+        return render(request, 'cover_totp.html', replace_dict)
 
 def home(request):
     if request.user.is_authenticated():
