@@ -1,6 +1,5 @@
 import os
 import json
-# import pyotp
 
 from PIL import Image
 from decorators import ajax_required
