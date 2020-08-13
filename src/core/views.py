@@ -1,84 +1,44 @@
 import os
 import json
-import pyotp
 
 from PIL import Image
 from decorators import ajax_required
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http.response import HttpResponse
 from django.utils import translation
-from django.contrib.auth import views as auth_views
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
+import stip.common.login as login_views
+from stip.common.login import set_language_setting
 from ctirs.models import STIPUser as User
 from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
 from feeds.views import FEEDS_NUM_PAGES, feeds
-from core.common import get_text_field_value
 
-# Japan
 DEFAULT_COUNTRY = 'JP'
-# Tokyo
 DEFAULT_CODE = 'JP-13'
 
-def get_login_authcode(request):
-    return get_text_field_value(request, 'authcode', default_value='')
+REDIRECT_TO = 'feeds'
+
 
 def login(request):
-    replace_dict = {}
-    auth_views.login(request, template_name='cover.html')
-    if request.user.is_authenticated():
-        stip_user = request.user
-        lang = stip_user.language
-        request.session['_language'] = lang
-        request.session['username'] = str(stip_user)
-        translation.activate(lang)
-        if not request.user.is_modified_password:
-            # 初回ログイン時はパスワード変更画面に飛ばす
-            return redirect('password_modified')
-        else:
-            # 認証成功
-            user = User.objects.get(username=stip_user)
-            if user.totp_secret is None:
-                # 初期画面の feeds へ
-                return feeds(request)
-            else:
-                # Authentication Code 入力画面へ
-                return render(request, 'cover_totp.html')
-    else:
-        replace_dict['error_msg'] = 'Login Failed'
-        return render(request, 'cover.html', replace_dict)
+    return login_views.login(request, REDIRECT_TO)
+
 
 def login_totp(request):
-    replace_dict = {}
-    # session から Username 取得
-    username = request.session['username']
-    # テキストフィールドから Authentication Code 取得
-    authcode = get_login_authcode(request)
-    # 共通鍵の取得・設定
-    user = User.objects.get(username=username)
-    totp = pyotp.TOTP(user.totp_secret)
-    
-    # 認証
-    if totp.verify(authcode):
-        # 認証成功(初期画面の feeds へ)
-        return feeds(request)
-    else:
-        # 認証失敗( Authentication Code 入力画面を表示)
-        replace_dict['error_msg'] = 'Two-factor authentication failed.'
-        return render(request, 'cover_totp.html', replace_dict)
+    return login_views.login_totp(request, REDIRECT_TO)
+
 
 def home(request):
     if request.user.is_authenticated():
         stip_user = request.user
-        lang = stip_user.language
-        request.session['_language'] = lang
-        translation.activate(lang)
+        request = set_language_setting(request, stip_user)
         return feeds(request)
     else:
         lang = 'en'
@@ -104,17 +64,14 @@ def network(request):
 @login_required
 def profile(request, username):
     page_user = get_object_or_404(User, username=username)
-    # page_user は STIPUser
     feeds = Feed.get_feeds(
         api_user=request.user,
         user_id=page_user.id,
         index=0,
         size=FEEDS_NUM_PAGES)
 
-    # from_feed = -1
     from_feed = None
     if feeds:
-        # from_feed = feeds[0].id
         from_feed = feeds[0].package_id
     return render(request, 'core/profile.html', {
         'page_user': page_user,
@@ -130,11 +87,9 @@ def settings(request):
     profile = stip_user.sns_profile
     if request.method == 'POST':
         form = ProfileForm(request.POST)
-        # countryに応じてchoices変更する
         country = request.POST['country']
         form.fields['administrative_area'].choices = Region.get_administrative_areas_choices(country)
         if form.is_valid():
-            # Screen Name はここで修正する
             stip_user.screen_name = form.cleaned_data.get('screen_name')
             stip_user.timezone = form.cleaned_data.get('timezone')
             stip_user.affiliation = form.cleaned_data.get('affiliation')
@@ -144,19 +99,15 @@ def settings(request):
             stip_user.description = form.cleaned_data.get('description')
             stip_user.tlp = form.cleaned_data.get('tlp')
             code = form.cleaned_data.get('administrative_area')
-            # region情報を取得
             try:
-                # administrative_code が指定されている場合は region から国情報を取得する
                 region = Region.objects.get(code=code)
                 administraive_code = region.code
                 administraive_area = region.administrative_area
                 country_code = region.country_code
             except BaseException:
-                # administrative_code が指定されていない場合は region, administrative_code, administrative_area はNone
                 region = None
                 administraive_code = None
                 administraive_area = None
-                # Country は form 指定の値
                 country_code = form.cleaned_data.get('country')
             stip_user.region = region
             stip_user.administrative_code = administraive_code
@@ -190,7 +141,6 @@ def settings(request):
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Your profile was successfully edited.'))
-            # 言語を変更
             lang = stip_user.language
             translation.activate(lang)
             request.session['_language'] = lang
@@ -260,7 +210,6 @@ def password(request, msg=None):
             new_password = form.cleaned_data.get('new_password')
             user.set_password(new_password)
             if user.username == 'admin':
-                # build_in account のパスワード変更
                 User.change_build_password(new_password)
             user.is_modified_password = True
             user.save()
@@ -338,7 +287,6 @@ def save_uploaded_picture(request):
 
 
 @ajax_required
-# country_code からadministrative_area情報を返却する
 def get_administrative_area(request):
     country_code = request.GET.get('country_code')
     dump = []
