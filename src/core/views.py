@@ -1,5 +1,9 @@
+import io
 import os
 import json
+import qrcode
+import base64
+import pyotp
 
 from PIL import Image
 from decorators import ajax_required
@@ -19,6 +23,7 @@ from stip.common.login import set_language_setting
 from ctirs.models import STIPUser as User
 from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
+from ctirs.models.rs.models import STIPUser
 from feeds.views import FEEDS_NUM_PAGES, feeds
 
 DEFAULT_COUNTRY = 'JP'
@@ -219,8 +224,14 @@ def password(request, msg=None):
             return redirect('password')
 
     else:
-        form = ChangePasswordForm(instance=user)
-
+        u = STIPUser.objects.get(username=user)
+        flg_enable_2fa = False
+        if u.totp_secret is not None:
+            flg_enable_2fa = True
+        form = ChangePasswordForm(
+            instance=user,
+            initial={'enable_2fa': flg_enable_2fa}
+        )
     return render(request, 'core/password.html', {'form': form, 'password_msg': msg})
 
 
@@ -296,4 +307,66 @@ def get_administrative_area(request):
         d['code'] = item.code
         dump.append(d)
     data = json.dumps(dump)
+    return HttpResponse(data, content_type='application/json')
+
+
+@login_required
+@ajax_required
+def get_2fa_secet(request):
+    stip_user = str(request.user)
+    base32secet = pyotp.random_base32()
+    otp = pyotp.totp.TOTP(base32secet)
+    uri = otp.provisioning_uri(name=stip_user, issuer_name="S-TIP")
+
+    qr = qrcode.make(uri)
+    img = io.BytesIO()
+    qr.save(img)
+    base64_img = base64.b64encode(img.getvalue()).decode()
+
+    request.session['secet'] = base32secet
+    request.session['user'] = stip_user
+
+    d = {}
+    d['qrcode'] = base64_img
+    d['secet'] = base32secet
+    data = json.dumps(d)
+    return HttpResponse(data, content_type='application/json')
+
+
+@login_required
+@ajax_required
+def enable_2fa(request):
+    secet = request.session['secet']
+    stip_user = request.session['user']
+    totp = pyotp.TOTP(secet)
+    authentication_code = request.POST.get('authentication_code')
+
+    d = {}
+    if totp.verify(authentication_code):
+        u = STIPUser.objects.get(username=stip_user)
+        u.totp_secret = secet
+        u.save()
+        d = {
+            "status": "OK"
+        }
+    else:
+        d = {
+            "status": "NG",
+            "error_msg": "The authorization code is incorrect."
+        }
+    data = json.dumps(d)
+    return HttpResponse(data, content_type='application/json')
+
+
+@login_required
+@ajax_required
+def disable_2fa(request):
+    user = str(request.user)
+    u = STIPUser.objects.get(username=user)
+    u.totp_secret = None
+    u.save()
+    d = {
+        "status": "OK"
+    }
+    data = json.dumps(d)
     return HttpResponse(data, content_type='application/json')
