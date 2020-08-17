@@ -122,6 +122,10 @@ msgstr ""
 msgid "Timezone"
 msgstr ""
 
+#: src/core/forms.py:161
+msgid "Enable 2FA"
+msgstr "二段階認証の有効"
+
 #: src/core/forms.py:106
 msgid "Old password"
 msgstr "今のパスワード"
@@ -133,6 +137,10 @@ msgstr "新しいパスワード"
 #: src/core/forms.py:115
 msgid "Confirm new password"
 msgstr "新しいパスワード(再入力)"
+
+#: src/core/forms.py:87
+msgid "Disable 2FA settings?"
+msgstr "二段階認証を無効にしますか？"
 
 #: src/core/templates/core/cover.html:21 src/core/templates/core/cover.html:39
 msgid "Log in"
@@ -205,6 +213,18 @@ msgstr "パスワードを変更"
 #: src/management/templates/management/white_list.html:24
 msgid "Save"
 msgstr "保存"
+
+#: src/core/templates/core/password.html:62
+msgid "Setup Authenticator App"
+msgstr "二段階認証アプリのセットアップ"
+
+#: src/core/templates/core/password.html:65
+msgid "Please set up the QR code with the authentication application."
+msgstr "二段階認証アプリでQRコードを読み込んで設定してください"
+
+#: src/core/templates/core/password.html:65
+msgid "Input authentication code (6 digits)"
+msgstr "認証コードを入力してください (6桁整数)"
 
 #: src/core/templates/core/picture.html:30
 msgid "Change Picture"
@@ -1994,3 +2014,4 @@ msgstr "ログアウト"
 
 #~ msgid "Check to post anonymously"
 #~ msgstr "匿名投稿を行うためにはチェックを入れてください"
+
