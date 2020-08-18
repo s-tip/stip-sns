@@ -226,7 +226,7 @@ def password(request, msg=None):
     else:
         u = STIPUser.objects.get(username=user)
         flg_enable_2fa = False
-        if u.totp_secret is not None:
+        if u.totp_secret:
             flg_enable_2fa = True
         form = ChangePasswordForm(
             instance=user,
@@ -238,7 +238,14 @@ def password(request, msg=None):
 @login_required
 def password_modified(request, msg=None):
     user = request.user
-    form = ChangePasswordForm(instance=user)
+    u = STIPUser.objects.get(username=user)
+    flg_enable_2fa = False
+    if u.totp_secret:
+        flg_enable_2fa = True
+    form = ChangePasswordForm(
+        instance=user,
+        initial={'enable_2fa': flg_enable_2fa}
+    )
     return render(request, 'core/password.html', {'form': form, 'password_msg': 'Please Change Your Password!!!'})
 
 
@@ -326,9 +333,10 @@ def get_2fa_secet(request):
     request.session['secet'] = base32secet
     request.session['user'] = stip_user
 
-    d = {}
-    d['qrcode'] = base64_img
-    d['secet'] = base32secet
+    d = {
+        "qrcode": base64_img,
+        "secet": base32secet
+    }
     data = json.dumps(d)
     return HttpResponse(data, content_type='application/json')
 
