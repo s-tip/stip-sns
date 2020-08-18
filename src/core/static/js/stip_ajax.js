@@ -15,7 +15,7 @@ $(document)
 function enable_2fa_submit() {
   var auth_code = $('#authentication_code').val();
   if (!re.test(auth_code)) {
-    $('.err_msg').text("Please enter a 6 digits integer");
+    $('.err_msg').text("Please enter a 6 digits integer.");
     return false;
   }
 
@@ -28,11 +28,11 @@ function enable_2fa_submit() {
     dataType: 'json',
     timespan: 1000 * 10,
   })
-    .done(function (data1, textStatus, jqXHR) {
-      if (data1.status == 'OK') {
+    .done(function (data, textStatus, jqXHR) {
+      if (data.status == 'OK') {
         $('#enable_2fa_modal').modal('hide');
       } else {
-        $('.err_msg').text(data1.error_msg);
+        $('.err_msg').text(data.error_msg);
       }
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
@@ -54,9 +54,9 @@ function enable_2fa() {
     dataType: 'json',
     timespan: 1000 * 10,
   })
-    .done(function (data1, textStatus, jqXHR) {
-      var secet = data1.secet;
-      var qrcode_base64 = 'data:image/png;base64,' + data1.qrcode;
+    .done(function (data, textStatus, jqXHR) {
+      var secet = data.secet;
+      var qrcode_base64 = 'data:image/png;base64,' + data.qrcode;
       $('#qrcode_img').attr('src', qrcode_base64);
       $('#secet').text(secet);
     })
@@ -76,16 +76,14 @@ function disable_2fa_submit() {
     url: '/settings/disable_2fa/',
     type: 'POST',
     data: $('#disable_2fa_form').serialize(),
-    // data: null,
     dataType: 'json',
     timespan: 1000 * 10,
   })
-    .done(function (data1, textStatus, jqXHR) {
-      if (data1.status == 'OK') {
-        // alert('OK');
+    .done(function (data, textStatus, jqXHR) {
+      if (data.status == 'OK') {
         $('#disable_2fa_modal').modal('hide');
       } else {
-        $('.err_msg').text(data1.error_msg);
+        $('.err_msg').text(data.error_msg);
       }
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
