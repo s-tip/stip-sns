@@ -43,22 +43,22 @@ function enable_2fa_submit() {
 function enable_2fa() {
   $('.err_msg').text('');
   $('#qrcode_img').attr('src', empty_gif);
-  $('#secet').text('');
+  $('#secret').text('');
   $('#authentication_code').val('');
   $('#enable_2fa_modal').modal();
 
   $.ajax({
-    url: '/settings/get_2fa_secet/',
+    url: '/settings/get_2fa_secret/',
     type: 'GET',
     data: null,
     dataType: 'json',
     timespan: 1000 * 10,
   })
     .done(function (data, textStatus, jqXHR) {
-      var secet = data.secet;
+      var secret = data.secret;
       var qrcode_base64 = 'data:image/png;base64,' + data.qrcode;
       $('#qrcode_img').attr('src', qrcode_base64);
-      $('#secet').text(secet);
+      $('#secret').text(secret);
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
       $('.err_msg').text(jqXHR.statusText);

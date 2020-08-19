@@ -319,10 +319,10 @@ def get_administrative_area(request):
 
 @login_required
 @ajax_required
-def get_2fa_secet(request):
+def get_2fa_secret(request):
     stip_user = str(request.user)
-    base32secet = pyotp.random_base32()
-    otp = pyotp.totp.TOTP(base32secet)
+    base32secret = pyotp.random_base32()
+    otp = pyotp.totp.TOTP(base32secret)
     uri = otp.provisioning_uri(name=stip_user, issuer_name="S-TIP")
 
     qr = qrcode.make(uri)
@@ -330,12 +330,12 @@ def get_2fa_secet(request):
     qr.save(img)
     base64_img = base64.b64encode(img.getvalue()).decode()
 
-    request.session['secet'] = base32secet
+    request.session['secret'] = base32secret
     request.session['user'] = stip_user
 
     d = {
         "qrcode": base64_img,
-        "secet": base32secet
+        "secret": base32secret
     }
     data = json.dumps(d)
     return HttpResponse(data, content_type='application/json')
@@ -344,15 +344,15 @@ def get_2fa_secet(request):
 @login_required
 @ajax_required
 def enable_2fa(request):
-    secet = request.session['secet']
+    secret = request.session['secret']
     stip_user = request.session['user']
-    totp = pyotp.TOTP(secet)
+    totp = pyotp.TOTP(secret)
     authentication_code = request.POST.get('authentication_code')
 
     d = {}
     if totp.verify(authentication_code):
         u = STIPUser.objects.get(username=stip_user)
-        u.totp_secret = secet
+        u.totp_secret = secret
         u.save()
         d = {
             "status": "OK"
