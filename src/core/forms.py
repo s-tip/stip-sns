@@ -156,11 +156,14 @@ class ProfileForm(forms.ModelForm):
 
 class ChangePasswordForm(forms.ModelForm):
     id = forms.CharField(widget=forms.HiddenInput())
+    enable_2fa = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),
+        label=_("Enable 2FA"),
+        required=False)
     old_password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         label=_("Old password"),
         required=True)
-
     new_password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         label=_("New password"),
@@ -172,7 +175,7 @@ class ChangePasswordForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['id', 'old_password', 'new_password', 'confirm_password']
+        fields = ['id', 'enable_2fa', 'old_password', 'new_password', 'confirm_password']
 
     def clean(self):
         super(ChangePasswordForm, self).clean()
