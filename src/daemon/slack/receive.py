@@ -292,13 +292,10 @@ def receive_slack(**payload):
     receive_data = payload['data']
 
     try:
-        print('>>>post_stip_from_slack start')
         post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user)
-        print('>>>post_stip_from_slack end')
     except BaseException:
         import traceback
         traceback.print_exc()
-        pass
 
 
 def get_attached_file_from_slack(file_path):

@@ -1,5 +1,4 @@
 import re
-import codecs
 import datetime
 import hashlib
 import io
