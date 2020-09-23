@@ -54,7 +54,7 @@ for choice in TLP_CHOICES:
 
 
 class SlackThread(threading.Thread):
-    def __init__(self, slack_rtm_client): 
+    def __init__(self, slack_rtm_client):
         super().__init__()
         self.started = threading.Event()
         self.alive = True
@@ -233,7 +233,7 @@ def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
         channel_id = receive_data['channel']
         channel_name = None
         try:
-            resp = wc.channels_info(channel=channel_id)
+            resp = wc.conversations_info(channel=channel_id)
             # public channel
             channel_name = resp['channel']['name']
         except slack.errors.SlackApiError:
