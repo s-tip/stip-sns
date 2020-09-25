@@ -122,6 +122,10 @@ msgstr ""
 msgid "Timezone"
 msgstr ""
 
+#: src/core/forms.py:161
+msgid "Enable 2FA"
+msgstr "二段階認証の有効"
+
 #: src/core/forms.py:106
 msgid "Old password"
 msgstr "今のパスワード"
@@ -206,6 +210,34 @@ msgstr "パスワードを変更"
 msgid "Save"
 msgstr "保存"
 
+#: src/core/templates/core/password.html:62
+msgid "Setup Authenticator App"
+msgstr "二段階認証アプリのセットアップ"
+
+#: src/core/templates/core/password.html:65
+msgid "Please set up the QR code with the authentication application."
+msgstr "二段階認証アプリでQRコードを読み込んで設定してください"
+
+#: src/core/templates/core/password.html:67
+msgid "If you are unable to scan the image, enter the following information in your app."
+msgstr "イメージが読み込めない場合は、アプリケーションに下記のコードを入力してください"
+
+#: src/core/templates/core/password.html:69
+msgid "Input authentication code (6 digits)"
+msgstr "認証コードを入力してください (6桁整数)"
+
+#: src/core/templates/core/password.html:76
+msgid "Submit"
+msgstr "送信"
+
+#: src/core/templates/core/password.html:88
+msgid "Confirmation"
+msgstr "確認"
+
+#: src/core/templates/core/password.html:91
+msgid "Disable 2FA?"
+msgstr "二段階認証を無効にしますか？"
+
 #: src/core/templates/core/picture.html:30
 msgid "Change Picture"
 msgstr "アイコンを変更"
@@ -270,6 +302,7 @@ msgstr "新規投稿"
 
 #: src/feeds/templates/feeds/feeds.html:26
 #: src/feeds/templates/feeds/feeds.html:228
+#: src/core/templates/core/password.html:75
 msgid "Cancel"
 msgstr "取り消し"
 
@@ -348,6 +381,18 @@ msgstr "投稿する"
 #: src/feeds/templates/feeds/feeds.html:253
 msgid "new posts"
 msgstr "新着投稿"
+
+#: src/feeds/templates/feeds/feeds.html:279
+#: src/feeds/templates/core/profile.html:73
+#: src/feeds/templates/search/search.html:280
+msgid "End of Feed."
+msgstr "フィードの最後 -"
+
+#: src/feeds/templates/feeds/feeds.html:279
+#: src/feeds/templates/core/profile.html:73
+#: src/feeds/templates/search/search.html:280
+msgid "Reload"
+msgstr "再取得"
 
 #: src/feeds/templates/feeds/partial_feed.html:54
 msgid "Click to remove this feed"
@@ -1982,3 +2027,4 @@ msgstr "ログアウト"
 
 #~ msgid "Check to post anonymously"
 #~ msgstr "匿名投稿を行うためにはチェックを入れてください"
+

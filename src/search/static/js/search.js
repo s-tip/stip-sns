@@ -1454,27 +1454,6 @@ $(function () {
         load_feeds();
     });
 
-
-    $(".stream-update a").click(function () {
-        var last_feed = $(".stream li:first-child").attr("feed-date");
-        var feed_source = $("#feed_source").val();
-        $.ajax({
-            url: '/feeds/load_new/',
-            data: {
-                'last_feed': last_feed,
-                'feed_source': feed_source
-            },
-            cache: false,
-            success: function (data) {
-                $("ul.stream").prepend(data);
-            },
-            complete: function () {
-                hide_stream_update();
-            }
-        });
-        return false;
-    });
-
     $("input,textarea").attr("autocomplete", "off");
 
     function track_comments() {

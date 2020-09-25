@@ -626,12 +626,18 @@ $(function () {
 
 	fd.append('multi_language', is_multi_language());
 	//複数ある content が一つでも長さ 0 の場合はエラー
+	var is_zero_content = false;
 	jQuery.each($('.compose-content'),function(){
 		if($(this).val().length == 0){
-			alert(gettext('Cannot to post it due to 0-length content.'));
-			return;
+			is_zero_content = true;
+			return false;
 		}
 	});
+	if(is_zero_content == true){
+        alert(gettext('Cannot to post it due to 0-length content.'));
+		return;
+	}
+
 	//複数ある content 情報から言語情報などをまとめる
 	var titles = get_stix2_title_information();
 	var contents = get_stix2_content_information()
@@ -667,6 +673,7 @@ $(function () {
     }
     var button = $(".btn-post");
 
+    display_processing_animation();
     $.ajax({
         url: '/feeds/confirm_indicator/',
         method: 'post',
@@ -705,7 +712,6 @@ $(function () {
     			table_datas[file_name][TABLE_ID_TAS] = data['tas'][file_name]
     		}
         }
-        remove_processing_animation();
     	// table_data があれば modal 表示
     	if(Object.keys(table_datas).length > 0){
     		make_extract_tables(table_datas);
@@ -737,11 +743,10 @@ $(function () {
     	}
 
     }).fail(function(XMLHttpRequest, textStatus, errorThrown){
-        remove_processing_animation();
    		var msg = XMLHttpRequest.statusText+ ': ' + XMLHttpRequest.responseText;
    		alert(msg);
    	}).always(function(){
-
+        remove_processing_animation();
    	});
   };
   
@@ -808,14 +813,12 @@ $(function () {
 
   //新規投稿の投稿ボタン押下時
   $(".btn-post").click(function () {
-    display_processing_animation();
 	// indicator 確認後投稿へ
     confirm_indicators();
   });
 
   //確認画面の投稿ボタン押下時
   $('#confirm-compose').click(function () {
-      display_processing_animation();
 	  $('#confirm_indicators_modal_dialog').modal('hide');
 	  var f = $('#compose-form');
 	  var button = $(".btn-post");
@@ -865,6 +868,7 @@ $(function () {
 	  fd.append('stix2_titles',JSON.stringify(get_stix2_title_information()));	
 	  fd.append('stix2_contents',JSON.stringify(get_stix2_content_information()));
 
+      display_processing_animation();
 	  $.ajax({
 	      url: '/feeds/post/',
 	      method: 'post',
@@ -882,7 +886,6 @@ $(function () {
 	  	var msg = XMLHttpRequest.statusText+ ': ' + XMLHttpRequest.responseText;
 	  	alert(msg);
 	  }).always(function(){
-		  //button toggle 処理はこの呼び出し元で行うため、ここでは実施しない
           remove_processing_animation();
    	      button.prop('disabled',false);
 	  });

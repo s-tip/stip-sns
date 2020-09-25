@@ -1,5 +1,4 @@
 import re
-import codecs
 import datetime
 import hashlib
 import io
@@ -111,7 +110,6 @@ def feed(request, pk):
     })
 
 
-@login_required
 @ajax_required
 # 次のページの読み込み時に呼ばれる
 def load(request):
@@ -196,7 +194,6 @@ def get_datetime_from_string(s):
     return ret
 
 
-@login_required
 @ajax_required
 def load_new(request):
     last_feed_datetime = get_datetime_from_string(request.GET.get('last_feed'))
@@ -206,7 +203,6 @@ def load_new(request):
     return HttpResponse(html)
 
 
-@login_required
 @ajax_required
 def check(request):
     last_feed_datetime = get_datetime_from_string(request.GET.get('last_feed'))
@@ -386,7 +382,7 @@ def is_multi_language(request):
     return is_multi_language
 
 
-@login_required
+@ajax_required
 # 添付されたファイルに indicators が含まれているかを確認する
 def confirm_indicator(request):
     # 添付ファイルごとに AttachFile を作成し list に格納　
@@ -514,7 +510,6 @@ def get_json_from_extractor(datas):
     return d
 
 
-@login_required
 @ajax_required
 def post(request):
     try:
@@ -533,7 +528,6 @@ def post(request):
         return HttpResponseServerError(str(e))
 
 
-@login_required
 @ajax_required
 def like(request):
     # Like元のパッケージID
@@ -584,7 +578,6 @@ def attach(request):
     return response
 
 
-@login_required
 @ajax_required
 def comment(request):
     # user は STIPUser
@@ -668,7 +661,6 @@ def write_like_comment_attach_stix(content):
     return tmp_file_path
 
 
-@login_required
 @ajax_required
 # 一定期間ごと (30s)に feed_source に関連する like, comment 情報を更新する
 def update(request):
@@ -694,7 +686,6 @@ def update(request):
     return HttpResponse(data, content_type='application/json')
 
 
-@login_required
 @ajax_required
 def track_comments(request):
     # 引数取得
@@ -708,7 +699,6 @@ def track_comments(request):
                   {'feeds': feeds})
 
 
-@login_required
 @ajax_required
 def remove(request):
     # remove 処理
@@ -762,7 +752,6 @@ def _get_ctim_gv_url(request):
     return gv_url
 
 
-@login_required
 @ajax_required
 def get_ctim_gv_url(request):
     try:
@@ -773,7 +762,6 @@ def get_ctim_gv_url(request):
         return HttpResponseServerError(str(e))
 
 
-@login_required
 @ajax_required
 def share_misp(request):
     try:
@@ -796,7 +784,6 @@ def _get_indicators_from_feed_id(feed_id):
         return get_csv_from_bundle_id(feed_id, indicators=True, vulnerabilities=False, threat_actors=False)
 
 
-@login_required
 @ajax_required
 def sighting_splunk(request):
     try:
@@ -833,7 +820,7 @@ def create_sighting_object(request):
                 stix20_json = json.load(fp)
             stix2 = stip_sighting.convert_to_stix_20_to_21(stix20_json)
         else:
-            with open(stix_file_path, 'r') as fp:
+            with open(stix_file_path, 'r', encoding='utf-8') as fp:
                 stix2 = parse(fp.read(), allow_custom=True)
 
         stix2 = stip_sighting.insert_sighting_object(
@@ -862,7 +849,6 @@ def create_sighting_object(request):
         return HttpResponseServerError(str(e))
 
 
-@login_required
 @ajax_required
 def run_phantom_playbook(request):
     try:
@@ -881,7 +867,6 @@ def run_phantom_playbook(request):
         return HttpResponseServerError(str(e))
 
 
-@login_required
 @ajax_required
 def call_jira(request):
     try:
@@ -1042,7 +1027,7 @@ def get_feed_stix(feed_file_name_id):
 
 def _get_bundle_from_bundle_id(bundle_id):
     stix_file_path = Feed.get_cached_file_path(bundle_id)
-    with open(stix_file_path, 'r') as fp:
+    with open(stix_file_path, 'r', encoding='utf-8') as fp:
         bundle = parse(fp.read(), allow_custom=True)
     return bundle
 
@@ -1179,7 +1164,6 @@ def _get_indicator_from_pattern(indicator):
     return (None, None)
 
 
-@login_required
 @ajax_required
 def is_exist_indicator(request):
     feed_file_name_id = request.POST['feed_id']
@@ -1598,7 +1582,6 @@ def get_tlp_from_stix(stix_package, user):
 
 
 # 投稿を開いた時の like,unlike 情報取得
-@login_required
 @ajax_required
 def get_like_comment(request):
     package_id = request.GET['package_id']

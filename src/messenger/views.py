@@ -87,7 +87,6 @@ def delete(request):
     return HttpResponse()
 
 
-@login_required
 @ajax_required
 def send(request):
     if request.method == 'POST':
@@ -107,7 +106,6 @@ def send(request):
         return HttpResponseBadRequest()
 
 
-@login_required
 @ajax_required
 def users(request):
     users = User.objects.filter(is_active=True)
@@ -122,7 +120,6 @@ def users(request):
     return HttpResponse(data, content_type='application/json')
 
 
-@login_required
 @ajax_required
 def check(request):
     count = Message.objects.filter(user=request.user, is_read=False).count()
