@@ -43,7 +43,24 @@ file_name_markup_expression = '[|](.+)[|]'
 file_name_markup_reg = re.compile(file_name_markup_expression)
 email_address_expression = r'.*?(\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*).*?$'
 email_address_reg = re.compile(email_address_expression)
+defang_expression = r'[\[\]()\{\}]'
+defang_reg = re.compile(defang_expression)
+bracket_expression = r'^\((?P<val>.*)\)$'
+bracket_reg = re.compile(bracket_expression)
+square_bracket_expression = r'^\[(?P<val>.*)\]$'
+square_bracket_reg = re.compile(square_bracket_expression)
+curly_bracket_expression = r'^\{(?P<val>.*)\}$'
+curly_bracket_reg = re.compile(curly_bracket_expression)
+left_bracket_expression = r'^[\(\[\{](?P<val>.*)$'
+left_bracket_reg = re.compile(left_bracket_expression)
+right_bracket_expression = r'^(?P<val>.*)[\)\]\}]$'
+right_bracket_reg = re.compile(right_bracket_expression)
 
+bracket_regs = [
+    bracket_reg,
+    square_bracket_reg,
+    curly_bracket_reg
+]
 
 JSON_OBJECT_TYPE_IPV4 = 'ipv4'
 JSON_OBJECT_TYPE_URI = 'uri'
@@ -82,28 +99,25 @@ class BaseExtractor(object):
 
     @staticmethod
     def _remove_parentheses(word):
-        if word[0] == '(' and word[-1] == ')':
-            return word[1:-1]
-        if word[0] == '[' and word[-1] == ']':
-            return word[1:-1]
-        if word[0] == '{' and word[-1] == '}':
-            return word[1:-1]
+        for brakcet_reg in bracket_regs:
+            ret = bracket_reg.match(word)
+            if ret:
+                return ret.group('val')
         return word
 
     @staticmethod
     def _remove_parenthes(word):
-        if word[0] == '(' or word[0] == '[' or word[0] == '{':
-            word = word[1:]
-        if word[-1] == ')' or word[-1] == ']' or word[-1] == '}':
-            word = word[:-1]
+        ret = left_bracket_reg.match(word)
+        if ret:
+            word = ret.group('val')
+        ret = right_bracket_reg.match(word)
+        if ret:
+            word = ret.group('val')
         return word
 
     @staticmethod
     def _refang_ioc(v):
-        v = v.replace('[', '').replace(']', '')
-        v = v.replace('(', '').replace(')', '')
-        v = v.replace('{', '').replace('}', '')
-        return v
+        return defang_reg.sub('', v)
 
     @classmethod
     # value が bytes なら str にする
