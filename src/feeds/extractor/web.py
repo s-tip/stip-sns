@@ -67,7 +67,6 @@ class WebExtractor(BaseExtractor):
                 # content_type が extractros の何かにマッチすればその処理を行う
                 for extractor_key in list(extractors.keys()):
                     if extractor_key in content_type:
-                        print(extractor_key)
                         # 一時ファイルを作成
                         file_ = WebExtractor._get_temp_file(referred_url, resp.content)
                         try:
