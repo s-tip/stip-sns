@@ -269,7 +269,7 @@ $(function () {
   function confirm_indicators(){
     //modal dialog に Indicators の結果を table として追加する
     function get_file_id_from_file_name(file_name){
-        return file_name.replace(/[\. '"\(\)\:\/\?=\[\]\{\}\#\@\!\$\&\+\,\;]/g,'--');
+      return file_name.replace(/[\. '"\(\)\:\/\?=\[\]\{\}\#\@\!\$\&\+\,\;]/g,'--');
     };
 
     function get_file_collapse_id(file_name){
