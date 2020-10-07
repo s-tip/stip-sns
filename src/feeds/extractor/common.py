@@ -21,7 +21,7 @@ from feeds.adapter.crowd_strike import query_actors, get_actor_entities
 from ctirs.models import SNSConfig
 
 # regular expression
-ipv4_reg_expression = r'.*?((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[\[]{0,1}\.[\]]{0,1}){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)).*?$'
+ipv4_reg_expression = r'.*?((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[\[(\{]{0,1}\.[\])\}]{0,1}){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)).*?$'
 ipv4_reg = re.compile(ipv4_reg_expression)
 url_reg_expression = r'.*?(https?|ftp)\[?(:)\]?(\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+).*?$'
 url_reg = re.compile(url_reg_expression)
@@ -33,17 +33,34 @@ sha256_expression = '.*?(([0-9]|[a-f]|[A-F]){64}).*?$'
 sha256_reg = re.compile(sha256_expression)
 sha512_expression = '.*?(([0-9]|[a-f]|[A-F]){128}).*?$'
 sha512_reg = re.compile(sha512_expression)
-domain_expression = r'.*?([A-Za-z0-9][A-Za-z0-9_-]*(\.[A-Za-z][A-Za-z0-9_-]*)*([\[]{0,1}\.[\]]{0,1}[A-Za-z][A-Za-z][A-Za-z]*)).*?'
+domain_expression = r'.*?([A-Za-z0-9][A-Za-z0-9_-]*(\.[A-Za-z][A-Za-z0-9_-]*)*([\[(\{]{0,1}\.[\])\}]{0,1}[A-Za-z][A-Za-z][A-Za-z]*)).*?'
 domain_reg = re.compile(domain_expression)
+file_name_expression = r'.*?([^\\]+\.[^\\]+).*?$'
+file_name_reg = re.compile(file_name_expression)
 cve_expression = '.*(CVE-([0-9]){4}-([0-9]){1,5}).*$'
 cve_reg = re.compile(cve_expression)
-file_name_expression = '[|](.+)[|]'
-file_name_reg = re.compile(file_name_expression)
+file_name_markup_expression = '[|](.+)[|]'
+file_name_markup_reg = re.compile(file_name_markup_expression)
 email_address_expression = r'.*?(\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*).*?$'
 email_address_reg = re.compile(email_address_expression)
+defang_expression = r'[\[\]()\{\}]'
+defang_reg = re.compile(defang_expression)
+bracket_expression = r'^\((?P<val>.*)\)$'
+bracket_reg = re.compile(bracket_expression)
+square_bracket_expression = r'^\[(?P<val>.*)\]$'
+square_bracket_reg = re.compile(square_bracket_expression)
+curly_bracket_expression = r'^\{(?P<val>.*)\}$'
+curly_bracket_reg = re.compile(curly_bracket_expression)
+left_bracket_expression = r'^[\(\[\{](?P<val>.*)$'
+left_bracket_reg = re.compile(left_bracket_expression)
+right_bracket_expression = r'^(?P<val>.*)[\)\]\}]$'
+right_bracket_reg = re.compile(right_bracket_expression)
 
-# ファイル名とみなす拡張子リスト
-file_name_extentions = ['js', 'dll', 'pdf', 'exe', 'vba', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'jpg', 'gif', 'png', 'ocx', 'html']
+bracket_regs = [
+    bracket_reg,
+    square_bracket_reg,
+    curly_bracket_reg
+]
 
 JSON_OBJECT_TYPE_IPV4 = 'ipv4'
 JSON_OBJECT_TYPE_URI = 'uri'
@@ -57,7 +74,7 @@ JSON_OBJECT_TYPE_EMAIL_ADDRESS = 'email_address'
 
 
 class BaseExtractor(object):
-    word_extract_expression = r'([\[\]\-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)'
+    word_extract_expression = r'([\[\]\-_.!~*\'(){}a-zA-Z0-9;\/?:\@&=+\$,%#]+)'
     word_extract_reg = re.compile(word_extract_expression)
     CVE_TYPE_STR = 'cve'
     TA_TYPE_STR = 'threat_actor'
@@ -78,11 +95,29 @@ class BaseExtractor(object):
     # 1行から word ごとに分割する
     @classmethod
     def _get_words_from_line(cls, line):
-        # " (" → " ( "
-        line = line.replace(' (', ' ( ')
-        # ") " → " ) "
-        line = line.replace(') ', ' ) ')
         return cls.word_extract_reg.findall(line)
+
+    @staticmethod
+    def _remove_parentheses(word):
+        for brakcet_reg in bracket_regs:
+            ret = bracket_reg.match(word)
+            if ret:
+                return ret.group('val')
+        return word
+
+    @staticmethod
+    def _remove_parenthes(word):
+        ret = left_bracket_reg.match(word)
+        if ret:
+            word = ret.group('val')
+        ret = right_bracket_reg.match(word)
+        if ret:
+            word = ret.group('val')
+        return word
+
+    @staticmethod
+    def _refang_ioc(v):
+        return defang_reg.sub('', v)
 
     @classmethod
     # value が bytes なら str にする
@@ -123,6 +158,7 @@ class BaseExtractor(object):
         if words is not None:
             # 単語ごとに indicators チェックする
             for word in words:
+                word = BaseExtractor._remove_parentheses(word)
                 type_, value = cls._get_objects_from_word(word)
                 if type_ is not None:
                     # 重複チェック
@@ -303,14 +339,6 @@ class CommonExtractor(object):
         if CommonExtractor.is_punctuation_char(last_char):
             word = word[:-1]
 
-        # () を外す
-        word = remove_bracket(word, CommonExtractor.parentheses_reg)
-
-        # [] を外す
-        word = remove_bracket(word, CommonExtractor.square_bracket_reg)
-
-        # {} を外す
-        word = remove_bracket(word, CommonExtractor.curly_reg)
         return word
 
     # 単語に cve 情報が含まれていたら返却する
@@ -342,6 +370,7 @@ class CommonExtractor(object):
                     # puctuation 対応
                     while True:
                         word = CommonExtractor.remove_punctuation_char(words[index])
+                        word = BaseExtractor._remove_parenthes(word)
                         # puctuation 対応後に長さが 0 の場合, words[index] は puctuation 文字であるため index をすすめる
                         if len(word) == 0:
                             index += 1
@@ -381,7 +410,7 @@ class CommonExtractor(object):
         # ipv4か?
         v = CommonExtractor._get_ipv4_value(word)
         if v is not None:
-            return JSON_OBJECT_TYPE_IPV4, v.replace('[', '').replace(']', '')
+            return JSON_OBJECT_TYPE_IPV4, BaseExtractor._refang_ioc(v)
 
         # urlか?
         v = CommonExtractor._get_url_value(word)
@@ -417,20 +446,19 @@ class CommonExtractor(object):
         # domainか?
         v = CommonExtractor._get_domain_value(word)
         if v is not None:
-            if CommonExtractor.is_file_name(v):
-                return JSON_OBJECT_TYPE_FILE_NAME, v
-            else:
-                # TLD が含まれていたらドメイン名と判断
-                v = v.replace('[', '').replace(']', '')
-                if CommonExtractor.tld.get_tld(v) is not None:
-                    # ドメイン名とする
-                    return JSON_OBJECT_TYPE_DOMAIN, v
-                else:
-                    # ファイル名とする
-                    return JSON_OBJECT_TYPE_FILE_NAME, v
+            # TLD が含まれていたらドメイン名と判断
+            v = BaseExtractor._refang_ioc(v)
+            if CommonExtractor.tld.get_tld(v) is not None:
+                # ドメイン名とする
+                return JSON_OBJECT_TYPE_DOMAIN, v
 
-        # file_nameか?
-        v = file_name_reg.match(word)
+        # file_nameか? (reg)
+        v = CommonExtractor._get_file_name_value(word)
+        if v is not None:
+            return JSON_OBJECT_TYPE_FILE_NAME, v
+
+        # file_nameか? (markup)
+        v = file_name_markup_reg.match(word)
         if v is not None:
             # 最初に見つかった項目のみを対象とする
             return JSON_OBJECT_TYPE_FILE_NAME, v.group(1)
@@ -447,7 +475,7 @@ class CommonExtractor(object):
         # ipv4か?
         if type_ == JSON_OBJECT_TYPE_IPV4:
             o_ = Address()
-            o_.address_value = v.replace('[', '').replace(']', '')
+            o_.address_value = BaseExtractor._refang_ioc(v)
 
         # urlか?
         if type_ == JSON_OBJECT_TYPE_URI:
@@ -482,7 +510,7 @@ class CommonExtractor(object):
         # domainか?
         if type_ == JSON_OBJECT_TYPE_DOMAIN:
             o_ = DomainName()
-            o_.value = v.replace('[', '').replace(']', '')
+            o_.value = BaseExtractor._refang_ioc(v)
 
         # file名か?
         if type_ == JSON_OBJECT_TYPE_FILE_NAME:
@@ -738,11 +766,16 @@ class CommonExtractor(object):
     def _get_domain_value(item):
         return CommonExtractor._get_regular_value(domain_reg, item)
 
-    # domain候補の文字列がファイル名であるかをチェックする
     @staticmethod
-    def is_file_name(s):
-        tld = s.split('.')[-1]
-        return tld.lower() in file_name_extentions
+    def _get_file_name_value(item):
+        ret = CommonExtractor._get_regular_value(file_name_reg, item)
+        if ret:
+            try:
+                float(ret)
+                return None
+            except ValueError:
+                return ret
+        return ret
 
     # 文字列がcveを含む場合、最初に見つかった文字列を返却
     # 存在しない場合はNone
