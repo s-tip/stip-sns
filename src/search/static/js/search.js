@@ -258,7 +258,7 @@ $(function () {
     function confirm_indicators() {
         //modal dialog に Indicators の結果を table として追加する
         function get_file_id_from_file_name(file_name) {
-            return file_name.replace(/\-/g,'--2d').replace(/\./g,'--2e').replace(/ /g,'--20').replace(/'/g,'--27').replace(/"/g,'--22').replace(/\(/g,'--28').replace(/\)/g,'--29').replace(/\:/g,'--3a').replace(/\//g,'--2f').replace(/\?/g,'--3f').replace(/=/g,'--3d').replace(/\[/g,'--5b').replace(/\]/g,'--5d').replace(/\{/g,'--7b').replace(/\}/g,'--7d').replace(/\#/g,'--23').replace(/\@/g,'--40').replace(/\!/g,'--21').replace(/\$/g,'--24').replace(/\&/g,'--26').replace(/\+/g,'--2b').replace(/\,/g,'--2c').replace(/\;/g,'--3b')
+            return file_name.replace(/\-/g,'--2d').replace(/\./g,'--2e').replace(/ /g,'--20').replace(/'/g,'--27').replace(/"/g,'--22').replace(/\(/g,'--28').replace(/\)/g,'--29').replace(/\:/g,'--3a').replace(/\//g,'--2f').replace(/\?/g,'--3f').replace(/=/g,'--3d').replace(/\[/g,'--5b').replace(/\]/g,'--5d').replace(/\{/g,'--7b').replace(/\}/g,'--7d').replace(/\#/g,'--23').replace(/\@/g,'--40').replace(/\!/g,'--21').replace(/\$/g,'--24').replace(/\&/g,'--26').replace(/\+/g,'--2b').replace(/\,/g,'--2c').replace(/\;/g,'--3b').replace(/\%/g,'--25')
         };
 
         function get_file_collapse_id(file_name) {
