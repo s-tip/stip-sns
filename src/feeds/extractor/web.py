@@ -45,7 +45,7 @@ class WebExtractor(BaseExtractor):
 
         # file_path は一時ファイル名から
         _, file_.file_path = tempfile.mkstemp()
-        with open(file_.file_path, 'w', encoding='utf-8') as fp:
+        with open(file_.file_path, 'wb') as fp:
             fp.write(content)
         return file_
 
