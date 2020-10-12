@@ -12,6 +12,8 @@ import traceback
 import iocextract
 import urllib
 import pytz
+import string
+
 try:
     from jira import JIRA
     imported_jira = True
@@ -1420,6 +1422,10 @@ def save_post(request,
     if len(x_stip_sns_attachment_refs) == 0:
         x_stip_sns_attachment_refs = None
 
+    # hashtag
+    feed_list, tag_index = extract_tags(post)
+    tags = [feed_list[i] for i in tag_index]
+    
     bundle = get_post_stix2_bundle(
         json_indicators,
         ttps,
@@ -1432,7 +1438,8 @@ def save_post(request,
         stix2_titles,
         stix2_contents,
         x_stip_sns_attachment_refs,
-        request.user)
+        request.user,
+        tags)
 
     feed.stix2_package_id = bundle.id
     feed.package_id = bundle.id
@@ -1616,3 +1623,13 @@ def check_match_query(request, user):
                 else:
                     return False
     return True
+
+def extract_tags(feed):
+    tag_index = []
+    delimiter_string = string.punctuation.translate(str.maketrans({'#':'', '_':''})) + string.whitespace
+    feed_list = re.split('([' + delimiter_string + '])', feed)
+    feed_list = [i for i in feed_list if i != '']
+    for i in range(len(feed_list)):
+        if len(feed_list[i]) > 1 and feed_list[i][0] == '#' and feed_list[i][1] != '_' and '#' not in feed_list[i][1:] and not feed_list[i].translate(str.maketrans({'#':'', '_':''})).isdecimal():
+            tag_index.append(i)
+    return feed_list, tag_index

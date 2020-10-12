@@ -293,7 +293,8 @@ def get_post_stix2_bundle(
     stix2_titles=[],
     stix2_contents=[],
     x_stip_sns_attachment_refs=None,
-    stip_user=None
+    stip_user=None,
+    tags=[]
 ):
 
     # S-TIP Identity 作成する
@@ -395,7 +396,8 @@ def get_post_stix2_bundle(
         created_by_ref=individual_identity,
         published=published,
         report_types=['threat-report'],
-        object_refs=report_object_refs)
+        object_refs=report_object_refs,
+        labels = tags)
     bundle.objects.append(report)
 
     # language-content 作成
