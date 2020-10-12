@@ -12,6 +12,7 @@ import traceback
 import iocextract
 import urllib
 import pytz
+import string
 try:
     from jira import JIRA
     imported_jira = True
@@ -88,7 +89,9 @@ def feeds(request):
         from_feed = feeds[0].package_id
     else:
         from_feed = None
-
+    for i in range(len(feeds)):
+        feed_list, tag_index = extract_tags(feeds[i].post)
+        feeds[i].post = create_link_tags(feed_list, tag_index)
     r = render(request, 'feeds/feeds.html', {
         'feeds': feeds,
         'jira': imported_jira,
@@ -145,6 +148,8 @@ def load(request):
     html = ''
     csrf_token = (csrf(request)['csrf_token'])
     for feed in feeds:
+        feed_list, tag_index = extract_tags(feed.post)
+        feed.post = create_link_tags(feed_list, tag_index)
         html = '{0}{1}'.format(
             html,
             render_to_string(
@@ -167,6 +172,8 @@ def _html_feeds(last_feed_datetime, user, csrf_token, feed_source='all'):
     feeds = Feed.get_feeds_after(last_feed_datetime=last_feed_datetime, api_user=user, user_id=user_id)
     html = ''
     for feed in feeds:
+        feed_list, tag_index = extract_tags(feed.post)
+        feed.post = create_link_tags(feed_list, tag_index)
         html = '{0}{1}'.format(
             html,
             render_to_string(
@@ -1616,3 +1623,26 @@ def check_match_query(request, user):
                 else:
                     return False
     return True
+
+
+def extract_tags(feed):
+    tag_index = []
+    delimiter_string = string.punctuation.translate(str.maketrans({'#':'', '_':''})) + string.whitespace
+    feed_list = re.split('([' + delimiter_string + '])', feed)
+    feed_list = [i for i in feed_list if i != '']
+    for i in range(len(feed_list)):
+        if len(feed_list[i]) > 1 and feed_list[i][0] == '#' and feed_list[i][1] != '_' and not '#' in feed_list[i][1:] and not feed_list[i].translate(str.maketrans({'#':'', '_':''})).isdecimal():
+            tag_index.append(i)
+    return feed_list, tag_index
+
+
+def create_link_tags(feed_list, tag_index):
+    print('Check final start')
+    print(feed_list)
+    print(tag_index)
+    print('Check final end')
+    for i in tag_index:
+        tag_string = urllib.parse.quote(feed_list[i])
+        feed_list[i] = '<a href=/search/?q=' + tag_string + '>' + feed_list[i] + '</a>'
+    return ''.join(feed_list)
+
