@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from ctirs.models import Group, Feed, STIPUser as User
-from feeds.views import extraction_tags, create_link_tags
+from feeds.views import extract_tags, create_link_tags
 
 try:
     from jira import JIRA
