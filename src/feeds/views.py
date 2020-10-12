@@ -1637,10 +1637,6 @@ def extract_tags(feed):
 
 
 def create_link_tags(feed_list, tag_index):
-    print('Check final start')
-    print(feed_list)
-    print(tag_index)
-    print('Check final end')
     for i in tag_index:
         tag_string = urllib.parse.quote(feed_list[i])
         feed_list[i] = '<a href=/search/?q=' + tag_string + '>' + feed_list[i] + '</a>'
