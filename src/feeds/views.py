@@ -1631,7 +1631,7 @@ def extract_tags(feed):
     feed_list = re.split('([' + delimiter_string + '])', feed)
     feed_list = [i for i in feed_list if i != '']
     for i in range(len(feed_list)):
-        if len(feed_list[i]) > 1 and feed_list[i][0] == '#' and feed_list[i][1] != '_' and '#' not in feed_list[i][1:] and not feed_list[i].translate(str.maketrans({'#':'', '_':''})).isdecimal():
+        if 1 < len(feed_list[i]) <= const.MAX_HASHTAG_LENGTH and feed_list[i][0] == '#' and feed_list[i].replace('#', '').count('_') != len(feed_list[i].replace('#', '')) and '#' not in feed_list[i][1:] and not feed_list[i].translate(str.maketrans({'#':'', '_':''})).isdecimal():
             tag_index.append(i)
     return feed_list, tag_index
 
