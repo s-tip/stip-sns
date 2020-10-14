@@ -43,8 +43,8 @@ def search(request):
     # anonymous以外の全ユーザを返却する
     users_list = User.objects.filter(is_active=True).exclude(username='anonymous').order_by('username')
     for i in range(len(feeds)):
-        feed_list, tag_index = extract_tags(feeds[i].post)
-        feeds[i].post = create_link_tags(feed_list, tag_index)
+        feed_words, tag_indexes = extract_tags(feeds[i].post)
+        feeds[i].post = create_link_tags(feed_words, tag_indexes)
     r = render(request, 'search/search.html',{
         'feeds': feeds,
         'jira': imported_jira,
