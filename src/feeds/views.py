@@ -1635,11 +1635,11 @@ def extract_tags(feed):
     feed_words = [i for i in feed_words if i != '']
     for i in range(len(feed_words)):
         word = feed_words[i]
+        if word[0] != '#':
+            continue
         if len(word) == 1:
             continue
         if len(word) > const.MAX_HASHTAG_LENGTH:
-            continue
-        if word[0] != '#':
             continue
         if re.match(sharp_underbar_reg, word) != None:
             continue
