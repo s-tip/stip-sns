@@ -72,8 +72,8 @@ PUBLICATION_VALUE_ALL = 'all'
 DEFAULT_GV_PORT = 10000
 L2_GV_PATH = '/L2'
 
-sharp_underbar_reg = re.compile('^#_+')
-sharp_underbar_numeric_reg = re.compile('#[_0-9０-９]+$')
+sharp_underbar_reg = re.compile('^#_+$')
+sharp_underbar_numeric_reg = re.compile('^#[_0-9０-９]+$')
 
 
 @login_required
