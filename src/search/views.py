@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from ctirs.models import Group, Feed, STIPUser as User
-from feeds.views import extract_tags, create_link_tags
+from feeds.views import extract_tags, create_tag_links
 
 try:
     from jira import JIRA
@@ -38,14 +38,14 @@ def search(request):
         query_string = None
         feeds = []
         from_feed = None
-    # ÅIXVŠÔ
+    # ï¿½ÅIï¿½Xï¿½Vï¿½ï¿½ï¿½ï¿½
     last_reload = str(datetime.datetime.now())
-    # anonymousˆÈŠO‚Ì‘Sƒ†[ƒU‚ğ•Ô‹p‚·‚é
+    # anonymousï¿½ÈŠOï¿½Ì‘Sï¿½ï¿½ï¿½[ï¿½Uï¿½ï¿½Ô‹pï¿½ï¿½ï¿½ï¿½
     users_list = User.objects.filter(is_active=True).exclude(username='anonymous').order_by('username')
     for i in range(len(feeds)):
-        feed_words, tag_indexes = extract_tags(feeds[i].post)
-        feeds[i].post = create_link_tags(feed_words, tag_indexes)
-    r = render(request, 'search/search.html',{
+        tags = extract_tags(feeds[i].post)
+        feeds[i].post = create_tag_links(tags, feeds[i].post)
+    r = render(request, 'search/search.html', {
         'feeds': feeds,
         'jira': imported_jira,
         'from_feed': from_feed,
