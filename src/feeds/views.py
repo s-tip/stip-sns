@@ -93,8 +93,8 @@ def feeds(request):
     else:
         from_feed = None
     for i in range(len(feeds)):
-        feed_words, tag_indexes = extract_tags(feeds[i].post)
-        feeds[i].post = create_link_tags(feed_words, tag_indexes)
+        _, post = extract_tags(feeds[i].post)
+        feeds[i].post = post
     r = render(request, 'feeds/feeds.html', {
         'feeds': feeds,
         'jira': imported_jira,
@@ -151,8 +151,8 @@ def load(request):
     html = ''
     csrf_token = (csrf(request)['csrf_token'])
     for feed in feeds:
-        feed_words, tag_indexes = extract_tags(feed.post)
-        feed.post = create_link_tags(feed_words, tag_indexes)
+        _, post = extract_tags(feed.post)
+        feed.post = post
         html = '{0}{1}'.format(
             html,
             render_to_string(
@@ -175,8 +175,8 @@ def _html_feeds(last_feed_datetime, user, csrf_token, feed_source='all'):
     feeds = Feed.get_feeds_after(last_feed_datetime=last_feed_datetime, api_user=user, user_id=user_id)
     html = ''
     for feed in feeds:
-        feed_words, tag_indexes = extract_tags(feed.post)
-        feed.post = create_link_tags(feed_words, tag_indexes)
+        _, post = extract_tags(feed.post)
+        feed.post = post
         html = '{0}{1}'.format(
             html,
             render_to_string(
@@ -1431,8 +1431,7 @@ def save_post(request,
         x_stip_sns_attachment_refs = None
 
     # hashtag
-    feed_words, tag_indexes = extract_tags(post)
-    tags = [feed_words[i] for i in tag_indexes]
+    tags, _ = extract_tags(post)
     
     bundle = get_post_stix2_bundle(
         json_indicators,
@@ -1633,33 +1632,34 @@ def check_match_query(request, user):
     return True
 
 
-def extract_tags(feed):
-    tag_indexes = []
+def extract_tags(post):
+    tags = []
+    return_post = ''
     delimiter_string = string.punctuation.translate(str.maketrans({'#':'', '_':''})) + string.whitespace
-    feed_words = re.split('([' + delimiter_string + '])', feed)
+    feed_words = re.split('([' + delimiter_string + '])', post)
     feed_words = [i for i in feed_words if i != '']
-    for i in range(len(feed_words)):
-        word = feed_words[i]
-        if word[0] != '#':
-            continue
-        if len(word) == 1:
-            continue
-        if len(word) > const.MAX_HASHTAG_LENGTH:
-            continue
-        if re.match(sharp_underbar_reg, word) != None:
-            continue
-        if '#' in word[1:]:
-            continue
-        if re.match(sharp_underbar_numeric_reg, word) != None:
-            continue
-        tag_indexes.append(i)
-    return feed_words, tag_indexes
+    for word in feed_words:
+        if is_tag(word):
+            encode_tag_word = urllib.parse.quote(word)
+            linked_str = '<a href=/search/?q=' + encode_tag_word + '>' + word + '</a>'
+            return_post += linked_str
+            tags.append(word)
+        else:
+            return_post += word
+    return list(set(tags)), return_post
 
 
-def create_link_tags(feed_words, tag_indexes):
-    for i in tag_indexes:
-        tag_word = feed_words[i]
-        encode_tag_word = urllib.parse.quote(tag_word)
-        feed_words[i] = '<a href=/search/?q=' + encode_tag_word + '>' + tag_word + '</a>'
-    return ''.join(feed_words)
-
+def is_tag(word):
+    if word[0] != '#':
+        return False
+    if len(word) == 1:
+        return False
+    if len(word) > const.MAX_HASHTAG_LENGTH:
+        return False
+    if re.match(sharp_underbar_reg, word):
+        return False
+    if '#' in word[1:]:
+        return False
+    if re.match(sharp_underbar_numeric_reg, word):
+        return False
+    return True
