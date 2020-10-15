@@ -1430,6 +1430,10 @@ def save_post(request,
     if len(x_stip_sns_attachment_refs) == 0:
         x_stip_sns_attachment_refs = None
 
+    # hashtag
+    feed_words, tag_indexes = extract_tags(post)
+    tags = [feed_words[i] for i in tag_indexes]
+    
     bundle = get_post_stix2_bundle(
         json_indicators,
         ttps,
@@ -1442,7 +1446,8 @@ def save_post(request,
         stix2_titles,
         stix2_contents,
         x_stip_sns_attachment_refs,
-        request.user)
+        request.user,
+        tags)
 
     feed.stix2_package_id = bundle.id
     feed.package_id = bundle.id
