@@ -20,6 +20,7 @@ except ImportError:
     imported_jira = False
 
 import stip.common.const as const
+import stip.common.tag as tag
 import ctirs.models.sns.feeds.rs as rs
 import feeds.feed_stix2_sighting as stip_sighting
 
@@ -1639,7 +1640,7 @@ def extract_tags(post):
     feed_words = re.split('([' + delimiter_string + '])', post)
     feed_words = [i for i in feed_words if i != '']
     for word in feed_words:
-        if is_tag(word):
+        if tag.is_tag(word):
             encode_tag_word = urllib.parse.quote(word)
             linked_str = '<a href=/search/?q=' + encode_tag_word + '>' + word + '</a>'
             return_post += linked_str
@@ -1647,19 +1648,3 @@ def extract_tags(post):
         else:
             return_post += word
     return list(set(tags)), return_post
-
-
-def is_tag(word):
-    if word[0] != '#':
-        return False
-    if len(word) == 1:
-        return False
-    if len(word) > const.MAX_HASHTAG_LENGTH:
-        return False
-    if re.match(sharp_underbar_reg, word):
-        return False
-    if '#' in word[1:]:
-        return False
-    if re.match(sharp_underbar_numeric_reg, word):
-        return False
-    return True
