@@ -1432,8 +1432,11 @@ def save_post(request,
         x_stip_sns_attachment_refs = None
 
     # hashtag
-    tags, _ = extract_tags(post, feed.title)
-    
+    post_tags, _ = extract_tags(post, only_extract=True)
+    title_tags, _ = extract_tags(feed.title, only_extract=True)
+    post_tags.extend(title_tags)
+    tags = list(set(post_tags))
+
     bundle = get_post_stix2_bundle(
         json_indicators,
         ttps,
@@ -1633,25 +1636,19 @@ def check_match_query(request, user):
     return True
 
 
-def extract_tags(post, title=None):
+def extract_tags(content, only_extract=False):
     tags = []
     return_post = ''
-    first_loop = True
     delimiter_string = string.punctuation.translate(str.maketrans({'#':'', '_':''})) + string.whitespace
-    for i in post, title:
-        if not i:
-            continue
-        words = re.split('([' + delimiter_string + '])', i)
-        words = [j for j in words if j != '']
-        for word in words:
-            if tag.is_tag(word):
-                if first_loop:
-                    encode_tag_word = urllib.parse.quote(word)
-                    linked_str = '<a href=/search/?q=' + encode_tag_word + '>' + word + '</a>'
-                    return_post += linked_str
-                tags.append(word)
-            else:
-                if first_loop:
-                    return_post += word
-        first_loop = False
+    words = re.split('([' + delimiter_string + '])', content)
+    words = [i for i in words if i != '']
+    for word in words:
+        if tag.is_tag(word):
+            if not only_extract:
+                encode_tag_word = urllib.parse.quote(word)
+                linked_str = '<a href=/search/?q=' + encode_tag_word + '>' + word + '</a>'
+                return_post += linked_str
+            tags.append(word)
+        else:
+            return_post += word
     return list(set(tags)), return_post
