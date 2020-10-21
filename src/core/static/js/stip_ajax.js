@@ -1,5 +1,8 @@
 const empty_gif = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 const re = /^[0-9]{6}$/;
+const suggest_limit = 5
+const suggest_min_length = 2
+
 
 $(document)
   .ajaxError(function (e, xhr, opts, error) {
@@ -136,3 +139,25 @@ $('#disable_close_btn').click(function () {
   $('#disable_2fa_modal').modal('hide');
   $('#id_enable_2fa').prop('checked', true);
 });
+
+var hashSuggest = new Bloodhound({
+  datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+  queryTokenizer: Bloodhound.tokenizers.whitespace,
+  remote: {
+    url: '/feeds/tags?word=%query',
+    wildcard: '%query',
+  }
+});
+
+$('.hash-suggest').typeahead(
+  {
+    minLength: suggest_min_length,
+    highlight: false
+  },
+  {
+    name: 'hash-suggest',
+    limit: suggest_limit,
+    display: 'value',
+    source: hashSuggest,
+  }
+);

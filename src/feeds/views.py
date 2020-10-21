@@ -1639,7 +1639,7 @@ def check_match_query(request, user):
 def extract_tags(content, only_extract=False):
     tags = []
     return_post = ''
-    delimiter_string = string.punctuation.translate(str.maketrans({'#':'', '_':''})) + string.whitespace
+    delimiter_string = string.punctuation.translate(str.maketrans({'#': '', '_': ''})) + string.whitespace
     words = re.split('([' + delimiter_string + '])', content)
     words = [i for i in words if i != '']
     for word in words:
@@ -1652,3 +1652,25 @@ def extract_tags(content, only_extract=False):
         else:
             return_post += word
     return list(set(tags)), return_post
+
+
+@login_required
+@ajax_required
+def tags(request):
+    try:
+        word = request.GET.get('word')
+        word = urllib.parse.quote(word)
+        # RSへGet処理
+        sns_config = SNSConfig.objects.get()
+        rs_host = sns_config.rs_host
+        url = rs_host + '/api/v1/sns/feeds/tags?word=' + word
+        headers = {"content-type": "application/json"}
+        r = requests.get(
+            url,
+            headers=headers,
+            verify=False)
+        res = r.json()
+        return JsonResponse(res, safe=False)
+    except Exception as e:
+        traceback.print_exc()
+        return HttpResponseServerError(str(e))
