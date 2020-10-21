@@ -1432,8 +1432,8 @@ def save_post(request,
         x_stip_sns_attachment_refs = None
 
     # hashtag
-    post_tags, _ = extract_tags(post, only_extract=True)
-    title_tags, _ = extract_tags(feed.title, only_extract=True)
+    post_tags, _ = extract_tags(post, True)
+    title_tags, _ = extract_tags(feed.title, True)
     post_tags.extend(title_tags)
     tags = list(set(post_tags))
 
