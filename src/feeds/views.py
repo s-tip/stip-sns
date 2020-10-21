@@ -1432,8 +1432,11 @@ def save_post(request,
         x_stip_sns_attachment_refs = None
 
     # hashtag
-    tags, _ = extract_tags(post)
-    
+    post_tags, _ = extract_tags(post, True)
+    title_tags, _ = extract_tags(feed.title, True)
+    post_tags.extend(title_tags)
+    tags = list(set(post_tags))
+
     bundle = get_post_stix2_bundle(
         json_indicators,
         ttps,
@@ -1633,17 +1636,18 @@ def check_match_query(request, user):
     return True
 
 
-def extract_tags(post):
+def extract_tags(content, only_extract=False):
     tags = []
     return_post = ''
     delimiter_string = string.punctuation.translate(str.maketrans({'#':'', '_':''})) + string.whitespace
-    feed_words = re.split('([' + delimiter_string + '])', post)
-    feed_words = [i for i in feed_words if i != '']
-    for word in feed_words:
+    words = re.split('([' + delimiter_string + '])', content)
+    words = [i for i in words if i != '']
+    for word in words:
         if tag.is_tag(word):
-            encode_tag_word = urllib.parse.quote(word)
-            linked_str = '<a href=/search/?q=' + encode_tag_word + '>' + word + '</a>'
-            return_post += linked_str
+            if not only_extract:
+                encode_tag_word = urllib.parse.quote(word)
+                linked_str = '<a href=/search/?q=' + encode_tag_word + '>' + word + '</a>'
+                return_post += linked_str
             tags.append(word)
         else:
             return_post += word
