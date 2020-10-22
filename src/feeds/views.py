@@ -73,6 +73,8 @@ PUBLICATION_VALUE_ALL = 'all'
 DEFAULT_GV_PORT = 10000
 L2_GV_PATH = '/L2'
 
+SUGGEST_MIN_LENGTH = 2
+
 sharp_underbar_reg = re.compile('^#_+$')
 sharp_underbar_numeric_reg = re.compile('^#[_0-9０-９]+$')
 
@@ -1639,7 +1641,7 @@ def check_match_query(request, user):
 def extract_tags(content, only_extract=False):
     tags = []
     return_post = ''
-    delimiter_string = string.punctuation.translate(str.maketrans({'#':'', '_':''})) + string.whitespace
+    delimiter_string = string.punctuation.translate(str.maketrans({'#': '', '_': ''})) + string.whitespace
     words = re.split('([' + delimiter_string + '])', content)
     words = [i for i in words if i != '']
     for word in words:
@@ -1652,3 +1654,31 @@ def extract_tags(content, only_extract=False):
         else:
             return_post += word
     return list(set(tags)), return_post
+
+
+@login_required
+@ajax_required
+def tags(request):
+    try:
+        res = []
+        word = request.GET.get('word')
+        if not word or len(word) < SUGGEST_MIN_LENGTH:
+            return JsonResponse(res, safe=False)
+        if word[0] != '#':
+            return JsonResponse(res, safe=False)
+        # URI encode
+        word = urllib.parse.quote(word)
+        # RSへGet処理
+        sns_config = SNSConfig.objects.get()
+        rs_host = sns_config.rs_host
+        url = rs_host + '/api/v1/sns/feeds/tags?word=' + word
+        headers = {"content-type": "application/json"}
+        r = requests.get(
+            url,
+            headers=headers,
+            verify=False)
+        res = r.json()
+        return JsonResponse(res, safe=False)
+    except Exception as e:
+        traceback.print_exc()
+        return HttpResponseServerError(str(e))
