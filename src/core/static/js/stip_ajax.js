@@ -144,7 +144,7 @@ var hashSuggest = new Bloodhound({
   datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
   queryTokenizer: Bloodhound.tokenizers.whitespace,
   remote: {
-    url: '/feeds/tags?word=%query',
+    url: '/feeds/tags/?word=%query',
     wildcard: '%query',
   }
 });

@@ -28,6 +28,6 @@ urlpatterns = [
     url(r'^run_phantom_playbook/$', views.run_phantom_playbook, name='run_phantom_playbook'),
     url(r'^get_like_comment/$', views.get_like_comment, name='get_like_comment'),
     url(r'^confirm_indicator/$', views.confirm_indicator, name='confirm_indicator'),
-    url(r'^tags$', views.tags, name='tags'),
+    url(r'^tags/$', views.tags, name='tags'),
     url(r'^id/(?P<pk>\S+)/$', views.feed, name='feed'),
 ]

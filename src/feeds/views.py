@@ -73,6 +73,8 @@ PUBLICATION_VALUE_ALL = 'all'
 DEFAULT_GV_PORT = 10000
 L2_GV_PATH = '/L2'
 
+SUGGEST_MIN_LENGTH = 2
+
 sharp_underbar_reg = re.compile('^#_+$')
 sharp_underbar_numeric_reg = re.compile('^#[_0-9０-９]+$')
 
@@ -1658,7 +1660,13 @@ def extract_tags(content, only_extract=False):
 @ajax_required
 def tags(request):
     try:
+        res = []
         word = request.GET.get('word')
+        if not word or len(word) < SUGGEST_MIN_LENGTH:
+            return JsonResponse(res, safe=False)
+        if word[0] != '#':
+            return JsonResponse(res, safe=False)
+        # URI encode
         word = urllib.parse.quote(word)
         # RSへGet処理
         sns_config = SNSConfig.objects.get()
