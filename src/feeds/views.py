@@ -1427,7 +1427,7 @@ def save_post(request,
         x_stip_sns_attachment_refs = None
 
     # hashtag
-    post_tags, feed.post = extract_tags(feed.post_org)
+    post_tags, linked_post = extract_tags(feed.post_org)
     title_tags, _ = extract_tags(feed.title, True)
     post_tags.extend(title_tags)
     tags = list(set(post_tags))
@@ -1471,6 +1471,7 @@ def save_post(request,
 
     feed.date = Feed.get_datetime_from_string(resp['produced'])
     feed.stix_file_path = _write_stix_file(bundle)
+    feed.post = linked_post
     feed.save()
 
     if len(tmp_feed_files) > 1:
