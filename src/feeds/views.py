@@ -895,7 +895,7 @@ def call_jira(request):
         issue = j.create_issue(
             project=SNSConfig.get_jira_project(),
             summary=feed.title,
-            description=feed.post,
+            description=feed.post_org,
             issuetype={
                 'name': SNSConfig.get_jira_type()
             })
@@ -1498,7 +1498,7 @@ def save_post(request,
         slack_post = ''
         slack_post += '[%s]\n' % (iocextract.defang(feed.title))
         slack_post += '\n'
-        slack_post += '%s\n' % (iocextract.defang(feed.post))
+        slack_post += '%s\n' % (iocextract.defang(feed.post_org))
         slack_post += '\n'
         slack_post += '---------- S-TIP Post Info (TLP: %s) ----------\n' % (feed.tlp)
         slack_post += '%s: %s\n' % ('Account', feed.user.username)
