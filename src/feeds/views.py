@@ -95,9 +95,6 @@ def feeds(request):
         from_feed = feeds[0].package_id
     else:
         from_feed = None
-    for i in range(len(feeds)):
-        _, post = extract_tags(feeds[i].post)
-        feeds[i].post = post
     r = render(request, 'feeds/feeds.html', {
         'feeds': feeds,
         'jira': imported_jira,
@@ -154,8 +151,6 @@ def load(request):
     html = ''
     csrf_token = (csrf(request)['csrf_token'])
     for feed in feeds:
-        _, post = extract_tags(feed.post)
-        feed.post = post
         html = '{0}{1}'.format(
             html,
             render_to_string(
@@ -178,8 +173,6 @@ def _html_feeds(last_feed_datetime, user, csrf_token, feed_source='all'):
     feeds = Feed.get_feeds_after(last_feed_datetime=last_feed_datetime, api_user=user, user_id=user_id)
     html = ''
     for feed in feeds:
-        _, post = extract_tags(feed.post)
-        feed.post = post
         html = '{0}{1}'.format(
             html,
             render_to_string(
@@ -1407,7 +1400,7 @@ def save_post(request,
     if len(post) == 0:
         return None
 
-    feed.post = post[:10240]
+    feed.post_org = post[:10240]
     sharing_range = FeedStixCommon._make_sharing_range_value(feed)
 
     tmp_feed_files = []
@@ -1434,7 +1427,7 @@ def save_post(request,
         x_stip_sns_attachment_refs = None
 
     # hashtag
-    post_tags, _ = extract_tags(post, True)
+    post_tags, linked_post = extract_tags(feed.post_org)
     title_tags, _ = extract_tags(feed.title, True)
     post_tags.extend(title_tags)
     tags = list(set(post_tags))
@@ -1444,7 +1437,7 @@ def save_post(request,
         ttps,
         tas,
         feed.title,
-        post,
+        feed.post_org,
         feed.tlp,
         feed.referred_url,
         sharing_range,
@@ -1478,6 +1471,7 @@ def save_post(request,
 
     feed.date = Feed.get_datetime_from_string(resp['produced'])
     feed.stix_file_path = _write_stix_file(bundle)
+    feed.post = linked_post
     feed.save()
 
     if len(tmp_feed_files) > 1:
