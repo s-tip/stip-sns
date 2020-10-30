@@ -1,7 +1,7 @@
 $(function () {
   var page_title = $(document).attr("title");
   var slideTime = 100;
-  var screen_type = document.getElementById('screen_type').value;
+  var screen_type = $("body").data("screen-type");
 
   //新規投稿とキャンセルを入れ替える
   function toggle_new_cancel_button() {
