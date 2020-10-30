@@ -8,13 +8,13 @@
   <link href="{% static 'css/jquery.dataTables.min.css' %}?v=1" rel="stylesheet">
   <script src="{% static 'js/jquery.bullseye-1.0-min.js' %}"></script>
   <script src="{% static 'js/jquery.multi-select.js' %}?v=1"></script>
-  <script src="{% static 'js/search.js' %}?v=1"></script>
+  <script src="{% static 'js/feeds.js' %}?v=1"></script>
   <script src="{% static 'js/jquery.quicksearch.js' %}?v=1"></script>
   <script src="{% static 'js/jquery.dataTables.min.js' %}?v=1"></script>
 {% endblock head %}
 
 {% block main %}
-
+  <input type="hidden" id="screen_type" value="search">
   <div class="row">
     <div class="col-md-9 col-md-offset-1">
 
@@ -41,8 +41,8 @@
               <br/>
 
               <div class="form-check">
-	              <label for="compose-stix-2">{% trans 'Also outputs STIX 2.1 format' %}:</label>&nbsp;&nbsp;
-	              <input class="form-check-input" type="checkbox" id="compose-stix-2" name="stix2"/> Yes
+	              <label for="compose-multi-language">{% trans 'Support Multi Languages' %}:</label>&nbsp;&nbsp;
+	              <input class="form-check-input" type="checkbox" id="compose-multi-language" name="stix2"/> Yes
               </div>
 
               <br/>

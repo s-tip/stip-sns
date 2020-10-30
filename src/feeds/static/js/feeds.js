@@ -1,6 +1,7 @@
 $(function () {
   var page_title = $(document).attr("title");
   var slideTime = 100;
+  var screen_type = document.getElementById('screen_type').value;
   
   //新規投稿とキャンセルを入れ替える
   function toggle_new_cancel_button(){
@@ -712,6 +713,10 @@ $(function () {
     			table_datas[file_name][TABLE_ID_TAS] = data['tas'][file_name]
     		}
         }
+        if(screen_type == 'search'){
+            fd.append('query_string',document.getElementById('query_string').value);
+            fd.append('screen_name',document.getElementById('screen_name').value);
+        }
     	// table_data があれば modal 表示
     	if(Object.keys(table_datas).length > 0){
     		make_extract_tables(table_datas);
@@ -867,7 +872,10 @@ $(function () {
 	  fd.append('multi_language',is_multi_language());
 	  fd.append('stix2_titles',JSON.stringify(get_stix2_title_information()));	
 	  fd.append('stix2_contents',JSON.stringify(get_stix2_content_information()));
-
+          if(screen_type == 'search'){
+              fd.append('query_string',document.getElementById('query_string').value);
+              fd.append('screen_name',document.getElementById('screen_name').value);
+          } 
       display_processing_animation();
 	  $.ajax({
 	      url: '/feeds/post/',
@@ -1506,8 +1514,9 @@ $(function () {
       window.setTimeout(check_new_feeds, check_interval);
     }
   };
-  check_new_feeds();
-
+  if(screen_type == 'feeds'){
+      check_new_feeds();
+  }
   $(".stream-update a").click(function () {
     var last_feed = $(".stream li:first-child").attr("feed-date");
     var feed_source = $("#feed_source").val();
