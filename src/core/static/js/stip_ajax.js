@@ -140,24 +140,66 @@ $('#disable_close_btn').click(function () {
   $('#id_enable_2fa').prop('checked', true);
 });
 
-var hashSuggest = new Bloodhound({
-  datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
-  queryTokenizer: Bloodhound.tokenizers.whitespace,
-  remote: {
-    url: '/feeds/tags/?word=%query',
-    wildcard: '%query',
-  }
-});
+function start() {
+  sg = new Suggest.LocalMulti(
+    "search-text",
+    "suggest",
+    [],
+    {
+      interval: 500,
+      dispMax: 5,
+      listTagName: "div",
+      prefix: true,
+      ignoreCase: true,
+      highlight: false,
+      display: false,
+      classMouseOver: "over",
+      classSelect: "select",
+      delim: " "
+    });
+  initSuggest(sg);
+};
 
-$('.hash-suggest').typeahead(
-  {
-    minLength: suggest_min_length,
-    highlight: false
-  },
-  {
-    name: 'hash-suggest',
-    limit: suggest_limit,
-    display: 'value',
-    source: hashSuggest,
+function initSuggest(suggest_obj) {
+  sg = suggest_obj;
+  sg._search = function (text) { return 0; };
+  sg.hookBeforeSearch = getList;
+}
+
+function getList(text) {
+  if (sg == null) {
+    return [];
   }
-);
+  if (text.length < 2) {
+    return [];
+  }
+  if (text[0] != "#") {
+    return [];
+  }
+  sg.candidateList = [];
+  url = "/feeds/tags/?word=" + encodeURIComponent(text)
+  $.ajax({
+    url: url,
+    type: "GET",
+    datatype: "json",
+    timespan: 5000
+  }).done(function (data, textStatus, jqXHR) {
+    sg.candidateList = data;
+    var list_count = sg.candidateList.length;
+    sg.suggestIndexList = [];
+    if (list_count != 0) {
+      for (i = 0; i < list_count; i++) {
+        sg.suggestIndexList.push(i);
+      }
+      sg.createSuggestArea(sg.candidateList);
+    }
+  }).fail(function (jqXHR, textStatus, errorThrown) {
+    return
+  })
+}
+
+var sg = null;
+
+window.addEventListener ?
+  window.addEventListener('load', start, false) :
+  window.attachEvent('onload', start);
