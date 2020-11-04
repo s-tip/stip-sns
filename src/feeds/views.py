@@ -1635,7 +1635,7 @@ def check_match_query(request, user):
 def extract_tags(content, only_extract=False):
     tags = []
     return_post = ''
-    delimiter_string = string.punctuation.translate(str.maketrans({'#': '', '_': ''})) + string.whitespace
+    delimiter_string = string.punctuation.translate(str.maketrans({'#': '', '_': ''})) + string.whitespace + '　'
     words = re.split('([' + delimiter_string + '])', content)
     words = [i for i in words if i != '']
     for word in words:
