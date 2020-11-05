@@ -93,10 +93,20 @@ def start_receive_slack_thread():
             SNS_SLACK_BOT_ACCOUNT,
             is_admin=False)
         slack_user.save()
+    proxies = System.get_request_proxies()
+    if proxies:
+        if 'https' in proxies:
+            proxy_str = proxies['https']
+        else:
+            proxy_str = None
+    else:
+        proxy_str = None
     slack_web_client = slack.WebClient(
-        token=slack_token)
+        token=slack_token,
+        proxy=proxy_str)
     slack_rtm_client = slack.RTMClient(
-        token=slack_token)
+        token=slack_token,
+        proxy=proxy_str)
     th = SlackThread(slack_rtm_client)
     return slack_web_client, slack_rtm_client, th
 
@@ -112,15 +122,25 @@ def restart_receive_slack_thread():
         th.end()
         th.join()
 
+    proxies = System.get_request_proxies()
+    if proxies:
+        if 'https' in proxies:
+            proxy_str = proxies['https']
+        else:
+            proxy_str = None
+    else:
+        proxy_str = None
     if not slack_rtm_client:
         loop = asyncio.new_event_loop()
         slack_rtm_client = slack.RTMClient(
             token=slack_token,
-            loop=loop)
+            loop=loop,
+            proxy=proxy_str)
     else:
         slack_rtm_client = slack.RTMClient(
             token=slack_token,
-            loop=slack_rtm_client._event_loop)
+            loop=slack_rtm_client._event_loop,
+            proxy=proxy_str)
     th = SlackThread(slack_rtm_client)
     return slack_web_client, slack_rtm_client, th
 
