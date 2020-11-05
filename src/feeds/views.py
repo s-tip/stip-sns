@@ -1615,7 +1615,7 @@ def check_match_query(request, user):
     if 'query_string' in request.POST.keys() and KEY_SCREEN_NAME in request.POST.keys():
         query_string = request.POST['query_string']
         # 空白スペース区切りで分割
-        query_strings = query_string.split(' ')
+        query_strings = re.split('[ 　]', query_string)
         # 空白スペース区切りで検索文字列が指定されていない場合(検索対象: 投稿/タイトル/ユーザ名/スクリーン名)
         if len(query_strings) == 1:
             if query_strings[0] in request.POST[KEY_POST] or query_strings[0] in request.POST[KEY_TITLE] or query_strings[0] in user or query_strings[0] in request.POST[KEY_SCREEN_NAME]:
@@ -1635,7 +1635,7 @@ def check_match_query(request, user):
 def extract_tags(content, only_extract=False):
     tags = []
     return_post = ''
-    delimiter_string = string.punctuation.translate(str.maketrans({'#': '', '_': ''})) + string.whitespace
+    delimiter_string = string.punctuation.translate(str.maketrans({'#': '', '_': ''})) + string.whitespace + '　'
     words = re.split('([' + delimiter_string + '])', content)
     words = [i for i in words if i != '']
     for word in words:
