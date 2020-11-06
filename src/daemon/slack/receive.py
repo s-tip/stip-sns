@@ -94,13 +94,10 @@ def start_receive_slack_thread():
             is_admin=False)
         slack_user.save()
     proxies = System.get_request_proxies()
+    proxy_str = None
     if proxies:
         if 'https' in proxies:
             proxy_str = proxies['https']
-        else:
-            proxy_str = None
-    else:
-        proxy_str = None
     slack_web_client = slack.WebClient(
         token=slack_token,
         proxy=proxy_str)
@@ -123,13 +120,10 @@ def restart_receive_slack_thread():
         th.join()
 
     proxies = System.get_request_proxies()
+    proxy_str = None
     if proxies:
         if 'https' in proxies:
             proxy_str = proxies['https']
-        else:
-            proxy_str = None
-    else:
-        proxy_str = None
     if not slack_rtm_client:
         loop = asyncio.new_event_loop()
         slack_rtm_client = slack.RTMClient(
