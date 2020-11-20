@@ -140,10 +140,10 @@ $('#disable_close_btn').click(function () {
   $('#id_enable_2fa').prop('checked', true);
 });
 
-function start() {
+function start(sg, inputid, suggestid) {
   sg = new Suggest.LocalMulti(
-    "search-text",
-    "suggest",
+    inputid,
+    suggestid,
     [],
     {
       interval: 500,
@@ -157,49 +157,45 @@ function start() {
       classSelect: "select",
       delim: " "
     });
-  initSuggest(sg);
+  sg._search = function (text) { return 0; };
+  sg.hookBeforeSearch = function (text) {
+    if (sg == null) { return []; }
+    if (text.length < 2) { return []; }
+    if (text[0] != "#") { return []; }
+    sg.candidateList = [];
+    url = "/feeds/tags/?word=" + encodeURIComponent(text)
+    $.ajax({
+      url: url,
+      type: "GET",
+      datatype: "json",
+      timespan: 5000
+    }).done(function (data, textStatus, jqXHR) {
+      sg.candidateList = data;
+      var list_count = sg.candidateList.length;
+      sg.suggestIndexList = [];
+      if (list_count != 0) {
+        for (i = 0; i < list_count; i++) {
+          sg.suggestIndexList.push(i);
+        }
+        sg.createSuggestArea(sg.candidateList);
+      }
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+      return
+    })
+  };
 };
 
-function initSuggest(suggest_obj) {
-  sg = suggest_obj;
-  sg._search = function (text) { return 0; };
-  sg.hookBeforeSearch = getList;
-}
-
-function getList(text) {
-  if (sg == null) {
-    return [];
-  }
-  if (text.length < 2) {
-    return [];
-  }
-  if (text[0] != "#") {
-    return [];
-  }
-  sg.candidateList = [];
-  url = "/feeds/tags/?word=" + encodeURIComponent(text)
-  $.ajax({
-    url: url,
-    type: "GET",
-    datatype: "json",
-    timespan: 5000
-  }).done(function (data, textStatus, jqXHR) {
-    sg.candidateList = data;
-    var list_count = sg.candidateList.length;
-    sg.suggestIndexList = [];
-    if (list_count != 0) {
-      for (i = 0; i < list_count; i++) {
-        sg.suggestIndexList.push(i);
-      }
-      sg.createSuggestArea(sg.candidateList);
-    }
-  }).fail(function (jqXHR, textStatus, errorThrown) {
-    return
-  })
-}
-
-var sg = null;
-
+var search_sg = null;
 window.addEventListener ?
-  window.addEventListener('load', start, false) :
-  window.attachEvent('onload', start);
+  window.addEventListener('load', start(search_sg, "search-text", "suggest"), false) :
+  window.attachEvent('onload', start(search_sg, "search-text", "suggest"));
+
+var title_sg = null;
+window.addEventListener ?
+  window.addEventListener('load', start(title_sg, "compose-title", "title-suggest"), false) :
+  window.attachEvent('onload', start(title_sg, "compose-title", "title-suggest"));
+
+var content_sg = null;
+window.addEventListener ?
+  window.addEventListener('load', start(content_sg, "compose-content", "content-suggest"), false) :
+  window.attachEvent('onload', start(content_sg, "compose-content", "content-suggest"));

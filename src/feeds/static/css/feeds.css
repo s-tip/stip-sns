@@ -337,3 +337,52 @@ ul.stream li .response-action-menu-li
   background: url("/static/img/processing.gif") center no-repeat;
 }
 
+#title-suggest {
+  z-index:1000;
+  position: absolute;
+  background-color: #FFFFFF;
+  border: 1px solid #CCCCFF;
+  font-size: 90%;
+  width: 190px;
+}
+
+#title-suggest div {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 2px;
+}
+
+#title-suggest div.select{
+  color: #FFFFFF;
+  background-color: #3366FF;
+}
+
+#title-suggest div.over{
+  background-color: #99CCFF;
+}
+
+#content-suggest {
+  z-index:1000;
+  position: absolute;
+  background-color: #FFFFFF;
+  border: 1px solid #CCCCFF;
+  font-size: 90%;
+  width: 190px;
+}
+
+#content-suggest div {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 2px;
+}
+
+#content-suggest div.select{
+  color: #FFFFFF;
+  background-color: #3366FF;
+}
+
+#content-suggest div.over{
+  background-color: #99CCFF;
+}
