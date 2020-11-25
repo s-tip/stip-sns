@@ -157,13 +157,19 @@ function start(sg, inputid, suggestid) {
       classSelect: "select",
       delim: " "
     });
-  sg._search = function (text) { return 0; };
+  sg._search = function (text) { return []; };
   sg.hookBeforeSearch = function (text) {
     if (sg == null) { return []; }
     if (text.length < 2) { return []; }
     if (text[0] != "#") { return []; }
+    var inputElement = $("#" + inputid);
+    var suggestElement = $("#" + suggestid);
+    var caretPosition = Measurement.caretPos(inputElement);
+    var scroll = $(window).scrollTop();
+    suggestElement.css({ "top": (caretPosition.top - scroll + 25) });
+    suggestElement.css({ "left": caretPosition.left });
     sg.candidateList = [];
-    url = "/feeds/tags/?word=" + encodeURIComponent(text)
+    url = "/feeds/tags/?word=" + encodeURIComponent(text);
     $.ajax({
       url: url,
       type: "GET",
@@ -173,22 +179,22 @@ function start(sg, inputid, suggestid) {
       sg.candidateList = data;
       var list_count = sg.candidateList.length;
       sg.suggestIndexList = [];
-      if (list_count != 0) {
+      if (list_count > 0) {
         for (i = 0; i < list_count; i++) {
           sg.suggestIndexList.push(i);
         }
         sg.createSuggestArea(sg.candidateList);
       }
     }).fail(function (jqXHR, textStatus, errorThrown) {
-      return
+      return []
     })
   };
 };
 
 var search_sg = null;
 window.addEventListener ?
-  window.addEventListener('load', start(search_sg, "search-text", "suggest"), false) :
-  window.attachEvent('onload', start(search_sg, "search-text", "suggest"));
+  window.addEventListener('load', start(search_sg, "search-text", "search-suggest"), false) :
+  window.attachEvent('onload', start(search_sg, "search-text", "search-suggest"));
 
 var title_sg = null;
 window.addEventListener ?

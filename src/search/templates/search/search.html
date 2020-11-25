@@ -11,6 +11,7 @@
   <script src="{% static 'js/feeds.js' %}?v=1"></script>
   <script src="{% static 'js/jquery.quicksearch.js' %}?v=1"></script>
   <script src="{% static 'js/jquery.dataTables.min.js' %}?v=1"></script>
+  <script src="{% static 'js/caretposition.js' %}?=v1"></script> 
 {% endblock head %}
 
 {% block main %}
@@ -61,8 +62,8 @@
                 <div class="row compose-title-div">
                   <div class="compose-title-text-div col-xs-8">
                     <label for="compose-title">{% trans 'Title' %}:</label><br/>
-                    <input class="form-control compose-title" type="text" id="compose-title" name="title" style="display: block"/>
-                    <div id="title-suggest" style="display:none;"></div>
+                    <input class="form-control compose-title" type="text" id="compose-title" name="title"/>
+                    <div id="title-suggest" class="hash-suggest"></div>
                   </div>
                   <div class="compose-title-language-div col-xs-2">
                     <label>{% trans 'Language' %}:</label><br/>
@@ -87,8 +88,8 @@
                 <div class="row compose-content-div">
                   <div class="compose-content-textarea-div col-xs-8">
                     <label for="compose-content">{% trans 'Content' %}:</label><br/>
-                    <textarea class="form-control compose-content" rows="10" name="post" id="compose-content" style="display: block"></textarea>
-                    <div id="content-suggest" style="display:none;"></div>
+                    <textarea class="form-control compose-content" rows="10" name="post" id="compose-content"></textarea>
+                    <div id="content-suggest" class="hash-suggest"></div>
                     <span class="help-block help-count pull-right">10240</span>
                   </div>
                   <div class="compose-content-language-div col-xs-2">
