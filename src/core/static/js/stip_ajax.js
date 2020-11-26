@@ -140,7 +140,7 @@ $('#disable_close_btn').click(function () {
   $('#id_enable_2fa').prop('checked', true);
 });
 
-function start(sg, inputid, suggestid) {
+function start_suggest(sg, inputid, suggestid) {
   sg = new Suggest.LocalMulti(
     inputid,
     suggestid,
@@ -193,15 +193,15 @@ function start(sg, inputid, suggestid) {
 
 var search_sg = null;
 window.addEventListener ?
-  window.addEventListener('load', start(search_sg, "search-text", "search-suggest"), false) :
-  window.attachEvent('onload', start(search_sg, "search-text", "search-suggest"));
+  window.addEventListener('load', start_suggest(search_sg, "search-text", "search-suggest"), false) :
+  window.attachEvent('onload', start_suggest(search_sg, "search-text", "search-suggest"));
 
 var title_sg = null;
 window.addEventListener ?
-  window.addEventListener('load', start(title_sg, "compose-title", "title-suggest"), false) :
-  window.attachEvent('onload', start(title_sg, "compose-title", "title-suggest"));
+  window.addEventListener('load', start_suggest(title_sg, "compose-title", "title-suggest"), false) :
+  window.attachEvent('onload', start_suggest(title_sg, "compose-title", "title-suggest"));
 
 var content_sg = null;
 window.addEventListener ?
-  window.addEventListener('load', start(content_sg, "compose-content", "content-suggest"), false) :
-  window.attachEvent('onload', start(content_sg, "compose-content", "content-suggest"));
+  window.addEventListener('load', start_suggest(content_sg, "compose-content", "content-suggest"), false) :
+  window.attachEvent('onload', start_suggest(content_sg, "compose-content", "content-suggest"));
