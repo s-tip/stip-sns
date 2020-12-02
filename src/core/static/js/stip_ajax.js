@@ -4,6 +4,17 @@ const suggest_limit = 5
 const suggest_min_length = 2
 
 
+function is_safari(){
+  var userAgent = window.navigator.userAgent.toLowerCase()
+  if (userAgent.indexOf('safari') == -1) {
+    return false
+  }
+  if (userAgent.indexOf('chrome') != -1) {
+    return false
+  }
+  return true
+}
+
 $(document)
   .ajaxError(function (e, xhr, opts, error) {
     console.log('AjaxError: ' + error);
@@ -11,7 +22,9 @@ $(document)
       alert('Session Timeout!!. Back to the Login Page.')
       window.location.href = '/login'
     } else {
-      alert(error);
+      if(!is_safari()){
+        alert(error);
+      }
     }
   });
 
