@@ -140,8 +140,8 @@ $('#disable_close_btn').click(function () {
   $('#id_enable_2fa').prop('checked', true);
 });
 
-function start_suggest(sg, inputid, suggestid) {
-  sg = new Suggest.LocalMulti(
+function start_suggest(inputid, suggestid) {
+  var sg_obj = new Suggest.LocalMulti(
     inputid,
     suggestid,
     [],
@@ -157,18 +157,18 @@ function start_suggest(sg, inputid, suggestid) {
       classSelect: "select",
       delim: " "
     });
-  sg._search = function (text) { return []; };
-  sg.hookBeforeSearch = function (text) {
-    if (sg == null) { return []; }
-    if (text.length < 2) { return []; }
-    if (text[0] != "#") { return []; }
+  sg_obj._search = function (text) { return []; };
+  sg_obj.hookBeforeSearch = function (text) {
+    if (sg_obj == null) { return; }
+    if (text.length < 2) { return; }
+    if (text[0] != "#") { return; }
     var inputElement = $("#" + inputid);
     var suggestElement = $("#" + suggestid);
     var caretPosition = Measurement.caretPos(inputElement);
     var scroll = $(window).scrollTop();
     suggestElement.css({ "top": (caretPosition.top - scroll + 25) });
     suggestElement.css({ "left": caretPosition.left });
-    sg.candidateList = [];
+    sg_obj.candidateList = [];
     url = "/feeds/tags/?word=" + encodeURIComponent(text);
     $.ajax({
       url: url,
@@ -176,32 +176,30 @@ function start_suggest(sg, inputid, suggestid) {
       datatype: "json",
       timespan: 5000
     }).done(function (data, textStatus, jqXHR) {
-      sg.candidateList = data;
-      var list_count = sg.candidateList.length;
-      sg.suggestIndexList = [];
+      sg_obj.candidateList = data;
+      sg_obj.suggestIndexList = [];
+      var list_count = sg_obj.candidateList.length;
       if (list_count > 0) {
         for (i = 0; i < list_count; i++) {
-          sg.suggestIndexList.push(i);
+          sg_obj.suggestIndexList.push(i);
         }
-        sg.createSuggestArea(sg.candidateList);
+        sg_obj.createSuggestArea(sg_obj.candidateList);
       }
+      return;
     }).fail(function (jqXHR, textStatus, errorThrown) {
-      return []
+      return;
     })
   };
 };
 
-var search_sg = null;
-window.addEventListener ?
-  window.addEventListener('load', start_suggest(search_sg, "search-text", "search-suggest"), false) :
-  window.attachEvent('onload', start_suggest(search_sg, "search-text", "search-suggest"));
+function _addEventListner(inputid, suggestid) {
+  if (!document.getElementById(inputid)) { return; }
+  if (!document.getElementById(suggestid)) { return; }
+  window.addEventListener ?
+    window.addEventListener('load', start_suggest(inputid, suggestid), false) :
+    window.attachEvent('onload', start_suggest(inputid, suggestid));
+}
 
-var title_sg = null;
-window.addEventListener ?
-  window.addEventListener('load', start_suggest(title_sg, "compose-title", "title-suggest"), false) :
-  window.attachEvent('onload', start_suggest(title_sg, "compose-title", "title-suggest"));
-
-var content_sg = null;
-window.addEventListener ?
-  window.addEventListener('load', start_suggest(content_sg, "compose-content", "content-suggest"), false) :
-  window.attachEvent('onload', start_suggest(content_sg, "compose-content", "content-suggest"));
+_addEventListner("search-text", "search-suggest")
+_addEventListner("compose-title", "title-suggest")
+_addEventListner("compose-content", "content-suggest")
