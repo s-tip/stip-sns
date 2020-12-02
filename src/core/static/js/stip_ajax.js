@@ -159,9 +159,9 @@ function start_suggest(inputid, suggestid) {
     });
   sg_obj._search = function (text) { return []; };
   sg_obj.hookBeforeSearch = function (text) {
-    if (sg_obj == null) { return []; }
-    if (text.length < 2) { return []; }
-    if (text[0] != "#") { return []; }
+    if (sg_obj == null) { return; }
+    if (text.length < 2) { return; }
+    if (text[0] != "#") { return; }
     var inputElement = $("#" + inputid);
     var suggestElement = $("#" + suggestid);
     var caretPosition = Measurement.caretPos(inputElement);
@@ -185,8 +185,9 @@ function start_suggest(inputid, suggestid) {
         }
         sg_obj.createSuggestArea(sg_obj.candidateList);
       }
+      return;
     }).fail(function (jqXHR, textStatus, errorThrown) {
-      return [];
+      return;
     })
   };
 };
