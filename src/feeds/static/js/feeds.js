@@ -1,3 +1,6 @@
+var title_count = 0;
+var content_count = 0;
+
 $(function () {
   var page_title = $(document).attr("title");
   var slideTime = 100;
@@ -781,10 +784,16 @@ $(function () {
 
   //title の plus ボタンクリック
   $(document).on("click", ".compose-title-plus-button", function () {
-    var compose_title_div = $('.compose-title-div');
+    title_count++;
+    var compose_title_div = $('.compose-title-div').clone(true);
+    var id_name = "compose-title-" + title_count
+    compose_title_div.find("input.compose-title").attr("id", id_name)
+    compose_title_div.find("label").attr("for", id_name)
     var append_div = $('<div class="row compose-title-div"><br/></div>');
     append_div.append(compose_title_div.html());
     $('#compose-title-root-div').append(append_div);
+    // stip_ajax.js start_suggset()
+    start_suggest(id_name, "suggest-block");
   });
 
   //title の remove ボタンクリック
@@ -799,10 +808,16 @@ $(function () {
 
   //content の plus ボタンクリック
   $(document).on("click", ".compose-content-plus-button", function () {
-    var compose_content_div = $('.compose-content-div');
+    content_count++;
+    var compose_content_div = $('.compose-content-div').clone(true);
+    var id_name = "compose-content-" + content_count
+    compose_content_div.find("textarea.compose-content").attr("id", id_name)
+    compose_content_div.find("label").attr("for", id_name)
     var append_div = $('<div class="row compose-content-div"><br/></div>');
     append_div.append(compose_content_div.html());
     $('#compose-content-root-div').append(append_div);
+    // stip_ajax.js start_suggset()
+    start_suggest(id_name, "suggest-block");
   });
 
   //content の remove ボタンクリック

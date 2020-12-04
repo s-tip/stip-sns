@@ -4,7 +4,7 @@ const suggest_limit = 5
 const suggest_min_length = 2
 
 
-function is_safari(){
+function is_safari() {
   var userAgent = window.navigator.userAgent.toLowerCase()
   if (userAgent.indexOf('safari') == -1) {
     return false
@@ -22,7 +22,7 @@ $(document)
       alert('Session Timeout!!. Back to the Login Page.')
       window.location.href = '/login'
     } else {
-      if(!is_safari()){
+      if (!is_safari()) {
         alert(error);
       }
     }
@@ -213,6 +213,6 @@ function _addEventListner(inputid, suggestid) {
     window.attachEvent('onload', start_suggest(inputid, suggestid));
 }
 
-_addEventListner("search-text", "search-suggest")
-_addEventListner("compose-title", "title-suggest")
-_addEventListner("compose-content", "content-suggest")
+_addEventListner("search-text", "suggest-block")
+_addEventListner("compose-title", "suggest-block")
+_addEventListner("compose-content", "suggest-block")
