@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^feeds/', include('feeds.urls')),
     url(r'^groups/', include('groups.urls')),
     url(r'^messages/', include('messenger.urls')),
+    url(r'^bulk_upload/', include('bulk_upload.urls')),
     url(r'^api/', include('api.urls')),
     url(r'^notifications/$', activities_views.notifications, name='notifications'),
     url(r'^notifications/last/$', activities_views.last_notifications, name='last_notifications'),

@@ -3,6 +3,7 @@ from django.core.management import call_command
 from django.utils.translation import ugettext_lazy
 from stip.common.boot import is_skip_sequence
 # from daemon.email.smtp import start_mail_thread
+from ctirs.core.boot_rs import init_mongo
 
 
 class StipSnsBoot(AppConfig):
@@ -75,6 +76,8 @@ class StipSnsBoot(AppConfig):
         StipSnsBoot.slack_web_client = slack_web_client
         StipSnsBoot.slack_rtm_client = slack_rtm_client
         StipSnsBoot.th = th
+
+        init_mongo()
         return
 
     @classmethod
