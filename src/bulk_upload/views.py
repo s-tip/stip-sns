@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http.response import HttpResponse, HttpResponseServerError
@@ -19,24 +20,20 @@ def entry(request):
 @login_required
 def post(request):
     try:
-        is_merged_single_stix = (request.POST['is_merged_single_stix'].lower()) == 'true'
         stix_title = request.POST['stix_title']
         stix_description = request.POST['stix_description']
         if not stix_title:
             stix_title = 'default'
         if not stix_description:
             stix_description = stix_title
+        tlp = request.POST['stix_tlp'].upper()
 
-        if is_merged_single_stix:
-            upload(request, request.FILES, stix_title, stix_description)
-        else:
-            counter = 0
-            for key, lists in request.FILES.lists():
-                files = MultiValueDict({key: lists})
-                title = '%s_%04d' % (stix_title, counter)
-                description = '%s_%04d' % (stix_description, counter)
-                upload(request, files, title, description)
-                counter += 1
+        confirm_data = None
+        if 'confirm_data' in request.POST:
+            if request.POST['confirm_data']:
+                confirm_data = json.loads(request.POST['confirm_data'])
+
+        upload(request, stix_title, stix_description, tlp, confirm_data)
         return HttpResponse()
     except Exception as e:
         import traceback
@@ -44,7 +41,7 @@ def post(request):
         return HttpResponseServerError(reason=str(e))
 
 
-def upload(request, files, title, post):
+def upload(request, title, post, tlp, confirm_data):
     publication = request.POST['publication']
     if 'group' in request.POST:
         group = request.POST['group']
@@ -53,10 +50,17 @@ def upload(request, files, title, post):
     new_post = {}
     new_post['title'] = title
     new_post['post'] = post
-    new_post['TLP'] = request.POST['stix_tlp'].upper()
+    new_post['TLP'] = tlp
     new_post['publication'] = publication
     request.POST = new_post
-    request = get_request_via_confirm_indicator(request)
+
+    if not confirm_data:
+        request = get_request_via_confirm_indicator(request)
+    else:
+        request.POST['indicators'] = json.dumps(confirm_data['indicators'])
+        request.POST['tas'] = json.dumps(confirm_data['tas'])
+        request.POST['ttps'] = json.dumps(confirm_data['ttps'])
+
     if publication == 'group':
         request.POST['group'] = group
     elif publication == 'people':

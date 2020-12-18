@@ -60,3 +60,14 @@ $(function(){
         $(this).parents('.dropdown').find('input[name="group"]').val($(this).attr('data-value'));
     });
 });
+
+  // display processing animation
+  function display_processing_animation() {
+    var processing_msg = '<div class="processing-msg">' + 'Processing...' + '</div>';
+    $('body').append('<div id="processing-div">' + processing_msg + '</div>');
+  }
+
+  // remove processing animation
+  function remove_processing_animation() {
+    $('#processing-div').remove();
+  } 
