@@ -69,6 +69,7 @@ INSTALLED_APPS = (
     'management',
     'messenger',
     'search',
+    'bulk_upload',
     'ctirs',
 )
 

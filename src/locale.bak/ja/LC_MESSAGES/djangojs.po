@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-17 15:17+0900\n"
+"POT-Creation-Date: 2017-11-22 19:40+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,32 +18,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: src/bulk_upload/static/js/upload.js:85
-msgid ""
-"\"Merge into a single STIX file\" cannot be disabled if \"Display a confirm "
-"dialog\" is enabled"
-msgstr "\"確認ダイアログを表示\" が有効の場合、\"一つの STIX に統合\"は無効にできません"
-
-#: src/feeds/static/js/feeds.js:608
+#: feeds/static/js/feeds.js:179
 msgid "Cannot to post it due to 0-length content."
 msgstr "Contentの記載がないため投稿できません"
 
-#: src/feeds/static/js/feeds.js:616
-msgid "Duplicate Same Language Title"
-msgstr ""
-
-#: src/feeds/static/js/feeds.js:620
-msgid "Duplicate Same Language Content"
-msgstr ""
-
-#: src/feeds/static/js/feeds.js:1357 src/feeds/static/js/feeds.js:1664
+#: feeds/static/js/feeds.js:459
 msgid "Like"
 msgstr "いいね"
 
-#: src/feeds/static/js/feeds.js:1361 src/feeds/static/js/feeds.js:1662
+#: feeds/static/js/feeds.js:463
 msgid "Unlike"
 msgstr "削除"
 
-#: src/groups/static/js/groups.js:4
+#: groups/static/js/groups.js:4
 msgid "Delete This Group?"
 msgstr "グループを削除してよろしいでしょうか？"

@@ -16,34 +16,34 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/bulk_upload/static/js/upload.js:85
+#: bulk_upload/static/js/upload.js:85
 msgid ""
 "\"Merge into a single STIX file\" cannot be disabled if \"Display a confirm "
 "dialog\" is enabled"
-msgstr "\"確認ダイアログを表示\" が有効の場合、\"一つの STIX に統合\"は無効にできません"
+msgstr ""
 
-#: src/feeds/static/js/feeds.js:608
+#: feeds/static/js/feeds.js:608
 msgid "Cannot to post it due to 0-length content."
-msgstr "Contentの記載がないため投稿できません"
+msgstr ""
 
-#: src/feeds/static/js/feeds.js:616
+#: feeds/static/js/feeds.js:616
 msgid "Duplicate Same Language Title"
 msgstr ""
 
-#: src/feeds/static/js/feeds.js:620
+#: feeds/static/js/feeds.js:620
 msgid "Duplicate Same Language Content"
 msgstr ""
 
-#: src/feeds/static/js/feeds.js:1357 src/feeds/static/js/feeds.js:1664
+#: feeds/static/js/feeds.js:1357 feeds/static/js/feeds.js:1664
 msgid "Like"
-msgstr "いいね"
+msgstr ""
 
-#: src/feeds/static/js/feeds.js:1361 src/feeds/static/js/feeds.js:1662
+#: feeds/static/js/feeds.js:1361 feeds/static/js/feeds.js:1662
 msgid "Unlike"
-msgstr "削除"
+msgstr ""
 
-#: src/groups/static/js/groups.js:4
+#: groups/static/js/groups.js:4
 msgid "Delete This Group?"
-msgstr "グループを削除してよろしいでしょうか？"
+msgstr ""

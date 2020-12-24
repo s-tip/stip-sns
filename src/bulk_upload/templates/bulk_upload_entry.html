@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block head %}
+<link href="{% static 'css/upload.css' %}?v=1" rel="stylesheet">
+<link href="{% static 'css/multi-select.css' %}?v=1" rel="stylesheet">
+<link href="{% static 'css/jquery.dataTables.min.css' %}?v=1" rel="stylesheet">
+<link href="{% static 'css/dropzone.css' %}?v=1" rel="stylesheet">
+<link href="{% static 'css/feeds.css' %}?v=1" rel="stylesheet">
+<script src="{% static 'js/jquery.multi-select.js' %}?v=1"></script>
+<script src="{% static 'js/sns_common.js' %}?v=1"></script>
+<script src="{% static 'js/confirm_dialog.js' %}?v=1"></script>
+<script src="{% static 'js/upload.js' %}?v=1"></script>
+<script src="{% static 'js/jquery.quicksearch.js' %}?v=1"></script>
+<script src="{% static 'js/dropzone.js' %}?v=1"></script>
+<script src="{% static 'js/jquery.dataTables.min.js' %}?v=1"></script>
+{% endblock head %}
+
+{% block main %}
+<div class="container">
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h1>{% trans 'Bulk Upload' %}</h1>
+        </div> <!--<div class="col"> -->
+    </div>
+
+    <br/>
+
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <form class="dropzone" name="bulk_upload_post" id="bulk-upload-post" action="{% url 'bulk_upload_post' %}" method="post" enctype="multipart/form-data">{% csrf_token %}</form>
+        </div>
+    </div> <!-- <div class="row"> -->
+ 
+    <br/>
+
+    <div class="row">
+        <div class="colxl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+            {% trans 'Title' %} :
+        </div>
+        <div class="colxl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+            <input type="text" id="stix-title-text" class="form-control" placeholder="{% trans '(Optional) Enter STIX Title ...' %}" value="default" />
+        </div><!--  <div class="col"> -->
+        <div class="colxl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+            {% trans 'Content' %} :
+        </div>
+        <div class="colxl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+            <input type="text" id="stix-description-text" class="form-control" placeholder="{% trans '(Optional) Enter STIX Description ...' %}"/ value="default">
+        </div><!--  <div class="col"> -->
+    </div> <!-- <div class="row"> -->
+
+    <br/>
+
+    <div class="row">
+        <div class="colxl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+            {% trans 'Merge into a single STIX file' %}:
+        </div>
+        <div class="colxl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+            <input type="checkbox" id="checkbox-is-single" />
+        </div>
+        <div class="colxl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+            {% trans 'TLP' %} :
+        </div>
+
+        <div class="colxl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+            <div class="form-group">
+                <div class="btn-group" data-toggle="buttons" id="tlp-div">
+                    <label class="btn btn-default btn-sm {% ifequal user.tlp 'RED' %}active{% endifequal %} label-tlp" id="label-tlp-red">
+                        <input type="radio" autocomplate="off" name="TLP" value="RED" class="radio-tlp" id="radio-tlp-red" {%ifequal user.tlp "RED" %}checked{% endifequal %}/>RED
+                    </label>
+                    <label class="btn btn-default btn-sm {% ifequal user.tlp 'AMBER' %}active{% endifequal %} label-tlp" id="label-tlp-amber">
+                        <input type="radio" autocomplate="off" name="TLP" value="AMBER" class="radio-tlp" id="radio-tlp-amber" {%ifequal user.tlp "AMBER" %}checked{% endifequal %}/>AMBER
+                    </label>
+                    <label class="btn btn-default btn-sm {% ifequal user.tlp 'GREEN' %}active{% endifequal %} label-tlp" id="label-tlp-green">
+                        <input type="radio" autocomplate="off" name="TLP" value="GREEN" class="radio-tlp" id="radio-tlp-green" {%ifequal user.tlp "GREEN" %}checked{% endifequal %}/>GREEN
+                    </label>
+                    <label class="btn btn-default btn-sm {% ifequal user.tlp 'WHITE' %}active{% endifequal %} label-tlp" id="label-tlp-white">
+                        <input type="radio" autocomplate="off" name="TLP" value="WHITE" class="radio-tlp" id="radio-tlp-white" {%ifequal user.tlp "WHITE" %}checked{% endifequal %}/>WHITE
+                    </label>
+                </div> <!-- btn-group -->
+            </div> <!--  form-group -->
+        </div><!--  <div class="col"> -->
+    </div> <!-- <div class="row"> -->
+
+    <br/>
+
+    <div class="row">
+        <div class="colxl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+            {% trans 'Display a confirm dialog' %}:
+        </div>
+        <div class="colxl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+            <input type="checkbox" id="checkbox-is-confirm-cee" checked/>
+        </div>
+        <div class="colxl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+            {% trans 'Sharing Range' %} :
+        </div>
+        <div class="colxl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
+            <div class="radio">
+                <label><input type="radio" name="publication" class="publication-radio" id="publication-people" value="people"/>{% trans 'People' %} / {% trans 'System'%}</label>
+            </div>
+            <div id="publication-people-div">
+                <div class="row account-select-style">
+                        <div class="account-select-left">
+                            <label>{% trans 'Select Sharing Accounts' %}</label>
+                            <select multiple class="form-control" id="account-select-box">
+                            {% for user in users %}
+                                <option value="{{user.id}}">{{user.get_screen_name}}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                </div> <!-- row style-select -->
+            </div> <!-- publication-people-div -->
+            <div class="radio">
+                <label><input type="radio" name="publication" class="publication-radio" id="publication-group" value="group"/>{% trans 'Group'%}</label>
+            </div>
+            <div id="publication-group-div">
+                <div class="dropdown">
+                    <div class="sharing-list">
+                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" id="sharing-menu" aria-haspopup="true" aria-expanded="true">
+                            {% trans 'Choose Group' %}
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="dropdown-sharing-group" aria-labelledby="sharing-menu">
+                            {% for group in sharing_groups %}
+                                {% ifequal group.locale user.language %}
+                                    <li><a data-value="{{group.en_name}}">{{group.local_name}}</a></li>
+                                {% else %}
+                                    <li><a data-value="{{group.en_name}}">{{group.en_name}}</a></li>
+                                {% endifequal %}
+                            {% endfor %}
+                        </ul>
+                        <input type="hidden" name="group" value="">
+                    </div> <!-- sharing-list -->
+                </div> <!-- dropdown -->
+            </div> <!-- publication-group-div -->
+            <div class="radio">
+                <label><input type="radio" name="publication" class="publication-radio" id="publication-all" value="all" checked/>{% trans 'All Users' %}</label>
+            </div>
+        </div><!--  <div class="col"> -->
+    </div> <!-- <div class="row"> -->
+
+    <br/>
+
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <button type="button" id="upload-button" class="btn btn-lg btn-info">Upload</button>
+        </div>
+    </div> <!-- <div class="row"> -->
+
+    <div class="modal fade" id="confirm_indicators_modal_dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span></span></button>
+                    <h4 class="modal-title">Check Imported CTI Elements</h4>
+                </div>
+                <div class="modal-body" id='indicator-modal-body'>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" id="confirm-cancel" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm-compose">Compose</button>
+                </div>
+          </div>
+        </div>
+    </div>
+
+</div> <!-- <div class="container"> -->
+{% endblock main %}
