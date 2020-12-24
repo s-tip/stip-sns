@@ -907,7 +907,7 @@ def call_jira(request):
             return HttpResponseServerError('Invalid Stix Version')
 
         # isssue番号返却
-        url = SNSConfig.get_jira_host() + '/projects/' + SNSConfig.get_jira_project() + '/issues/' + str(issue)
+        url = SNSConfig.get_jira_host() + '/browse/' + str(issue)
         rsp = {
             'issues': str(issue),
             'url': url,
