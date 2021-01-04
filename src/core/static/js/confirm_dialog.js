@@ -149,29 +149,29 @@ function _get_file_modal_body_panel_collapse (file_name, table_datas) {
   const div_template = $('<div>', {
     class: 'panel panel-default'
   })
-  const div_indicators = div_template.clone()
-  const div_ttps = div_template.clone()
-  const div_tas = div_template.clone()
   const table_data = table_datas[file_name]
-  if (TABLE_ID_INDICATORS in table_data) {
-    div_indicators.append(_get_indicators_modal_body_panel_heading(file_name))
-    div_indicators.append(_get_indicators_modal_body_panel_collapse(file_name, table_data[TABLE_ID_INDICATORS]))
-  }
-  if (TABLE_ID_TTPS in table_data) {
-    div_ttps.append(_get_ttps_modal_body_panel_heading(file_name))
-    div_ttps.append(_get_ttps_modal_body_panel_collapse(file_name, table_data[TABLE_ID_TTPS]))
-  }
-  if (TABLE_ID_TAS in table_data) {
-    div_tas.append(_get_tas_modal_body_panel_heading(file_name))
-    div_tas.append(_get_tas_modal_body_panel_collapse(file_name, table_data[TABLE_ID_TAS]))
-  }
   const div = $('<div>', {
     id: _get_file_collapse_id(file_name),
     class: 'panel-collapse collapse'
   })
-  div.append(div_indicators)
-  div.append(div_ttps)
-  div.append(div_tas)
+  if (TABLE_ID_INDICATORS in table_data) {
+    const div_indicators = div_template.clone()
+    div_indicators.append(_get_indicators_modal_body_panel_heading(file_name))
+    div_indicators.append(_get_indicators_modal_body_panel_collapse(file_name, table_data[TABLE_ID_INDICATORS]))
+    div.append(div_indicators)
+  }
+  if (TABLE_ID_TTPS in table_data) {
+    const div_ttps = div_template.clone()
+    div_ttps.append(_get_ttps_modal_body_panel_heading(file_name))
+    div_ttps.append(_get_ttps_modal_body_panel_collapse(file_name, table_data[TABLE_ID_TTPS]))
+    div.append(div_ttps)
+  }
+  if (TABLE_ID_TAS in table_data) {
+    const div_tas = div_template.clone()
+    div_tas.append(_get_tas_modal_body_panel_heading(file_name))
+    div_tas.append(_get_tas_modal_body_panel_collapse(file_name, table_data[TABLE_ID_TAS]))
+    div.append(div_tas)
+  }
   return div
 }
 
