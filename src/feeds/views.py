@@ -104,7 +104,7 @@ def feeds(request):
         'users': users_list,
         'sharing_groups': Group.objects.all(),
     })
-    r.set_cookie(key='username', value=str(request.user))
+    # r.set_cookie(key='username', value=str(request.user))
     return r
 
 
