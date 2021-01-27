@@ -1,4 +1,4 @@
-from feeds.extractor.common import CommonExtractor, FileExtractor
+from feeds.extractor.common import CommonExtractor, FileExtractor, CTIElementExtractorBean
 
 
 class CSVExtractor(FileExtractor):
@@ -7,9 +7,7 @@ class CSVExtractor(FileExtractor):
     # 指定の CSV ファイルを開き、indicators, cve, threat_actors の要素を返却する
     @classmethod
     def _get_element_from_target_file(cls, file_, ta_list=[], white_list=[]):
-        confirm_indicators = []
-        confirm_ttps = []
-        confirm_tas = []
+        eeb = CTIElementExtractorBean()
         with open(file_.file_path, 'rb') as fp:
             lines = fp.readlines()
             # 各行から Observable を取得する
@@ -39,7 +37,7 @@ class CSVExtractor(FileExtractor):
                         # white_list check
                         white_flag = cls._is_included_white_list(value, white_list)
                         # white_list に含まれない場合に checked をつける
-                        confirm_indicators.append((type_, value, title, file_.file_name, (white_flag is False)))
+                        eeb.append_indicator((type_, value, title, file_.file_name, (white_flag is False)))
                 # cve チェック
                 cve, col = CSVExtractor._get_cve_from_csv_line(line)
                 if cve is not None:
@@ -47,7 +45,7 @@ class CSVExtractor(FileExtractor):
                     if not duplicate_flag:
                         # 重複していないので登録
                         title = '%s-Row-%d-COL-%d-%s' % (file_.file_name, row, col, cls.CVE_TYPE_STR)
-                        confirm_ttps.append((cls.CVE_TYPE_STR, cve, title, file_.file_name, True))
+                        eeb.append_ttp((cls.CVE_TYPE_STR, cve, title, file_.file_name, True))
                 # Threat Actor チェック
                 ta, col = CSVExtractor._get_ta_from_csv_line(line, ta_list)
                 if ta is not None:
@@ -55,9 +53,9 @@ class CSVExtractor(FileExtractor):
                     if not duplicate_flag:
                         # 重複していないので登録
                         title = '%s-Row-%d-COL-%d-%s' % (file_.file_name, row, col, cls.TA_TYPE_STR)
-                        confirm_tas.append((cls.TA_TYPE_STR, ta, title, file_.file_name, True))
+                        eeb.append_ta((cls.TA_TYPE_STR, ta, title, file_.file_name, True))
                 row += 1
-        return confirm_indicators, confirm_ttps, confirm_tas
+        return eeb
 
     # あるかを判定する、最初に見つかった要素を(列数, object, type)として返却。
     # 一行に複数見つかった場合でも最初に見つかった要素のみを有効として返却する

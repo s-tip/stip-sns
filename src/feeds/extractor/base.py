@@ -3,6 +3,7 @@ from feeds.extractor.pdf import PDFExtractor
 from feeds.extractor.post import PostExtractor
 from feeds.extractor.txt import TxtExtractor
 from feeds.extractor.web import WebExtractor
+from feeds.extractor.common import CTIElementExtractorBean
 
 
 class Extractor(object):
@@ -30,39 +31,27 @@ class Extractor(object):
             (scan_post, WebExtractor),
         ]
 
-        confirm_indicators = []
-        confirm_ets = []
-        confirm_tas = []
+        eeb = CTIElementExtractorBean()
 
         for scan_content in scan_contents:
             flag = scan_content[0]
             clazz = scan_content[1]
             # check flag がある場合は get_stix_elements を呼び出し、戻り値が list なら要素を追加する
             if flag:
-                indicators, ets, tas = clazz.get_stix_elements(
+                this_eeb = clazz.get_stix_elements(
                     files=files,
                     referred_url=referred_url,
                     ta_list=ta_list,
                     white_list=white_list)
-                if isinstance(indicators, list):
-                    confirm_indicators.extend(indicators)
-                if isinstance(ets, list):
-                    confirm_ets.extend(ets)
-                if isinstance(tas, list):
-                    confirm_tas.extend(tas)
+                eeb.extend(this_eeb)
 
         # scan_post だけ別
         if scan_post:
             for post in posts:
-                indicators, ets, tas = PostExtractor.get_stix_elements(
+                this_eeb = PostExtractor.get_stix_elements(
                     post=post,
                     ta_list=ta_list,
                     white_list=white_list)
-                if isinstance(indicators, list):
-                    confirm_indicators.extend(indicators)
-                if isinstance(ets, list):
-                    confirm_ets.extend(ets)
-                if isinstance(tas, list):
-                    confirm_tas.extend(tas)
+                eeb.extend(this_eeb)
 
-        return confirm_indicators, confirm_ets, confirm_tas
+        return eeb.indicators, eeb.ttps, eeb.tas
