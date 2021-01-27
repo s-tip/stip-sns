@@ -10,7 +10,6 @@ class TxtExtractor(FileExtractor):
     def _get_element_from_target_file(cls, file_, ta_list=[], white_list=[]):
         with open(file_.file_path, 'r', encoding='utf-8') as fp:
             outfp = StringIO(fp.read())
-            confirm_indicators, confirm_ttps, confirm_tas = cls._get_extract_lists(outfp, file_.file_name, ta_list, white_list)
+            eeb = cls._get_extract_lists(outfp, file_.file_name, ta_list, white_list)
             outfp.close()
-            return confirm_indicators, confirm_ttps, confirm_tas
-        return None, None, None
+            return eeb

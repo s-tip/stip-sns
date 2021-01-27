@@ -28,6 +28,6 @@ class PDFExtractor(FileExtractor):
             for page in PDFPage.get_pages(fp, set(), maxpages=0, caching=True, check_extractable=True):
                 interpreter.process_page(page)
         pdf_device.close()
-        confirm_indicators, confirm_ttps, confirm_tas = cls._get_extract_lists(outfp, file_.file_name, ta_list, white_list)
+        eeb = cls._get_extract_lists(outfp, file_.file_name, ta_list, white_list)
         outfp.close()
-        return confirm_indicators, confirm_ttps, confirm_tas
+        return eeb

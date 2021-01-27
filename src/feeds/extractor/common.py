@@ -73,6 +73,31 @@ JSON_OBJECT_TYPE_FILE_NAME = 'file_name'
 JSON_OBJECT_TYPE_EMAIL_ADDRESS = 'email_address'
 
 
+class CTIElementExtractorBean(object):
+    def __init__(self):
+        self.indicators = []
+        self.ttps = []
+        self.tas = []
+
+    def extend(self, eeb):
+        if eeb is None:
+            return
+        if not isinstance(eeb, CTIElementExtractorBean):
+            return
+        self.indicators.extend(eeb.indicators)
+        self.ttps.extend(eeb.ttps)
+        self.tas.extend(eeb.tas)
+        
+    def append_indicator(self, indicator):
+        self.indicators.append(indicator)
+
+    def append_ttp(self, ttp):
+        self.ttps.append(ttp)
+
+    def append_ta(self, ta):
+        self.tas.append(ta)
+
+
 class BaseExtractor(object):
     word_extract_expression = r'([\[\]\-_.!~*\'(){}a-zA-Z0-9;\/?:\@&=+\$,%#]+)'
     word_extract_reg = re.compile(word_extract_expression)
@@ -145,9 +170,7 @@ class BaseExtractor(object):
         # 改行ごとにリストとする
         contents = outfp.getvalue()
         extract_dict = {}
-        confirm_indicators = []
-        confirm_ttps = []
-        confirm_tas = []
+        eeb = CTIElementExtractorBean()
         indicator_index = 1
         ttp_index = 1
         ta_index = 1
@@ -169,7 +192,7 @@ class BaseExtractor(object):
                         # white_list check
                         white_flag = cls._is_included_white_list(value, white_list)
                         # white_list に含まれない場合に checked をつける
-                        confirm_indicators.append((cls.decode(type_), cls.decode(value), cls.decode(title), cls.decode(title_base_name), (white_flag is False)))
+                        eeb.append_indicator((cls.decode(type_), cls.decode(value), cls.decode(title), cls.decode(title_base_name), (white_flag is False)))
                         indicator_index += 1
                 # cve チェック
                 cve = CommonExtractor.get_cve_from_word(word)
@@ -178,7 +201,7 @@ class BaseExtractor(object):
                     if not duplicate_flag:
                         # 重複していないので登録
                         title = '%s-%04d' % (title_base_name, ttp_index)
-                        confirm_ttps.append((cls.decode(cls.CVE_TYPE_STR), cls.decode(cve), cls.decode(title), cls.decode(title_base_name), True))
+                        eeb.append_ttp((cls.decode(cls.CVE_TYPE_STR), cls.decode(cve), cls.decode(title), cls.decode(title_base_name), True))
                         ttp_index += 1
             for index, word in enumerate(words):
                 ta = CommonExtractor.get_ta_from_words(words[index:], ta_list)
@@ -187,9 +210,9 @@ class BaseExtractor(object):
                     if not duplicate_flag:
                         # 重複していないので登録
                         title = '%s-%04d' % (title_base_name, ta_index)
-                        confirm_tas.append((cls.decode(cls.TA_TYPE_STR), cls.decode(ta), cls.decode(title), cls.decode(title_base_name), True))
+                        eeb.append_ta((cls.decode(cls.TA_TYPE_STR), cls.decode(ta), cls.decode(title), cls.decode(title_base_name), True))
                         ta_index += 1
-        return confirm_indicators, confirm_ttps, confirm_tas
+        return eeb
 
 
 class FileExtractor(BaseExtractor):
@@ -201,17 +224,14 @@ class FileExtractor(BaseExtractor):
         target_files = cls._get_target_files(files)
         # 該当ファイルがないので Indicators を作成しない
         if len(target_files) == 0:
-            return None, None, None
-        confirm_indicatorss = []
-        confirm_ttpss = []
-        confirm_tass = []
+            return None
+        eeb = CTIElementExtractorBean()
         for file_ in target_files:
             # Observable の Object リストと cve リストを Web Browser で確認用の indicators リストを取得する
-            confirm_indicators, confirm_ttps, confirm_tas = cls._get_element_from_target_file(file_, ta_list=ta_list, white_list=white_list)
-            confirm_indicatorss.extend(confirm_indicators)
-            confirm_ttpss.extend(confirm_ttps)
-            confirm_tass.extend(confirm_tas)
-        return confirm_indicatorss, confirm_ttpss, confirm_tass
+            this_eeb = cls._get_element_from_target_file(
+                file_, ta_list=ta_list, white_list=white_list)
+            eeb.extend(this_eeb)
+        return eeb
 
     # Extract 対象ファイルを返却
     @classmethod
