@@ -71,16 +71,11 @@ function display_confirm_dialog (data) {
     }
   }
 
-  var custom_object_list = []
-  if (Object.keys(data['custom_object_list']).length > 0) {
-    custom_object_list = data['custom_object_list']
+  var custom_object_dict = {}
+  if (Object.keys(data['custom_object_dict']).length > 0) {
+    custom_object_dict = data['custom_object_dict']
   }
-  $('#confirm_indicators_modal_dialog').data('custom_object_list', custom_object_list)
-  var custom_property_list = []
-  if (Object.keys(data['custom_property_list']).length > 0) {
-    custom_property_list = data['custom_property_list']
-  }
-  $('#confirm_indicators_modal_dialog').data('custom_property_list', custom_property_list)
+  $('#confirm_indicators_modal_dialog').data('custom_object_dict', custom_object_dict)
   if (Object.keys(data.custom_objects).length > 0) {
     for (file_name in data.custom_objects) {
       if (!(file_name in table_datas)) {
@@ -1308,12 +1303,21 @@ function _get_confirm_table_tr_ta_td_list () {
   return td_list
 }
 
+function _get_custom_objects_list () {
+  return Object.keys($('#confirm_indicators_modal_dialog').data('custom_object_dict')).sort()
+}
+
+function _get_custom_properties_list (custom_object) {
+  return $('#confirm_indicators_modal_dialog').data('custom_object_dict')[custom_object].sort()
+}
+
 function _get_confirm_table_tr_custom_object_td_list (type_) {
-  const CUSTOM_OBJECT_LIST = $('#confirm_indicators_modal_dialog').data('custom_object_list')
-  const CUSTOM_PROPERTY_LIST = $('#confirm_indicators_modal_dialog').data('custom_property_list')
+
   const type_list = type_.split('CUSTOM_OBJECT:')[1].split('/')
   const custom_object = type_list[0]
   const custom_property = type_list[1]
+  const CUSTOM_OBJECT_LIST = _get_custom_objects_list()
+  const CUSTOM_PROPERTY_LIST = _get_custom_properties_list(custom_object)
 
   const td_list = []
   const button = $('<button>', {
@@ -1322,7 +1326,6 @@ function _get_confirm_table_tr_custom_object_td_list (type_) {
     type: custom_object
   })
   button.text(custom_object)
-  button.prop('disabled', true)
   const td = _get_confirtm_table_tr_td_pulldown(button, CUSTOM_OBJECT_LIST, 'dropdown-menu-custom-object-type')
   td_list.push(td)
 
@@ -1333,7 +1336,6 @@ function _get_confirm_table_tr_custom_object_td_list (type_) {
     type: custom_property
   })
   button_2.text(custom_property)
-  button_2.prop('disabled', true)
   const td_2 = _get_confirtm_table_tr_td_pulldown(button_2, CUSTOM_PROPERTY_LIST, 'dropdown-menu-custom-property-type')
   td_list.push(td_2)
   return td_list
@@ -1471,6 +1473,7 @@ function get_confirm_data () {
   const ttps = []
   const tas = []
   const custom_objects = []
+  let error_flag = false
   $(CONFIRM_ITEM_TR_SELECTOR).each(function (index, element) {
     const checkbox_elem = $(element).find(CONFIRM_ITEM_CHECKBOX_SELECTOR)
     const table_id = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TABLE_ID)
@@ -1505,6 +1508,11 @@ function get_confirm_data () {
       if (table_id == TABLE_ID_CUSTOM_OBJECTS) {
         const custom_property_elem = $(element).find(CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_SELECTOR)
         const custom_property = custom_property_elem.attr(LISTBOX_TYPE_ATTR)
+        if(custom_property === undefined){
+          alert('Set a custom property')
+          error_flag = true
+          return null
+        }
         item.type = `${item.type}/${custom_property}`
         custom_objects.push(item)
       }
@@ -1529,6 +1537,10 @@ function get_confirm_data () {
     }
     other[target_id] = item
   })
+
+  if (error_flag === true){
+    return null
+  }
   return {
     indicators: indicators,
     ttps: ttps,

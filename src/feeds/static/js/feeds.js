@@ -286,16 +286,11 @@ $(function () {
           table_datas[file_name][TABLE_ID_TAS] = data['tas'][file_name]
         }
       }
-      var custom_object_list = []
-      if (Object.keys(data['custom_object_list']).length > 0) {
-        custom_object_list = data['custom_object_list']
+      var custom_property_dict = {}
+      if (Object.keys(data['custom_object_dict']).length > 0) {
+        custom_object_dict = data['custom_object_dict']
       }
-      $('#confirm_indicators_modal_dialog').data('custom_object_list', custom_object_list)
-      var custom_property_list = []
-      if (Object.keys(data['custom_property_list']).length > 0) {
-        custom_property_list = data['custom_property_list']
-      }
-      $('#confirm_indicators_modal_dialog').data('custom_property_list', custom_property_list)
+      $('#confirm_indicators_modal_dialog').data('custom_object_dict', custom_object_dict)
       if (Object.keys(data['custom_objects']).length > 0) {
         for (file_name in data['custom_objects']) {
           if (!(file_name in table_datas)) {
@@ -401,11 +396,16 @@ $(function () {
 
   //確認画面の投稿ボタン押下時
   $('#confirm-compose').click(function () {
+    //各々の confirm-item-tr ごとに checkbox がついていたら form の引数に追加する
+    var data = get_confirm_data();
+    if (data == null){
+      return
+    }
+
+    $('#confirm_indicators_modal_dialog').modal('hide');
     var f = $('#compose-form');
     var button = $(".btn-post");
 
-    //各々の confirm-item-tr ごとに checkbox がついていたら form の引数に追加する
-    var confirm_data = get_confirm_data();
 
     //フィールドにファイルを追加したのでajax送信方法を追加
     var fd = new FormData($('#compose-form').get(0));

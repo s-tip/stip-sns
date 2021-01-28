@@ -27,12 +27,14 @@ class StixCustomizer(object):
         with open(conf_file_path, 'r') as fp:
             j = json.load(fp)
         objects = []
-        custom_objects = []
-        custom_properties = []
+        custom_objects_dict = {}
         if 'objects' in j:
             for o_ in j['objects']:
                 if 'name' not in o_:
                     print('No name in an object. skip!!')
+                    continue
+                if not o_['name'].startswith('x-'):
+                    print('Invalide name. skip!!: ' + o_['name'])
                     continue
                 if 'properties' not in o_:
                     print('No properties in an object. skip!!')
@@ -42,6 +44,9 @@ class StixCustomizer(object):
                 for prop in o_['properties']:
                     if 'name' not in prop:
                         print('No name in a property. skip!!')
+                        continue
+                    if not prop['name'].startswith('x_'):
+                        print('Invalide name. skip!!: ' + prop['name'])
                         continue
                     # if 'required' not in prop:
                     #    print('No required in a property. skip!!')
@@ -62,8 +67,11 @@ class StixCustomizer(object):
                             continue
                     else:
                         prop['pattern'] = None
-                    custom_objects.append(o_['name'])
-                    custom_properties.append(prop['name'])
+                    if o_['name'] in custom_objects_dict:
+                        if prop['name'] not in custom_objects_dict[o_['name']]:
+                            custom_objects_dict[o_['name']].append(prop['name'])
+                    else:
+                        custom_objects_dict[o_['name']] = [prop['name']]
                     properties.append(prop)
 
                 co_properties.append(('name', StringProperty(required=True)))
@@ -77,15 +85,16 @@ class StixCustomizer(object):
         self.conf_json = {
             'objects': objects
         }
-        self.custom_objects = sorted(list(set(custom_objects)))
-        self.custom_properties = sorted(list(set(custom_properties)))
+        for key in custom_objects_dict:
+            custom_objects_dict[key] = sorted(list(set(custom_objects_dict[key])))
+        self.custom_objects_dict = custom_objects_dict
 
     def get_custom_object_list(self):
-        return self.custom_objects
+        return sorted(self.custom_objects_dict.keys())
 
-    def get_custom_property_list(self):
-        return self.custom_properties
-        
+    def get_custom_object_dict(self):
+        return self.custom_objects_dict
+
     def get_custom_objects(self):
         if self.conf_json is None:
             return None
