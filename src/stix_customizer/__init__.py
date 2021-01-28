@@ -20,15 +20,17 @@ class StixCustomizer(object):
         else:
             StixCustomizer.__instance = self
         self.conf_json = None
+        self.custom_objects = []
+        self.custom_properties = []
 
-    def init_custozer_conf(self, conf_file_path):
+    def init_customizer_conf(self, conf_file_path):
         with open(conf_file_path, 'r') as fp:
-            self.j = json.load(fp)
+            j = json.load(fp)
         objects = []
         custom_objects = []
         custom_properties = []
-        if 'objects' in self.j:
-            for o_ in self.j['objects']:
+        if 'objects' in j:
+            for o_ in j['objects']:
                 if 'name' not in o_:
                     print('No name in an object. skip!!')
                     continue

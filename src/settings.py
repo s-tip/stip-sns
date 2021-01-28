@@ -45,7 +45,7 @@ except UndefinedValueError:
 
 stix_customizer = StixCustomizer.get_instance()
 try:
-    stix_customizer.init_custozer_conf(config('STIX_CUSTOZER_CONF_PATH'))
+    stix_customizer.init_customizer_conf(config('STIX_CUSTOMIZER_CONF_PATH'))
 except UndefinedValueError:
     pass
 
