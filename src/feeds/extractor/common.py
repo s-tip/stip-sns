@@ -192,7 +192,7 @@ class BaseExtractor(object):
         indicator_index = 1
         ttp_index = 1
         ta_index = 1
-        custom_object_index = 1
+        custom_objects = StixCustomizer.get_instance().get_custom_objects()
 
         # 一行から半角文字郡のリストを抽出する
         words = cls._get_words_from_line(contents)
@@ -231,18 +231,14 @@ class BaseExtractor(object):
                         title = '%s-%04d' % (title_base_name, ta_index)
                         eeb.append_ta((cls.decode(cls.TA_TYPE_STR), cls.decode(ta), cls.decode(title), cls.decode(title_base_name), True))
                         ta_index += 1
-            for word in words:
-                word = BaseExtractor._remove_parentheses(word)
-                for o_ in StixCustomizer.get_instance().get_custom_objects():
-                    for prop in o_['properties']:
-                        if prop['pattern'] is not None:
-                            value = CommonExtractor._get_regular_value(prop['pattern'], word)
-                            if value is None:
-                                continue
-                            title = '%s-%04d' % (title_base_name, custom_object_index)
-                            type_ = 'CUSTOM_OBJECT:%s/%s' % (o_['name'], prop['name'])
-                            eeb.append_custom_object((cls.decode(type_), cls.decode(value), cls.decode(title), cls.decode(title_base_name), True))
-                            custom_object_index += 1
+
+            custom_object_index = 1
+            for co in CommonExtractor.get_custom_objects_from_words(words, custom_objects):
+                obj_name, prop_name, obj_value = co
+                title = '%s-%04d' % (title_base_name, custom_object_index)
+                type_ = 'CUSTOM_OBJECT:%s/%s' % (obj_name, prop_name)
+                eeb.append_custom_object((cls.decode(type_), cls.decode(obj_value), cls.decode(title), cls.decode(title_base_name), True))
+                custom_object_index += 1
         return eeb
 
 
@@ -443,6 +439,25 @@ class CommonExtractor(object):
                 return actor_words
         # 一致しなかった
         return None
+
+    @staticmethod
+    def get_custom_objects_from_words(words, custom_objects):
+        ret = []
+        if custom_objects is None:
+            return ret
+        for word in words:
+            word = BaseExtractor._remove_parentheses(word)
+            for o_ in custom_objects:
+                for prop in o_['properties']:
+                    if prop['pattern'] is not None:
+                        value = CommonExtractor._get_regular_value(prop['pattern'], word)
+                        if value is None:
+                            continue
+                        ret.append((
+                            BaseExtractor.decode(o_['name']),
+                            BaseExtractor.decode(prop['name']),
+                            BaseExtractor.decode(value)))
+        return ret
 
     # 単語がそれぞれipv4,url,hash,domainであるかを判定する
     # そのcybox 種別 と 値を返却する
