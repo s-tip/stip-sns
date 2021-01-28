@@ -1,4 +1,5 @@
 from feeds.extractor.common import CommonExtractor, FileExtractor, CTIElementExtractorBean
+from stix_customizer import StixCustomizer
 
 
 class CSVExtractor(FileExtractor):
@@ -8,6 +9,7 @@ class CSVExtractor(FileExtractor):
     @classmethod
     def _get_element_from_target_file(cls, file_, ta_list=[], white_list=[]):
         eeb = CTIElementExtractorBean()
+        custom_objects = StixCustomizer.get_instance().get_custom_objects()
         with open(file_.file_path, 'rb') as fp:
             lines = fp.readlines()
             # 各行から Observable を取得する
@@ -54,6 +56,14 @@ class CSVExtractor(FileExtractor):
                         # 重複していないので登録
                         title = '%s-Row-%d-COL-%d-%s' % (file_.file_name, row, col, cls.TA_TYPE_STR)
                         eeb.append_ta((cls.TA_TYPE_STR, ta, title, file_.file_name, True))
+
+                for co in CSVExtractor._get_custom_objects_from_csv_line(line, custom_objects):
+                    obj_name, prop_name, obj_value = co
+                    type_ = 'CUSTOM_OBJECT:%s/%s' % (obj_name, prop_name)
+                    title = '%s-Row-%d-COL-%d-%s' % (file_.file_name, row, col, type_)
+                    duplicate_flag, extract_dict = CommonExtractor.is_duplicate(extract_dict, type_, obj_value)
+                    if not duplicate_flag:
+                        eeb.append_custom_object((type_, obj_value, title, file_.file_name, True))
                 row += 1
         return eeb
 
@@ -107,5 +117,14 @@ class CSVExtractor(FileExtractor):
             v = CommonExtractor.get_ta_from_words([item], ta_list)
             if v is not None:
                 return v, col
-            col += 1
         return None, None
+
+    @staticmethod
+    def _get_custom_objects_from_csv_line(line, custom_objects):
+        for item in line.split(','):
+            if len(item) == 0:
+                continue
+            v = CommonExtractor.get_custom_objects_from_words([item], custom_objects)
+            if v is not None:
+                return v
+        return []
