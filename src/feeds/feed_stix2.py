@@ -12,6 +12,7 @@ from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GR
 from stip.common.x_stip_sns import StipSns
 from stip.common.stip_stix2 import _get_stip_individual_identity
 from ctirs.models import SNSConfig
+from stix_customizer import StixCustomizer
 
 # S-TIP オブジェクトに格納する固定値
 STIP_IDENTITY_CLASS = 'organization'
@@ -748,6 +749,30 @@ def _get_indicator_object(indicator, stip_identity, tlp_marking_object):
     return indicator_o
 
 
+def _get_custom_object(custom_object, stip_identity, tlp_marking_object):
+    name = custom_object['title']
+    description = custom_object['title']
+    [custom_object_name, custom_property_name] = custom_object['type'].split('/')
+    value = custom_object['value']
+
+    custom_o = None
+    for co in StixCustomizer.get_instance().get_custom_objects():
+        if custom_object_name != co['name']:
+            continue
+        kwargs = {
+            custom_property_name: value
+        }
+        custom_o = co['class'](
+            name=name,
+            description=description,
+            created_by_ref=stip_identity,
+            object_marking_refs=[tlp_marking_object],
+            **kwargs
+        )
+        break
+    return custom_o
+
+
 # GlanularMarkings 作成する
 def _make_granular_markings(stix2_title, stix2_content, lang):
     granular_markings = []
@@ -876,7 +901,10 @@ def _get_organization_identity(stip_user, individual_identity):
 
 # stix2 の Bundle 作成する (post)
 def get_post_stix2_bundle(
-    confirm_data,
+    indicators,
+    ttps,
+    tas,
+    custom_objects,
     title,
     content,
     tlp,
@@ -889,12 +917,6 @@ def get_post_stix2_bundle(
     stip_user=None,
     tags=[]
 ):
-
-    from feeds.views import KEY_INDICATORS, KEY_TTPS, KEY_TAS, KEY_OTHER
-    indicators = confirm_data[KEY_INDICATORS]
-    ttps = confirm_data[KEY_TTPS]
-    tas = confirm_data[KEY_TAS]
-    other_objects = confirm_data[KEY_OTHER]
 
     # S-TIP Identity 作成する
     individual_identity = _get_stip_individual_identity(stip_user)
@@ -952,13 +974,12 @@ def get_post_stix2_bundle(
             bundle.objects.append(indicator_o)
             report_object_refs.append(indicator_o)
 
-    for other_object in other_objects:
-        oo_type = other_object['type']
-        if oo_type in OO_FUNCS:
-            f = OO_FUNCS[oo_type]
-            o_ = f(other_object, individual_identity, tlp_marking_object)
-            bundle.objects.append(o_)
-            report_object_refs.append(o_)
+    # objects に Custom Object 追加
+    for custom_object in custom_objects:
+        custom_o = _get_custom_object(custom_object, individual_identity, tlp_marking_object)
+        if custom_o is not None:
+            bundle.objects.append(custom_o)
+            report_object_refs.append(custom_o)
 
     # 共通 lang
     common_lang = stip_user.language

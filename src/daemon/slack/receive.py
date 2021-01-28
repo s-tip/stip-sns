@@ -434,7 +434,7 @@ def set_extractor_info(stip_params, attached_files, username):
         ta_list = []
         white_list = []
 
-    confirm_indicators, confirm_ets, confirm_tas = Extractor.get_stix_element(
+    eeb = Extractor.get_stix_element(
         files=attached_files,
         posts=[stip_params[STIP_PARAMS_INDEX_POST]],
         referred_url=stip_params[STIP_PARAMS_INDEX_REFERRED_URL] if len(
@@ -443,11 +443,11 @@ def set_extractor_info(stip_params, attached_files, username):
         white_list=white_list
     )
     stip_params[STIP_PARAMS_INDEX_INDICATORS] = json.dumps(
-        get_extractor_items(confirm_indicators))
+        get_extractor_items(eeb.get_indicators()))
     stip_params[STIP_PARAMS_INDEX_TTPS] = json.dumps(
-        get_extractor_items(confirm_ets))
+        get_extractor_items(eeb.get_ttps()))
     stip_params[STIP_PARAMS_INDEX_TAS] = json.dumps(
-        get_extractor_items(confirm_tas))
+        get_extractor_items(eeb.get_tas()))
     return stip_params
 
 

@@ -286,6 +286,24 @@ $(function () {
           table_datas[file_name][TABLE_ID_TAS] = data['tas'][file_name]
         }
       }
+      var custom_object_list = []
+      if (Object.keys(data['custom_object_list']).length > 0) {
+        custom_object_list = data['custom_object_list']
+      }
+      $('#confirm_indicators_modal_dialog').data('custom_object_list', custom_object_list)
+      var custom_property_list = []
+      if (Object.keys(data['custom_property_list']).length > 0) {
+        custom_property_list = data['custom_property_list']
+      }
+      $('#confirm_indicators_modal_dialog').data('custom_property_list', custom_property_list)
+      if (Object.keys(data['custom_objects']).length > 0) {
+        for (file_name in data['custom_objects']) {
+          if (!(file_name in table_datas)) {
+            table_datas[file_name] = []
+          }
+          table_datas[file_name][TABLE_ID_CUSTOM_OBJECTS] = data['custom_objects'][file_name]
+        }
+      }
       if (screen_type == 'search') {
         fd.append('query_string', document.getElementById('query_string').value);
         fd.append('screen_name', document.getElementById('screen_name').value);
@@ -391,7 +409,10 @@ $(function () {
 
     //フィールドにファイルを追加したのでajax送信方法を追加
     var fd = new FormData($('#compose-form').get(0));
-    fd.append('confirm_data', JSON.stringify(confirm_data));
+    fd.append('indicators', JSON.stringify(data['indicators']));
+    fd.append('ttps', JSON.stringify(data['ttps']));
+    fd.append('tas', JSON.stringify(data['tas']));
+    fd.append('custom_objects', JSON.stringify(data['custom_objects']));
     //複数ある content 情報から言語情報などをまとめる
     fd.append('multi_language', is_multi_language());
     fd.append('stix2_titles', JSON.stringify(get_stix2_title_information()));
