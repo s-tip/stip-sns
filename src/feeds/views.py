@@ -76,8 +76,7 @@ KEY_INDICATORS = 'indicators'
 KEY_TTPS = 'ttps'
 KEY_TAS = 'tas'
 KEY_CUSTOM_OBJECTS = 'custom_objects'
-KEY_CUSTOM_OBJECT_LIST = 'custom_object_list'
-KEY_CUSTOM_PROPERTY_LIST = 'custom_property_list'
+KEY_CUSTOM_OBJECT_DICT = 'custom_object_dict'
 KEY_MULTI_LANGUAGE = 'multi_language'
 KEY_STIX2_TITLES = 'stix2_titles'
 KEY_STIX2_CONTENTS = 'stix2_contents'
@@ -496,8 +495,7 @@ def confirm_indicator(request):
     data[KEY_TAS] = get_json_from_extractor(eeb.get_tas())
     data[KEY_CUSTOM_OBJECTS] = get_json_from_extractor(eeb.get_custom_objects())
     customizer = StixCustomizer.get_instance()
-    data[KEY_CUSTOM_OBJECT_LIST] = customizer.get_custom_object_list()
-    data[KEY_CUSTOM_PROPERTY_LIST] = customizer.get_custom_property_list()
+    data[KEY_CUSTOM_OBJECT_DICT] = customizer.get_custom_object_dict()
     return JsonResponse(data)
 
 
