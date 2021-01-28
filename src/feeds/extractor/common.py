@@ -18,6 +18,7 @@ from stip.common.tld import TLD
 from feeds.mongo import Cve
 from feeds.adapter.att_ck import ATTCK_Taxii_Server
 from feeds.adapter.crowd_strike import query_actors, get_actor_entities
+from stix_customizer import StixCustomizer
 from ctirs.models import SNSConfig
 
 # regular expression
@@ -78,6 +79,7 @@ class CTIElementExtractorBean(object):
         self.indicators = []
         self.ttps = []
         self.tas = []
+        self.custom_objects = []
 
     def extend(self, eeb):
         if eeb is None:
@@ -87,6 +89,7 @@ class CTIElementExtractorBean(object):
         self.indicators.extend(eeb.indicators)
         self.ttps.extend(eeb.ttps)
         self.tas.extend(eeb.tas)
+        self.custom_objects.extend(eeb.custom_objects)
         
     def append_indicator(self, indicator):
         self.indicators.append(indicator)
@@ -96,6 +99,21 @@ class CTIElementExtractorBean(object):
 
     def append_ta(self, ta):
         self.tas.append(ta)
+
+    def append_custom_object(self, custom_object):
+        self.custom_objects.append(custom_object)
+
+    def get_indicators(self):
+        return self.indicators
+
+    def get_ttps(self):
+        return self.ttps
+
+    def get_tas(self):
+        return self.tas
+
+    def get_custom_objects(self):
+        return self.custom_objects
 
 
 class BaseExtractor(object):
@@ -174,6 +192,7 @@ class BaseExtractor(object):
         indicator_index = 1
         ttp_index = 1
         ta_index = 1
+        custom_object_index = 1
 
         # 一行から半角文字郡のリストを抽出する
         words = cls._get_words_from_line(contents)
@@ -212,6 +231,18 @@ class BaseExtractor(object):
                         title = '%s-%04d' % (title_base_name, ta_index)
                         eeb.append_ta((cls.decode(cls.TA_TYPE_STR), cls.decode(ta), cls.decode(title), cls.decode(title_base_name), True))
                         ta_index += 1
+            for word in words:
+                word = BaseExtractor._remove_parentheses(word)
+                for o_ in StixCustomizer.get_instance().get_custom_objects():
+                    for prop in o_['properties']:
+                        if prop['pattern'] is not None:
+                            value = CommonExtractor._get_regular_value(prop['pattern'], word)
+                            if value is None:
+                                continue
+                            title = '%s-%04d' % (title_base_name, custom_object_index)
+                            type_ = 'CUSTOM_OBJECT:%s/%s' % (o_['name'], prop['name'])
+                            eeb.append_custom_object((cls.decode(type_), cls.decode(value), cls.decode(title), cls.decode(title_base_name), True))
+                            custom_object_index += 1
         return eeb
 
 

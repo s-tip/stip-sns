@@ -54,4 +54,4 @@ class Extractor(object):
                     white_list=white_list)
                 eeb.extend(this_eeb)
 
-        return eeb.indicators, eeb.ttps, eeb.tas
+        return eeb
