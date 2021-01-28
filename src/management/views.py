@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.shortcuts import render
 from django.http.response import HttpResponseForbidden
 from django.utils.translation import ugettext_lazy as _
-from ctirs.models import STIPUser, SNSConfig
+from ctirs.models import SNSConfig
 from management.forms import SNSConfigForm
 from feeds.mongo import Attck
 from boot_sns import StipSnsBoot
