@@ -150,11 +150,15 @@ def _get_custom_object(custom_object, stip_identity, tlp_marking_object):
         kwargs = {
             custom_property_name: value
         }
+        x_stip_value = {
+            custom_property_name: value
+        }
         custom_o = co['class'](
             name=name,
             description=description,
             created_by_ref=stip_identity,
             object_marking_refs=[tlp_marking_object],
+            x_stip_value=x_stip_value,
             **kwargs
         )
         break

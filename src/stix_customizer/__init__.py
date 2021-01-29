@@ -1,6 +1,6 @@
 import re
 import json
-from stix2.properties import StringProperty
+from stix2.properties import StringProperty, DictionaryProperty
 from stix2.v21.sdo import CustomObject
 
 
@@ -76,6 +76,7 @@ class StixCustomizer(object):
 
                 co_properties.append(('name', StringProperty(required=True)))
                 co_properties.append(('description', StringProperty(required=True)))
+                co_properties.append(('x_stip_value', DictionaryProperty(required=True)))
                 @CustomObject(o_['name'], co_properties)
                 class CutomObjectTemp:
                     pass
