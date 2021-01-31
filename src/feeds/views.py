@@ -48,7 +48,7 @@ from django.template.loader import render_to_string
 from ctirs.models import AttachFile, Feed, Group, SNSConfig, STIPUser, System, Profile
 from feeds.adapter.phantom import call_run_phantom_playbook
 from feeds.adapter.splunk import get_sightings
-from feeds.extractor.base import Extractor
+import feeds.extractor.base as cee
 from feeds.feed_pdf import FeedPDF
 from feeds.feed_stix import FeedStix
 from feeds.feed_stix2 import get_post_stix2_bundle, get_attach_stix2_bundle, get_comment_stix2_bundle, get_like_stix2_bundle
@@ -520,21 +520,23 @@ def confirm_indicator(request):
     confidence = request.POST['confidence']
 
     if attach_confirm:
-        # threat_actors list を取得する
-        ta_list = get_threat_actors_list(request)
-        # white_list list を取得する
-        white_list = get_white_list(request)
-        # STIX element を取得する
-        eeb = Extractor.get_stix_element(
-            files,
-            referred_url,
-            posts,
-            ta_list,
-            white_list,
+        account_param = cee.CTIElementExtractorAccountParam(
             request.user.sns_profile.scan_csv,
             request.user.sns_profile.scan_pdf,
             request.user.sns_profile.scan_post,
             request.user.sns_profile.scan_txt)
+        list_param = cee.CTIElementExtractorListParam(
+            get_threat_actors_list(request),
+            get_white_list(request))
+        post_param = cee.CTIElementExtractorPostParam(
+            files=files,
+            referred_url=referred_url,
+            posts=posts)
+        param = cee.CTIElementExtractorParam(
+            account_param,
+            list_param,
+            post_param)
+        eeb = cee.Extractor.get_stix_element(param)
     else:
         # attach_confrim 指定なし
         # pending

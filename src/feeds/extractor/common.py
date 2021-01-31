@@ -184,7 +184,7 @@ class BaseExtractor(object):
     # 2.含まれている cve を自動判別し tuple リストを作成する
     # 3.含まれている ta_list を自動判別し tuple リストを作成する
     @classmethod
-    def _get_extract_lists(cls, outfp, title_base_name, ta_list, white_list):
+    def _get_extract_lists(cls, outfp, title_base_name, list_param):
         # 改行ごとにリストとする
         contents = outfp.getvalue()
         extract_dict = {}
@@ -193,6 +193,8 @@ class BaseExtractor(object):
         ttp_index = 1
         ta_index = 1
         custom_objects = StixCustomizer.get_instance().get_custom_objects()
+        ta_list = list_param.ta_list
+        white_list =list_param.white_list
 
         # 一行から半角文字郡のリストを抽出する
         words = cls._get_words_from_line(contents)
@@ -247,7 +249,8 @@ class FileExtractor(BaseExtractor):
 
     # ファイルから STIX 要素 (indicator, Exploit_Targets) を作成する
     @classmethod
-    def get_stix_elements(cls, files, ta_list=[], white_list=[], **kwargs):
+    def get_stix_elements(cls, param):
+        files = param.post_param.files
         target_files = cls._get_target_files(files)
         # 該当ファイルがないので Indicators を作成しない
         if len(target_files) == 0:
@@ -255,8 +258,7 @@ class FileExtractor(BaseExtractor):
         eeb = CTIElementExtractorBean()
         for file_ in target_files:
             # Observable の Object リストと cve リストを Web Browser で確認用の indicators リストを取得する
-            this_eeb = cls._get_element_from_target_file(
-                file_, ta_list=ta_list, white_list=white_list)
+            this_eeb = cls._get_element_from_target_file(file_, param.list_param)
             eeb.extend(this_eeb)
         return eeb
 

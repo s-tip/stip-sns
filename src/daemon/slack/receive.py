@@ -16,7 +16,7 @@ from boot_sns import StipSnsBoot
 from ctirs.models import System, STIPUser, SNSConfig, AttachFile, Feed
 from stip.common.const import TLP_CHOICES, SNS_SLACK_BOT_ACCOUNT
 from feeds.views import get_merged_conf_list, post_common
-from feeds.extractor.base import Extractor
+import feeds.extractor.base as cee
 from feeds.views import KEY_TLP as STIP_PARAMS_INDEX_TLP
 from feeds.views import KEY_POST as STIP_PARAMS_INDEX_POST
 from feeds.views import KEY_REFERRED_URL as STIP_PARAMS_INDEX_REFERRED_URL
@@ -434,14 +434,20 @@ def set_extractor_info(stip_params, attached_files, username):
         ta_list = []
         white_list = []
 
-    eeb = Extractor.get_stix_element(
+    account_param = cee.CTIElementExtractorAccountParam()
+    list_param = cee.CTIElementExtractorListParam(
+        ta_list,
+        white_list)
+    post_param = cee.CTIElementExtractorPostParam(
         files=attached_files,
-        posts=[stip_params[STIP_PARAMS_INDEX_POST]],
-        referred_url=stip_params[STIP_PARAMS_INDEX_REFERRED_URL] if len(
-            stip_params[STIP_PARAMS_INDEX_REFERRED_URL]) != 0 else None,
-        ta_list=ta_list,
-        white_list=white_list
-    )
+        referred_url=stip_params[STIP_PARAMS_INDEX_REFERRED_URL] if len(stip_params[STIP_PARAMS_INDEX_REFERRED_URL]) != 0 else None,
+        posts=[stip_params[STIP_PARAMS_INDEX_POST]])
+    param = cee.CTIElementExtractorParam(
+        account_param,
+        list_param,
+        post_param )
+
+    eeb = cee.Extractor.get_stix_element(param)
     stip_params[STIP_PARAMS_INDEX_INDICATORS] = json.dumps(
         get_extractor_items(eeb.get_indicators()))
     stip_params[STIP_PARAMS_INDEX_TTPS] = json.dumps(
