@@ -7,9 +7,11 @@ class CSVExtractor(FileExtractor):
 
     # 指定の CSV ファイルを開き、indicators, cve, threat_actors の要素を返却する
     @classmethod
-    def _get_element_from_target_file(cls, file_, ta_list=[], white_list=[]):
+    def _get_element_from_target_file(cls, file_, list_param):
         eeb = CTIElementExtractorBean()
         custom_objects = StixCustomizer.get_instance().get_custom_objects()
+        ta_list = list_param.ta_list
+        white_list =list_param.white_list
         with open(file_.file_path, 'rb') as fp:
             lines = fp.readlines()
             # 各行から Observable を取得する

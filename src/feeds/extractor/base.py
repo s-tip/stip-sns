@@ -5,53 +5,51 @@ from feeds.extractor.txt import TxtExtractor
 from feeds.extractor.web import WebExtractor
 from feeds.extractor.common import CTIElementExtractorBean
 
+class CTIElementExtractorParam(object):
+    def __init__(self, account_param, list_param, post_param):
+        self.account_param = account_param
+        self.list_param = list_param
+        self.post_param = post_param
+
+class CTIElementExtractorAccountParam(object):
+    def __init__(self, scan_csv=True, scan_pdf=False, scan_post=True, scan_txt=True):
+        self.scan_csv = scan_csv
+        self.scan_pdf = scan_pdf
+        self.scan_post= scan_post
+        self.scan_txt= scan_txt
+
+class CTIElementExtractorListParam(object):
+    def __init__(self, ta_list, white_list):
+        self.ta_list = ta_list
+        self.white_list = white_list
+
+class CTIElementExtractorPostParam(object):
+    def __init__(self, files, referred_url=None, posts=[]):
+        self.files = files
+        self.referred_url = referred_url
+        self.posts = posts
 
 class Extractor(object):
-    # 添付ファイル or post からSTIX要素(indicator,Exploit_Targets)を作成する
-    # 存在しない場合は None を返却する
     @staticmethod
-    def get_stix_element(
-            files,
-            referred_url=None,
-            posts=[],
-            ta_list=[],
-            white_list=[],
-            scan_csv=True,
-            scan_pdf=False,
-            scan_post=True,
-            scan_txt=True):
-
-        # scan するコンテンツのフラグとクラス
+    def get_stix_element(param):
+        account_param = param.account_param
         scan_contents = [
-            (scan_csv, CSVExtractor),
-            (scan_pdf, PDFExtractor),
-            (scan_txt, TxtExtractor),
-            # (scan_post, PostExtractor),
-            # scan_post と一緒とする
-            (scan_post, WebExtractor),
+            (account_param.scan_csv, CSVExtractor),
+            (account_param.scan_pdf, PDFExtractor),
+            (account_param.scan_txt, TxtExtractor),
+            (account_param.scan_post, WebExtractor),
         ]
-
+ 
         eeb = CTIElementExtractorBean()
-
         for scan_content in scan_contents:
             flag = scan_content[0]
             clazz = scan_content[1]
-            # check flag がある場合は get_stix_elements を呼び出し、戻り値が list なら要素を追加する
             if flag:
-                this_eeb = clazz.get_stix_elements(
-                    files=files,
-                    referred_url=referred_url,
-                    ta_list=ta_list,
-                    white_list=white_list)
+                this_eeb = clazz.get_stix_elements(param)
                 eeb.extend(this_eeb)
-
-        # scan_post だけ別
-        if scan_post:
-            for post in posts:
-                this_eeb = PostExtractor.get_stix_elements(
-                    post=post,
-                    ta_list=ta_list,
-                    white_list=white_list)
+        if account_param.scan_post:
+            for post in param.post_param.posts:
+                this_eeb = PostExtractor.get_stix_elements(post, param)
                 eeb.extend(this_eeb)
 
         return eeb
