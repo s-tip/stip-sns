@@ -289,6 +289,8 @@ $(function () {
       var custom_property_dict = {}
       if (Object.keys(data['custom_object_dict']).length > 0) {
         custom_object_dict = data['custom_object_dict']
+      } else {
+        custom_object_dict = {}
       }
       $('#confirm_indicators_modal_dialog').data('custom_object_dict', custom_object_dict)
       if (Object.keys(data['custom_objects']).length > 0) {
