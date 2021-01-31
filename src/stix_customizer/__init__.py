@@ -94,6 +94,8 @@ class StixCustomizer(object):
         return sorted(self.custom_objects_dict.keys())
 
     def get_custom_object_dict(self):
+        if not hasattr(self, 'custom_objects_dict'):
+            return {}
         return self.custom_objects_dict
 
     def get_custom_objects(self):
