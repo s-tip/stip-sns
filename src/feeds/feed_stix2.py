@@ -229,15 +229,6 @@ def _get_individual_identity(stip_user):
     return identity
 
 
-def _get_relationship_between_individual_to_organization(individual, organization):
-    relationship = Relationship(
-        relationship_type='belongs_to',
-        source_ref=individual,
-        target_ref=organization
-    )
-    return relationship
-
-
 def _get_organization_identity_sectors(ci):
     ci_table = {
         'Information and Communication Services': ['telecommunications'],
@@ -266,13 +257,14 @@ def _get_organization_identity_sectors(ci):
 
 
 # stip_user から identity (Organization) を作成する
-def _get_organization_identity(stip_user):
+def _get_organization_identity(stip_user, individual_identity):
     if stip_user.affiliation is None or len(stip_user.affiliation) == 0:
         return None
     sectors = _get_organization_identity_sectors(stip_user.ci)
     identity = Identity(
         name=stip_user.affiliation,
         identity_class='Organization',
+        created_by_ref=individual_identity,
         sectors=sectors,
         x_stip_sns_account=stip_user.username,
         allow_custom=True
@@ -299,7 +291,7 @@ def get_post_stix2_bundle(
 
     # S-TIP Identity 作成する
     individual_identity = _get_individual_identity(stip_user)
-    organization_identity = _get_organization_identity(stip_user)
+    organization_identity = _get_organization_identity(stip_user, individual_identity)
 
     # x_stip_sns_author
     x_stip_sns_author = _get_x_stip_sns_author(stip_user)
@@ -333,10 +325,6 @@ def get_post_stix2_bundle(
     bundle = Bundle(individual_identity, tlp_marking_object)
     if organization_identity:
         bundle.objects.append(organization_identity)
-        bundle.objects.append(
-            _get_relationship_between_individual_to_organization(
-                individual_identity,
-                organization_identity))
 
     # objects に Vulnerability 追加
     for ttp in ttps:
@@ -438,7 +426,7 @@ def get_attach_stix2_bundle(
 
     # S-TIP Identity 作成する
     individual_identity = _get_individual_identity(stip_user)
-    organization_identity = _get_organization_identity(stip_user)
+    organization_identity = _get_organization_identity(stip_user, individual_identity)
     # x_stip_sns_author
     x_stip_sns_author = _get_x_stip_sns_author(stip_user)
 
@@ -483,10 +471,6 @@ def get_attach_stix2_bundle(
         stip_sns)
     if organization_identity:
         bundle.objects.append(organization_identity)
-        bundle.objects.append(
-            _get_relationship_between_individual_to_organization(
-                individual_identity,
-                organization_identity))
     return bundle, stip_sns.id
 
 
@@ -544,7 +528,7 @@ def get_comment_stix2_bundle(
 
     # S-TIP Identity 作成する
     individual_identity = _get_individual_identity(stip_user)
-    organization_identity = _get_organization_identity(stip_user)
+    organization_identity = _get_organization_identity(stip_user, individual_identity)
     # x_stip_sns_author
     x_stip_sns_author = _get_x_stip_sns_author(stip_user)
     # x_stip_sns_identity
@@ -577,10 +561,6 @@ def get_comment_stix2_bundle(
         stip_sns)
     if organization_identity:
         bundle.objects.append(organization_identity)
-        bundle.objects.append(
-            _get_relationship_between_individual_to_organization(
-                individual_identity,
-                organization_identity))
     return bundle
 
 
@@ -595,7 +575,7 @@ def get_like_stix2_bundle(
 
     # S-TIP Identity 作成する
     individual_identity = _get_individual_identity(stip_user)
-    organization_identity = _get_organization_identity(stip_user)
+    organization_identity = _get_organization_identity(stip_user, individual_identity)
     # x_stip_sns_author
     x_stip_sns_author = _get_x_stip_sns_author(stip_user)
     # x_stip_sns_identity
@@ -638,8 +618,4 @@ def get_like_stix2_bundle(
         stip_sns)
     if organization_identity:
         bundle.objects.append(organization_identity)
-        bundle.objects.append(
-            _get_relationship_between_individual_to_organization(
-                individual_identity,
-                organization_identity))
     return bundle
