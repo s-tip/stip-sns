@@ -1308,7 +1308,16 @@ function _get_custom_objects_list () {
 }
 
 function _get_custom_properties_list (custom_object) {
-  return $('#confirm_indicators_modal_dialog').data('custom_object_dict')[custom_object].sort()
+  const custom_object_dict = $('#confirm_indicators_modal_dialog').data('custom_object_dict')
+  if (custom_object in custom_object_dict) {
+    return custom_object_dict[custom_object].sort()
+  } else{
+    const l = []
+    $.each(custom_object_dict,function (key, properties) {
+      $.merge( l , properties )
+    })
+    return $.unique(l).sort()
+  }
 }
 
 function _get_confirm_table_tr_custom_object_td_list (type_) {

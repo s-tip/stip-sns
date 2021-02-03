@@ -49,6 +49,11 @@ try:
 except UndefinedValueError:
     pass
 
+try:
+    NLP_TYPE = config('NLP_TYPE').lower()
+except UndefinedValueError:
+    NLP_TYPE = None
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
