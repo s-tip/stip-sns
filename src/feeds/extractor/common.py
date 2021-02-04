@@ -25,7 +25,6 @@ from stix_customizer import StixCustomizer
 from ctirs.models import SNSConfig
 
 if settings.NLP_TYPE == 'mecab':
-    print('mecab')
     mecab = MeCab.Tagger('-d /usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ipadic-neologd ')
 
 if settings.NLP_TYPE == 'nltk':
@@ -203,7 +202,6 @@ class BaseExtractor(object):
         indicator_index = 1
         ttp_index = 1
         ta_index = 1
-        custom_objects = StixCustomizer.get_instance().get_custom_objects()
         ta_list = list_param.ta_list
         white_list = list_param.white_list
 
@@ -245,16 +243,28 @@ class BaseExtractor(object):
                         eeb.append_ta((cls.decode(cls.TA_TYPE_STR), cls.decode(ta), cls.decode(title), cls.decode(title_base_name), True))
                         ta_index += 1
 
-            custom_object_index = 1
-            for co in CommonExtractor.get_custom_objects_from_words(words, custom_objects):
-                obj_name, prop_name, obj_value = co
-                title = '%s-%04d' % (title_base_name, custom_object_index)
-                type_ = 'CUSTOM_OBJECT:%s/%s' % (obj_name, prop_name)
-                eeb.append_custom_object((cls.decode(type_), cls.decode(obj_value), cls.decode(title), cls.decode(title_base_name), True))
-                custom_object_index += 1
-
+        custom_objects = StixCustomizer.get_instance().get_custom_objects()
         if custom_objects is None:
             return eeb
+
+        contents = contents.replace('\r', ' ') 
+        contents = contents.replace('\n', ' ') 
+        custom_object_index = 1
+        for custom_object in custom_objects:
+            for custom_property in custom_object['properties']:
+                if custom_property['pattern'] is None:
+                    continue
+                matches = custom_property['pattern'].findall(contents)
+                values = []
+                for obj_value in matches:
+                    if obj_value in values:
+                        continue
+                    values.append(obj_value)
+                    title = '%s-%04d' % (title_base_name, custom_object_index)
+                    type_ = 'CUSTOM_OBJECT:%s/%s' % (custom_object['name'], custom_property['name'])
+                    eeb.append_custom_object((cls.decode(type_), cls.decode(obj_value), cls.decode(title), cls.decode(title_base_name), True))
+                    custom_object_index += 1
+
         if settings.NLP_TYPE is None:
             return eeb
 
@@ -486,25 +496,6 @@ class CommonExtractor(object):
                 return actor_words
         # 一致しなかった
         return None
-
-    @staticmethod
-    def get_custom_objects_from_words(words, custom_objects):
-        ret = []
-        if custom_objects is None:
-            return ret
-        for word in words:
-            word = BaseExtractor._remove_parentheses(word)
-            for o_ in custom_objects:
-                for prop in o_['properties']:
-                    if prop['pattern'] is not None:
-                        value = CommonExtractor._get_regular_value(prop['pattern'], word)
-                        if value is None:
-                            continue
-                        ret.append((
-                            BaseExtractor.decode(o_['name']),
-                            BaseExtractor.decode(prop['name']),
-                            BaseExtractor.decode(value)))
-        return ret
 
     # 単語がそれぞれipv4,url,hash,domainであるかを判定する
     # そのcybox 種別 と 値を返却する
