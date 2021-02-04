@@ -1,4 +1,4 @@
-from feeds.extractor.common import CommonExtractor, FileExtractor, CTIElementExtractorBean
+from feeds.extractor.common import CommonExtractor, FileExtractor, CTIElementExtractorBean, BaseExtractor
 from stix_customizer import StixCustomizer
 
 
@@ -11,7 +11,7 @@ class CSVExtractor(FileExtractor):
         eeb = CTIElementExtractorBean()
         custom_objects = StixCustomizer.get_instance().get_custom_objects()
         ta_list = list_param.ta_list
-        white_list =list_param.white_list
+        white_list = list_param.white_list
         with open(file_.file_path, 'rb') as fp:
             lines = fp.readlines()
             # 各行から Observable を取得する
@@ -59,7 +59,8 @@ class CSVExtractor(FileExtractor):
                         title = '%s-Row-%d-COL-%d-%s' % (file_.file_name, row, col, cls.TA_TYPE_STR)
                         eeb.append_ta((cls.TA_TYPE_STR, ta, title, file_.file_name, True))
 
-                for co in CSVExtractor._get_custom_objects_from_csv_line(line, custom_objects):
+                custom_object_list, col = CSVExtractor._get_custom_objects_from_csv_line(line, custom_objects)
+                for co in custom_object_list:
                     obj_name, prop_name, obj_value = co
                     type_ = 'CUSTOM_OBJECT:%s/%s' % (obj_name, prop_name)
                     title = '%s-Row-%d-COL-%d-%s' % (file_.file_name, row, col, type_)
@@ -102,7 +103,6 @@ class CSVExtractor(FileExtractor):
             v = CommonExtractor.get_cve_from_word(item)
             if v is not None:
                 return v, col
-            col += 1
         return None, None
 
     # 一行に含まれるカンマごとに区切り、threat_actor があるかを判定する、
@@ -123,10 +123,32 @@ class CSVExtractor(FileExtractor):
 
     @staticmethod
     def _get_custom_objects_from_csv_line(line, custom_objects):
+        col = 1
         for item in line.split(','):
             if len(item) == 0:
+                col += 1
                 continue
-            v = CommonExtractor.get_custom_objects_from_words([item], custom_objects)
-            if v is not None:
-                return v
-        return []
+            v = CSVExtractor._get_custom_objects_from_words([item], custom_objects)
+            if len(v) > 0:
+                return v, col
+        return [], None
+
+
+    @staticmethod
+    def _get_custom_objects_from_words(words, custom_objects):
+        ret = []
+        if custom_objects is None:
+            return ret
+        for word in words:
+            word = BaseExtractor._remove_parentheses(word)
+            for o_ in custom_objects:
+                for prop in o_['properties']:
+                    if prop['pattern'] is not None:
+                        matches = prop['pattern'].findall(word)
+                        if len(matches) == 0:
+                            continue
+                        ret.append((
+                            BaseExtractor.decode(o_['name']),
+                            BaseExtractor.decode(prop['name']),
+                            BaseExtractor.decode(matches[0])))
+        return ret
