@@ -41,18 +41,20 @@ class CSVExtractor(FileExtractor):
                         # white_list に含まれない場合に checked をつける
                         confirm_indicators.append((type_, value, title, file_.file_name, (white_flag is False)))
                 # cve チェック
-                cve = CSVExtractor._get_cve_from_csv_line(line)
+                cve, col = CSVExtractor._get_cve_from_csv_line(line)
                 if cve is not None:
                     duplicate_flag, extract_dict = CommonExtractor.is_duplicate(extract_dict, cls.CVE_TYPE_STR, cve)
                     if not duplicate_flag:
                         # 重複していないので登録
+                        title = '%s-Row-%d-COL-%d-%s' % (file_.file_name, row, col, cls.CVE_TYPE_STR)
                         confirm_ttps.append((cls.CVE_TYPE_STR, cve, title, file_.file_name, True))
                 # Threat Actor チェック
-                ta = CSVExtractor._get_ta_from_csv_line(line, ta_list)
+                ta, col = CSVExtractor._get_ta_from_csv_line(line, ta_list)
                 if ta is not None:
                     duplicate_flag, extract_dict = CommonExtractor.is_duplicate(extract_dict, cls.TA_TYPE_STR, ta)
                     if not duplicate_flag:
                         # 重複していないので登録
+                        title = '%s-Row-%d-COL-%d-%s' % (file_.file_name, row, col, cls.TA_TYPE_STR)
                         confirm_tas.append((cls.TA_TYPE_STR, ta, title, file_.file_name, True))
                 row += 1
         return confirm_indicators, confirm_ttps, confirm_tas
@@ -81,26 +83,31 @@ class CSVExtractor(FileExtractor):
     # 一行に複数見つかった場合でも最初に見つかった要素のみを有効として返却する
     @staticmethod
     def _get_cve_from_csv_line(line):
+        col = 1
         for item in line.split(','):
             if len(item) == 0:
+                col += 1
                 continue
             # cve か?
             v = CommonExtractor.get_cve_from_word(item)
             if v is not None:
-                return v
-        return None
+                return v, col
+            col += 1
+        return None, None
 
     # 一行に含まれるカンマごとに区切り、threat_actor があるかを判定する、
     # 最初に見つかった Threat Actorを返却
     # 一行に複数見つかった場合でも最初に見つかった要素のみを有効として返却する
     @staticmethod
     def _get_ta_from_csv_line(line, ta_list):
+        col = 1
         for item in line.split(','):
             if len(item) == 0:
+                col += 1
                 continue
             # Threat Actor か?
-            # v = CommonExtractor.get_ta_from_line(item,ta_list)
             v = CommonExtractor.get_ta_from_words([item], ta_list)
             if v is not None:
-                return v
-        return None
+                return v, col
+            col += 1
+        return None, None
