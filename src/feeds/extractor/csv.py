@@ -1,5 +1,5 @@
 from feeds.extractor.common import CommonExtractor, FileExtractor, CTIElementExtractorBean, BaseExtractor
-from stix_customizer import StixCustomizer
+from stip.common.stix_customizer import StixCustomizer
 
 
 class CSVExtractor(FileExtractor):

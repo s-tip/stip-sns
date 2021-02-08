@@ -2,7 +2,7 @@ import os
 from decouple import Csv, config, UndefinedValueError
 from unipath import Path
 import stip.common.const as const
-from stix_customizer import StixCustomizer
+from stip.common.stix_customizer import StixCustomizer
 
 PROJECT_DIR = Path(__file__).parent
 

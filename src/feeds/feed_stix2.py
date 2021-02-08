@@ -5,11 +5,10 @@ import feeds.extractor.common as fec
 import stip.common.const as const
 from stix2.v21.bundle import Bundle
 from stix2.v21.sdo import Report, Vulnerability, ThreatActor, Indicator, Identity
-from stix2.v21.sro import Relationship
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
 from stip.common.x_stip_sns import StipSns
 from ctirs.models import SNSConfig
-from stix_customizer import StixCustomizer
+from stip.common.stix_customizer import StixCustomizer
 
 # S-TIP オブジェクトに格納する固定値
 STIP_IDENTITY_CLASS = 'organization'

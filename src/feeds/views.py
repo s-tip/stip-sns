@@ -52,7 +52,7 @@ from feeds.feed_pdf import FeedPDF
 from feeds.feed_stix import FeedStix
 from feeds.feed_stix2 import get_post_stix2_bundle, get_attach_stix2_bundle, get_comment_stix2_bundle, get_like_stix2_bundle
 from feeds.feed_stix_common import FeedStixCommon
-from stix_customizer import StixCustomizer
+from stip.common.stix_customizer import StixCustomizer
 from stix.core.stix_package import STIXPackage
 from stix2 import parse
 import stix2.v21.sdo as sdo_21
