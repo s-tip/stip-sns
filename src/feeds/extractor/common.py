@@ -21,7 +21,7 @@ from stip.common.tld import TLD
 from feeds.mongo import Cve
 from feeds.adapter.att_ck import ATTCK_Taxii_Server
 from feeds.adapter.crowd_strike import query_actors, get_actor_entities
-from stix_customizer import StixCustomizer
+from stip.common.stix_customizer import StixCustomizer
 from ctirs.models import SNSConfig
 
 if settings.NLP_TYPE == 'mecab':

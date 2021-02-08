@@ -12,7 +12,7 @@ from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GR
 from stip.common.x_stip_sns import StipSns
 from stip.common.stip_stix2 import _get_stip_individual_identity
 from ctirs.models import SNSConfig
-from stix_customizer import StixCustomizer
+from stip.common.stix_customizer import StixCustomizer
 
 # S-TIP オブジェクトに格納する固定値
 STIP_IDENTITY_CLASS = 'organization'
