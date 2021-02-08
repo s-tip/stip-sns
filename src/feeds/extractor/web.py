@@ -62,7 +62,13 @@ class WebExtractor(BaseExtractor):
             file_ = None
             if 'text/html' in content_type:
                 bs = bs4.BeautifulSoup(resp.text, 'lxml')
-                return WebExtractor._get_element_from_post(bs.body.text, referred_url, list_param)
+                for script in bs(["script", "style"]):
+                    script.decompose()
+                lines = []
+                for line in bs.get_text().splitlines():
+                    lines.append(line.strip())
+                content = "\n".join(line for line in lines if line)
+                return WebExtractor._get_element_from_post(content, referred_url, list_param)
             else:
                 # content_type が extractros の何かにマッチすればその処理を行う
                 for extractor_key in list(extractors.keys()):
