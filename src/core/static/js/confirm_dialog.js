@@ -435,10 +435,10 @@ function _get_custom_properties_list (custom_object) {
 }
 
 function _get_confirm_table_tr_custom_object_td_list (type_) {
-
-  const type_list = type_.split('CUSTOM_OBJECT:')[1].split('/')
-  const custom_object = type_list[0]
-  const custom_property = type_list[1]
+  const custom_info = type_.split('CUSTOM_OBJECT:')[1]
+  const index = custom_info.indexOf('/')
+  const custom_object = custom_info.substr(0,index)
+  const custom_property = custom_info.substr(index + 1)
   const CUSTOM_OBJECT_LIST = _get_custom_objects_list()
   const CUSTOM_PROPERTY_LIST = _get_custom_properties_list(custom_object)
 
