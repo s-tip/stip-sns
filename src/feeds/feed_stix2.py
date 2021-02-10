@@ -752,16 +752,25 @@ def _get_indicator_object(indicator, stip_identity, tlp_marking_object):
 def _get_custom_object(custom_object, stip_identity, tlp_marking_object):
     name = custom_object['title']
     description = custom_object['title']
-    [custom_object_name, custom_property_name] = custom_object['type'].split('/')
+    custom_info = custom_object['type'].split('/')
+    custom_object_name = custom_info[0]
+    custom_property_name = custom_info[1]
     value = custom_object['value']
+    if len(custom_info) == 3:
+        d = {}
+        d[custom_info[2]] = value
+        kwargs = {
+            custom_property_name: d
+        }
+    else:
+        kwargs = {
+            custom_property_name: value
+        }
 
     custom_o = None
     for co in StixCustomizer.get_instance().get_custom_objects():
         if custom_object_name != co['name']:
             continue
-        kwargs = {
-            custom_property_name: value
-        }
         custom_o = co['class'](
             name=name,
             description=description,
