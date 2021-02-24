@@ -3,6 +3,7 @@ from decouple import Csv, config, UndefinedValueError
 from unipath import Path
 import stip.common.const as const
 from stip.common.stix_customizer import StixCustomizer
+from stip.common.matching_customizer import MatchingCustomizer
 
 PROJECT_DIR = Path(__file__).parent
 
@@ -46,6 +47,12 @@ except UndefinedValueError:
 stix_customizer = StixCustomizer.get_instance()
 try:
     stix_customizer.init_customizer_conf(config('STIX_CUSTOMIZER_CONF_PATH'))
+except UndefinedValueError:
+    pass
+
+matching_customizer = MatchingCustomizer.get_instance()
+try:
+    matching_customizer.init_customizer_conf(config('MATCHING_CUSTOMIZER_CONF_PATH'))
 except UndefinedValueError:
     pass
 
