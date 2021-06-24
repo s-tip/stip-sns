@@ -2,7 +2,10 @@ import json
 from stix2 import parse
 from stix2.v21.sro import Sighting
 from stix2.v21.sdo import ObservedData
-from stix2elevator import elevate_file
+try:
+    from stix2elevator import elevate_file as ELEVATE
+except ImportError:
+    from stix2elevator import elevate as ELEVATE
 from stix2elevator.options import initialize_options, set_option_value
 from stix2elevator.stix_stepper import step_bundle
 from stix2matcher.matcher import match
@@ -50,7 +53,7 @@ def convert_to_stix_1x_to_21(stix_file_path):
     initialize_options()
     set_option_value('validator_args', '--silent')
     set_option_value('silent', 'True')
-    stix20_str = elevate_file(stix_file_path)
+    stix20_str = ELEVATE(stix_file_path)
     stix20 = _replace_stix2_tlp(stix20_str)
     # for stix2-elevator issue
     stix20_new = {}
