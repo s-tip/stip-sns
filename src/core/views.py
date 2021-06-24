@@ -41,7 +41,7 @@ def login_totp(request):
 
 
 def home(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         stip_user = request.user
         request = set_language_setting(request, stip_user)
         return feeds(request)
