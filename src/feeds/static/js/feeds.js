@@ -4,6 +4,7 @@ var content_count = 0;
 $(function () {
   var page_title = $(document).attr("title");
   var screen_type = $("body").data("screen-type");
+  var is_post = false
 
   //新規投稿とキャンセルを入れ替える
   function toggle_new_cancel_button() {
@@ -246,6 +247,7 @@ $(function () {
     var button = $(".btn-post");
 
     display_processing_animation();
+    is_post = true
     $.ajax({
       url: '/feeds/confirm_indicator/',
       method: 'post',
@@ -291,6 +293,7 @@ $(function () {
       // table_data があれば modal 表示
       if (Object.keys(table_datas).length > 0) {
         make_extract_tables(table_datas);
+        is_post = false
         $('#confirm_indicators_modal_dialog').modal();
       } else {
         //存在しない
@@ -315,6 +318,7 @@ $(function () {
           alert(msg);
         }).always(function () {
           button.prop('disabled', false);
+          is_post = false
         });
       }
 
@@ -323,6 +327,7 @@ $(function () {
       alert(msg);
     }).always(function () {
       remove_processing_animation();
+      is_post = false
     });
   };
 
@@ -428,6 +433,7 @@ $(function () {
       fd.append('screen_name', document.getElementById('screen_name').value);
     }
     display_processing_animation();
+    is_post = true
     $.ajax({
       url: '/feeds/post/',
       method: 'post',
@@ -447,6 +453,7 @@ $(function () {
     }).always(function () {
       remove_processing_animation();
       button.prop('disabled', false);
+      is_post = false
     });
   });
 
@@ -1010,6 +1017,10 @@ $(function () {
 
   var check_interval = 5000
   function check_new_feeds() {
+    if (is_post === true){
+      window.setTimeout(check_new_feeds, check_interval);
+      return
+    }
     var last_feed = $(".stream li:first-child").attr("feed-date");
     var feed_source = $("#feed_source").val();
     if (last_feed != undefined) {
@@ -1063,6 +1074,10 @@ $(function () {
 
   //定期時間ごとに like,comment 情報を更新しているが処理速度低下のため一旦コメントアウトする
   function update_feeds() {
+    if (is_post === true){
+      window.setTimeout(update_feeds, check_interval);
+      return
+    }
     var first_feed = $(".stream .feed-li:first-child").attr("feed-date");
     var last_feed = $(".stream .feed-li:last-child").attr("feed-date");
     var feed_source = $("#feed_source").val();
@@ -1095,6 +1110,10 @@ $(function () {
   update_feeds();
 
   function track_comments() {
+    if (is_post === true){
+      window.setTimeout(track_comments, 30000);
+      return
+    }
     $(".tracking").each(function () {
       var container = $(this);
       var package_id = $(this).closest("li").attr("package-id");
