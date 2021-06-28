@@ -34,8 +34,8 @@ urlpatterns = [
     url(r'^notifications/last/$', activities_views.last_notifications, name='last_notifications'),
     url(r'^notifications/check/$', activities_views.check_notifications, name='check_notifications'),
     url(r'^search/$', search_views.search, name='search'),
-    url(r'^(?P<username>[^/]+)/$', core_views.profile, name='profile'),
-    url(r'^jsi18n/$', JavaScriptCatalog.as_view())
+    url(r'^jsi18n/$', JavaScriptCatalog.as_view()),
+    url(r'^(?P<username>[^/]+)/$', core_views.profile, name='profile')
 ]
 
 if settings.DEBUG:
