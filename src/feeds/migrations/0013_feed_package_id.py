@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='feed',
             name='package_id',
-            field=models.TextField(default='', max_length=128, null=True),
+            field=models.TextField(max_length=128, null=True),
         ),
     ]
