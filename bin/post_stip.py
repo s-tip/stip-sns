@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding: UTF-8
 import sys
 import traceback
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(1)
 
-    with open(args.post_info_file, 'r') as fp:
+    with open(args.post_info_file, 'r', encoding='utf-8') as fp:
         payload = json.load(fp)
 
     index = 0
