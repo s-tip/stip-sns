@@ -822,7 +822,7 @@ def create_sighting_object(request):
         if feed.stix_version.startswith('1.'):
             stix2 = stip_sighting.convert_to_stix_1x_to_21(stix_file_path)
         elif feed.stix_version == '2.0':
-            with open(stix_file_path, 'r') as fp:
+            with open(stix_file_path, 'r', encoding='utf-8') as fp:
                 stix20_json = json.load(fp)
             stix2 = stip_sighting.convert_to_stix_20_to_21(stix20_json)
         else:
@@ -926,7 +926,7 @@ def _set_jira_param_v2(feed, feed_file_name_id, j, issue):
             attachment=attach_file_path,
             filename=attach_file.file_name)
 
-    with open(feed.stix_file_path, 'r') as fp:
+    with open(feed.stix_file_path, 'r', encoding='utf-8') as fp:
         bundle = json.load(fp)
     package_id = bundle['id']
     stix_file_name = '%s.json' % (package_id)

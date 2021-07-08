@@ -56,7 +56,7 @@ class FeedPDFStixV2(FeedPDFStixBase):
     def __init__(self, feed):
         from feeds.views import get_csv_from_bundle_id
         super().__init__(feed)
-        with open(feed.stix_file_path, 'r') as fp:
+        with open(feed.stix_file_path, 'r', encoding='utf-8') as fp:
             self.stix_package = parse(fp.read(), allow_custom=True)
             self.package_id = feed.package_id
         self.indicators = []

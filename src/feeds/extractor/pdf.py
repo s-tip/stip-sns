@@ -1,3 +1,4 @@
+import logging
 from io import StringIO
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.layout import LAParams
@@ -9,6 +10,7 @@ pdf_rsrcmgr = PDFResourceManager()
 pdf_codec = 'utf-8'
 pdf_laparams = LAParams()
 pdf_laparams.detect_vertical = True
+logging.getLogger("pdfminer").setLevel(logging.WARNING)
 
 
 class PDFExtractor(FileExtractor):
