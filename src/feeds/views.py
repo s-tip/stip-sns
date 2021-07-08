@@ -875,7 +875,6 @@ def run_phantom_playbook(request):
 
 @ajax_required
 def call_jira(request):
-    print('>>>call_jira')
     try:
         # JIRA が import されていない場合は何もしない
         if imported_jira is None:
