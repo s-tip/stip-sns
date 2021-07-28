@@ -322,7 +322,7 @@ def get_post_stix2_bundle(
     tlp_marking_object = _get_tlp_markings(tlp)
 
     # bundle 作成
-    bundle = Bundle(individual_identity, tlp_marking_object)
+    bundle = Bundle(individual_identity, tlp_marking_object, allow_custom=True)
     if organization_identity:
         bundle.objects.append(organization_identity)
 
@@ -385,7 +385,9 @@ def get_post_stix2_bundle(
         published=published,
         report_types=['threat-report'],
         object_refs=report_object_refs,
-        labels = tags)
+        labels=tags,
+        allow_custom=True
+    )
     bundle.objects.append(report)
 
     # language-content 作成
@@ -400,7 +402,8 @@ def get_post_stix2_bundle(
                 created_by_ref=individual_identity,
                 object_ref=stip_sns,
                 object_modified=stip_sns.created,
-                contents=language_contents
+                contents=language_contents,
+                allow_custom=True
             )
             bundle.objects.append(s_tip_lc)
 
@@ -409,7 +412,8 @@ def get_post_stix2_bundle(
                 object_ref=report,
                 created_by_ref=individual_identity,
                 object_modified=report.created,
-                contents=language_contents
+                contents=language_contents,
+                allow_custom=True
             )
             bundle.objects.append(report_lc)
     return bundle
