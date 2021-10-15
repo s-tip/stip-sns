@@ -284,7 +284,7 @@ def get_post_stix2_bundle(
     sharing_range,
     stix2_titles=[],
     stix2_contents=[],
-    x_stip_sns_attachment_refs=None,
+    x_stip_sns_attachments=None,
     stip_user=None,
     tags=[]
 ):
@@ -304,8 +304,8 @@ def get_post_stix2_bundle(
         sharing_range,
         referred_url)
 
-    # x_stip_sns_object_ref
-    x_stip_sns_object_ref = None
+    # x_stip_sns_bundle_id
+    x_stip_sns_bundle_id = None
     # x_stip_sns_tags
     x_stip_sns_tags = None
     # x_stip_sns_indicators
@@ -364,8 +364,8 @@ def get_post_stix2_bundle(
         x_stip_sns_type='post',
         x_stip_sns_author=x_stip_sns_author,
         x_stip_sns_post=x_stip_sns_post,
-        x_stip_sns_attachment_refs=x_stip_sns_attachment_refs,
-        x_stip_sns_object_ref=x_stip_sns_object_ref,
+        x_stip_sns_attachments=x_stip_sns_attachments,
+        x_stip_sns_bundle_id=x_stip_sns_bundle_id,
         x_stip_sns_tags=x_stip_sns_tags,
         x_stip_sns_indicators=x_stip_sns_indicators,
         x_stip_sns_identity=x_stip_sns_identity,
@@ -472,7 +472,8 @@ def get_attach_stix2_bundle(
     bundle = Bundle(
         individual_identity,
         tlp_marking_object,
-        stip_sns)
+        stip_sns,
+        allow_custom=True)
     if organization_identity:
         bundle.objects.append(organization_identity)
     return bundle, stip_sns.id
@@ -523,8 +524,8 @@ def _get_tlp_markings(tlp):
 
 # stix2 の Bundle 作成する (comment)
 def get_comment_stix2_bundle(
-    x_stip_sns_object_ref,
-    x_stip_sns_object_ref_version,
+    x_stip_sns_bundle_id,
+    x_stip_sns_bundle_version,
     description,
     tlp,
     stip_user=None
@@ -544,7 +545,7 @@ def get_comment_stix2_bundle(
     # 共通 lang
     common_lang = stip_user.language
 
-    title = 'Comment to %s' % (x_stip_sns_object_ref)
+    title = 'Comment to %s' % (x_stip_sns_bundle_id)
     stip_sns = StipSns(
         lang=common_lang,
         object_marking_refs=[tlp_marking_object],
@@ -553,8 +554,8 @@ def get_comment_stix2_bundle(
         description=description,
         x_stip_sns_type=const.STIP_STIX2_SNS_POST_TYPE_COMMENT,
         x_stip_sns_author=x_stip_sns_author,
-        x_stip_sns_object_ref=x_stip_sns_object_ref,
-        x_stip_sns_object_ref_version=x_stip_sns_object_ref_version,
+        x_stip_sns_bundle_id=x_stip_sns_bundle_id,
+        x_stip_sns_bundle_version=x_stip_sns_bundle_version,
         x_stip_sns_identity=x_stip_sns_identity,
         x_stip_sns_tool=x_stip_sns_tool)
 
@@ -562,7 +563,8 @@ def get_comment_stix2_bundle(
     bundle = Bundle(
         individual_identity,
         tlp_marking_object,
-        stip_sns)
+        stip_sns,
+        allow_custom=True)
     if organization_identity:
         bundle.objects.append(organization_identity)
     return bundle
@@ -570,8 +572,8 @@ def get_comment_stix2_bundle(
 
 # stix2 の Bundle 作成する (like)
 def get_like_stix2_bundle(
-    x_stip_sns_object_ref,
-    x_stip_sns_object_ref_version,
+    x_stip_sns_bundle_id,
+    x_stip_sns_bundle_version,
     like,
     tlp,
     stip_user=None
@@ -594,13 +596,13 @@ def get_like_stix2_bundle(
     if like:
         # like -> unlike
         x_stip_sns_type = const.STIP_STIX2_SNS_POST_TYPE_UNLIKE
-        title = 'Unlike to %s' % (x_stip_sns_object_ref)
-        description = 'Unlike to %s' % (x_stip_sns_object_ref)
+        title = 'Unlike to %s' % (x_stip_sns_bundle_id)
+        description = 'Unlike to %s' % (x_stip_sns_bundle_id)
     else:
         # unlike -> like
         x_stip_sns_type = const.STIP_STIX2_SNS_POST_TYPE_LIKE
-        title = 'Like to %s' % (x_stip_sns_object_ref)
-        description = 'Like to %s' % (x_stip_sns_object_ref)
+        title = 'Like to %s' % (x_stip_sns_bundle_id)
+        description = 'Like to %s' % (x_stip_sns_bundle_id)
 
     stip_sns = StipSns(
         lang=common_lang,
@@ -610,8 +612,8 @@ def get_like_stix2_bundle(
         description=description,
         x_stip_sns_type=x_stip_sns_type,
         x_stip_sns_author=x_stip_sns_author,
-        x_stip_sns_object_ref=x_stip_sns_object_ref,
-        x_stip_sns_object_ref_version=x_stip_sns_object_ref_version,
+        x_stip_sns_bundle_id=x_stip_sns_bundle_id,
+        x_stip_sns_bundle_version=x_stip_sns_bundle_version,
         x_stip_sns_identity=x_stip_sns_identity,
         x_stip_sns_tool=x_stip_sns_tool)
 
@@ -619,7 +621,8 @@ def get_like_stix2_bundle(
     bundle = Bundle(
         individual_identity,
         tlp_marking_object,
-        stip_sns)
+        stip_sns,
+        allow_custom=True)
     if organization_identity:
         bundle.objects.append(organization_identity)
     return bundle

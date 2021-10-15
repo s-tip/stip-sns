@@ -550,10 +550,10 @@ def like(request):
     myliker = '%s %s' % (SNSConfig.get_sns_identity_name(), stip_user.username)
     like = myliker in likers
     # Like/Unlike 用の STIX イメージ作成
-    x_stip_sns_object_ref_version = '1.2'
+    x_stip_sns_bundle_version = '2.1'
     bundle = get_like_stix2_bundle(
         package_id,
-        x_stip_sns_object_ref_version,
+        x_stip_sns_bundle_version,
         like,
         feed.tlp,
         stip_user
@@ -1404,7 +1404,7 @@ def save_post(request,
     sharing_range = FeedStixCommon._make_sharing_range_value(feed)
 
     tmp_feed_files = []
-    x_stip_sns_attachment_refs = []
+    x_stip_sns_attachments = []
     for feed_file in request_files:
         x_stip_sns_attachment_bundle, x_stip_sns_attachment_id = get_attach_stix2_bundle(
             feed.tlp,
@@ -1416,15 +1416,15 @@ def save_post(request,
         d[const.STIP_STIX2_SNS_ATTACHMENT_BUNDLE] = x_stip_sns_attachment_bundle.id
         d[const.STIP_STIX2_SNS_ATTACHMENT_STIP_SNS] = x_stip_sns_attachment_id
 
-        x_stip_sns_attachment_refs.append(d)
+        x_stip_sns_attachments.append(d)
         # StixFiles register
         _regist_bundle(feed.user, x_stip_sns_attachment_bundle)
 
         feed_file.produced_str = get_produced_str(x_stip_sns_attachment_bundle)
         feed_file.bundle_id = x_stip_sns_attachment_bundle.id
         tmp_feed_files.append(feed_file)
-    if len(x_stip_sns_attachment_refs) == 0:
-        x_stip_sns_attachment_refs = None
+    if len(x_stip_sns_attachments) == 0:
+        x_stip_sns_attachments = None
 
     # hashtag
     post_tags, linked_post = extract_tags(feed.post_org)
@@ -1443,7 +1443,7 @@ def save_post(request,
         sharing_range,
         stix2_titles,
         stix2_contents,
-        x_stip_sns_attachment_refs,
+        x_stip_sns_attachments,
         request.user,
         tags)
 
