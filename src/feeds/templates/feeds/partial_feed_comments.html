@@ -15,7 +15,11 @@
       {% if comment.screen_instance %}<small class="text feed-tlp">[{{comment.screen_instance}}]</small>{% endif %}
       <small>{{ comment.date }}</small>
     </h4>
-    <div>{{ comment.linkfy_post|safe }}</div>
+    <div>
+      {% autoescape on %}
+      {{ comment }}
+      {% endautoescape %}
+    </div>
   </li>
 {% empty %}
   <li class="empty">{% trans 'Be the first one to comment' %}</li>
