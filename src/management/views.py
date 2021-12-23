@@ -12,6 +12,7 @@ from daemon.slack.receive import restart_receive_slack_thread
 from decorators import ajax_required
 from django.views.decorators.csrf import csrf_exempt
 from stip.common.stix_customizer import StixCustomizer
+from stip.common.matching_customizer import MatchingCustomizer
 
 
 def group(request):
@@ -148,8 +149,7 @@ def sns_config(request):
 def stix_customizer(request):
     if not request.user.is_admin:
         return HttpResponseForbidden('You have no permission.')
-    form = {}
-    return render(request, 'management/stix_customizer.html', {'form': form})
+    return render(request, 'management/stix_customizer.html', {})
 
 
 @ajax_required
@@ -184,4 +184,34 @@ def set_stix_customizer_configuration(request):
     conf_json = json.loads(request.body)
     stix_customizer = StixCustomizer.get_instance()
     stix_customizer.update_customizer_conf(conf_json)
+    return HttpResponse(status=201)
+
+
+@login_required
+def matching_customizer(request):
+    if not request.user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
+    return render(request, 'management/matching_customizer.html', {})
+
+
+@ajax_required
+def get_matching_customizer_configuration(request):
+    if not request.user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
+    matching_customizer = MatchingCustomizer.get_instance()
+    return JsonResponse(matching_customizer.conf_json)
+
+
+@login_required
+@csrf_exempt
+def set_matching_customizer_configuration(request):
+    if not request.user.is_admin:
+        return HttpResponseForbidden('You have no permission.')
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    conf_json = json.loads(request.body)
+    matching_customizer = MatchingCustomizer.get_instance()
+    matching_customizer.update_customizer_conf(conf_json)
     return HttpResponse(status=201)

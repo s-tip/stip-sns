@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% block title %}{% trans 'SNS Config' %}{% endblock %}
+{% block head %}
+{% endblock head %}
+
+{% block main %}
+<head>
+<script type="text/javascript" src="{% static 'js/vis.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/matching_customizer.js' %}"></script>
+<link type="text/css" rel="stylesheet" href="{% static 'css/vis.min.css' %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'css/matching_customizer.css' %}"/>
+</head>
+
+<div id="add-node-popUp">
+  <span id="add-node-operation">{% trans 'Add Custom Object or Property' %}</span>
+  <br/><br/>
+  <div class="form-group row">
+    <div class="col-xs-2">
+      <label for="add-node-name" class="col-form-label">Name</label>
+    </div>
+    <div class="col-xs-10" style="display:inline-block;">
+      <input class="form-control" id="add-node-name" />
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="node-type" class="col-form-label col-sm-2">Type</label>
+    <div class="col-sm-5 form-check">
+      <input class="form-check-input add-type-radio" type="radio" name="add-type-radio" id="add-type-object" value="object" checked>
+      <label class="form-check-label" for="add-type-object">Object</label>
+    </div>
+    <div class="col-sm-5 form-check">
+      <input class="form-check-input add-type-radio" type="radio" name="add-type-radio" id="add-type-property" value="property">
+      <label class="form-check-label" for="add-type-property">Property</label>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm-3">
+      <input class="btn btn-sm btn-primary" type="button" value="Save" id="add-node-saveButton" />
+    </div>
+    <div class="col-sm-3">
+      <input class="btn btn-sm " type="button" value="Cancel" id="add-node-cancelButton" />
+    </div>
+  </div>
+</div>
+
+<div id="edit-node-popUp">
+  <h4 id="edit-node-operation"></h4>
+  <div class="form-group row">
+    <div class="col-xs-2">
+      <label for="edit-node-name" class="col-form-label">Name</label>
+    </div>
+    <div class="col-xs-10" style="display:inline-block;">
+      <input class="form-control" id="edit-node-name" placeholder="Do not enter prefix ('x-' or 'x_')"/>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="node-type" class="col-form-label col-sm-2">Type</label>
+    <div class="col-sm-5 form-check">
+      <input class="form-check-input edit-type-radio" type="radio" name="edit-type-radio" id="edit-type-object" value="object" disabled>
+      <label class="form-check-label" for="edit-type-object">Object</label>
+    </div>
+    <div class="col-sm-5 form-check">
+      <input class="form-check-input edit-type-radio" type="radio" name="edit-type-radio" id="edit-type-property" value="property" disabled>
+      <label class="form-check-label" for="edit-type-property">Property</label>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <div class="col-sm-3">
+      <input class="btn btn-sm btn-primary" type="button" value="Save" id="edit-node-saveButton" />
+    </div>
+    <div class="col-sm-3">
+      <input class="btn btn-sm " type="button" value="Cancel" id="edit-node-cancelButton" />
+    </div>
+  </div>
+</div>
+
+<div id="edge-popUp">
+  <div class="form-group row">
+    <div class="col-xs-12">
+      <span id="edge-operation">edge</span> 
+    </div>
+  </div>
+  <br/><br/>
+  <div class="form-group row">
+    <div class="col-xs-12">
+      <span>Add the link?</span> 
+    </div>
+  </div>
+  <br/>
+
+  <div class="form-group row" id='edge-div-rule-name'>
+    <div class="col-sm-2">
+      <label for="edit-edge-rule-name" class="col-form-label">Rule Name</label>
+    </div>
+    <div class="col-sm-10" style="display:inline-block;">
+      <input class="form-control" id="edit-edge-rule-name" >
+    </div>
+  </div>
+ 
+  <div class="form-group row">
+    <div class="col-sm-3">
+      <input class="btn btn-sm btn-primary" type="button" value="save" id="edge-saveButton" />
+    </div>
+    <div class="col-sm-3">
+      <input class="btn btn-sm" type="button" value="cancel" id="edge-cancelButton" />
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <div class="form-group row">
+    <div class="col-sm-10">
+      <h1>{% trans 'Matching Customizer' %}</h1>
+    </div>
+    <div class="col-sm-1">
+      <input class="btn btn-lg btn-danger" type="button" value="Discard" id="discard-button" />
+    </div>
+    <div class="col-sm-1">
+      <input class="btn btn-lg btn-primary" type="button" value="Save" id="save-button" />
+    </div>
+  </div>
+</div>
+<div class="from-group row">
+  <div class="col-sm-12">
+    <div id="visjs-network"></div>
+  </div>
+</div>
+{% csrf_token %}
+{% endblock main %}
