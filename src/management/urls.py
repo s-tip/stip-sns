@@ -8,4 +8,7 @@ urlpatterns = [
     url(r'^stix_customizer/set_configuration/$', views.set_stix_customizer_configuration, name='set_stix_customizer_configuration'),
     url(r'^stix_customizer/get_configuration/$', views.get_stix_customizer_configuration, name='get_stix_customizer_configuration'),
     url(r'^stix_customizer/$', views.stix_customizer, name='stix_customizer'),
+    url(r'^matching_customizer/$', views.matching_customizer, name='matching_customizer'),
+    url(r'^matching_customizer/set_configuration/$', views.set_matching_customizer_configuration, name='set_matching_customizer_configuration'),
+    url(r'^matching_customizer/get_configuration/$', views.get_matching_customizer_configuration, name='get_matching_customizer_configuration'),
 ]
