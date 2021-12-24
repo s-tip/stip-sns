@@ -381,18 +381,7 @@ $(function() {
       callback(null)
       return
     }
-
-    document.getElementById('edge-saveButton').onclick = save_contains_edge.bind(
-      this,
-      data,
-      from,
-      to,
-      callback
-    )
-    document.getElementById('edge-cancelButton').onclick = cancelEdgeEdit.bind(this, callback)
-    document.getElementById('edge-operation').innerText = 'Connect a contains link.'
-    document.getElementById('edge-div-rule-name').style.display = 'none'
-    document.getElementById('edge-popUp').style.display = 'block'
+    save_contains_edge(data, from, to, callback)
   }
 
   function _set_matthing_edge_dialog(operation_type, data, from, to, callback) {

@@ -404,17 +404,7 @@ $(function() {
       alert('Cannot connect nodes which has already an edge')
       return
     }
-
-    document.getElementById('edge-saveButton').onclick = saveEdgeData.bind(
-      this,
-      data,
-      from,
-      to,
-      callback
-    )
-    document.getElementById('edge-cancelButton').onclick =
-      cancelEdgeEdit.bind(this, callback)
-    document.getElementById('edge-popUp').style.display = 'block'
+    saveEdgeData(data, from, to, callback)
   }
 
   function clearEdgePopUp() {
