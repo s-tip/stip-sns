@@ -3,6 +3,10 @@ $(function() {
   const NODE_TYPE_OBJECT = 'eclipse'
   const NODE_TYPE_PROPERTY = 'box'
   const NODE_DEFAULT_COLOR = '#D2E5FF'
+  const EDGE_DEFAULT_COLOR = {
+      opacity: 1.0,
+      color: '#777777'
+    }
 
   const EDGE_TYPE_CONTAINS = 'contains'
 
@@ -107,10 +111,7 @@ $(function() {
       to: prop_id,
       type: EDGE_TYPE_CONTAINS
     }
-    d.color = {
-      opacity: 1.0,
-      color: '#777777'
-    }
+    d.color = EDGE_DEFAULT_COLOR
     d.smooth = false
     d.chosen = false
     return d
@@ -143,7 +144,6 @@ $(function() {
             alert('Can not connect the node to itself.')
             return
           }
-          document.getElementById('edge-operation').innerText = 'Connect a link between Object and Property'
           editEdgeWithoutDrag(data, callback)
         },
         editEdge: {
@@ -404,6 +404,7 @@ $(function() {
       alert('Cannot connect nodes which has already an edge')
       return
     }
+    data.color = EDGE_DEFAULT_COLOR
     saveEdgeData(data, from, to, callback)
   }
 
