@@ -1,4 +1,4 @@
-$(function(){
+$(function() {
 
   const NODE_TYPE_OBJECT = 'eclipse'
   const NODE_TYPE_PROPERTY = 'box'
@@ -26,8 +26,8 @@ $(function(){
     }
   }
 
-  function updateGraph(dataSource){
-    if (dataSource == null){
+  function updateGraph(dataSource) {
+    if (dataSource == null) {
       return
     }
     var show_config = $('#enable-visjs-config').prop('checked')
@@ -35,15 +35,15 @@ $(function(){
     var edges = new vis.DataSet([])
     var store_object = {}
      
-    $.each(dataSource.matching_patterns,function(key_obj,mp){
+    $.each(dataSource.matching_patterns,function(key_obj,mp) {
       var matches = []
-      $.each(mp.targets, function (key_target,target){
+      $.each(mp.targets, function(key_target,target) {
         var obj_name = target.split(':')[0]
         var prop_name = target.split(':')[1]
         var obj_node = null
-        if (obj_name in store_object){
+        if (obj_name in store_object) {
           obj_node = store_object[obj_name].node
-        }else{
+        } else {
           obj_node = _get_node_from_object(obj_name)
           nodes.add(obj_node)
           store_object[obj_name] = {
@@ -52,9 +52,9 @@ $(function(){
           }
         }
         var properties = store_object[obj_name].properties
-        if (prop_name in properties){
+        if (prop_name in properties) {
           prop_node = properties[prop_name]
-        }else{
+        } else {
           prop_node = _get_node_from_property(obj_name, prop_name)
           nodes.add(prop_node)
           store_object[obj_name].properties[prop_name] = prop_node
@@ -64,9 +64,9 @@ $(function(){
         edges.add(edge)
         matches.push(prop_node)
       })
-      $.each(matches, function (key_source, source){
-        $.each(matches, function (key_target, target){
-          if(key_source < key_target){
+      $.each(matches, function(key_source, source) {
+        $.each(matches, function(key_target, target) {
+          if (key_source < key_target) {
             var edge = _get_edge(source.id, target.id, EDGE_TYPE_MATCH, mp.name)
             edges.add(edge)
             matching_names[edge.id] = mp.name
@@ -77,7 +77,7 @@ $(function(){
     _start_network(nodes, edges, null)
   }
 
-  function _get_node_from_object(obj_name){
+  function _get_node_from_object(obj_name) {
     var d = {
       type:  DATA_TYPE_OBJECT,
       parent: null,
@@ -88,7 +88,7 @@ $(function(){
     return d
   }
 
-  function _init_property_node () {
+  function _init_property_node() {
     var prop = {
       type:  DATA_TYPE_PROPERTY,
       parent: null,
@@ -106,7 +106,7 @@ $(function(){
     return node
   }
 
-  function _get_edge(obj_id, prop_id, edge_type, matching_name){
+  function _get_edge(obj_id, prop_id, edge_type, matching_name) {
     var d = {
       from: obj_id,
       to: prop_id,
@@ -123,7 +123,7 @@ $(function(){
     return d
   }
 
-  function _start_network(nodes, edges, config_dom){
+  function _start_network(nodes, edges, config_dom) {
     var container = document.getElementById('visjs-network')
     var data = {
       nodes: nodes,
@@ -139,13 +139,13 @@ $(function(){
         }
       },
       manipulation: {
-        addNode: function (data, callback) {
+        addNode: function(data, callback) {
           addNode(data, callback)
         },
-        editNode: function (data, callback) {
+        editNode: function(data, callback) {
           editNode(data, callback)
         },
-        addEdge: function (data, callback) {
+        addEdge: function(data, callback) {
           if (data.from == data.to) {
             alert('Can not connect the node to itself.')
             return
@@ -153,7 +153,7 @@ $(function(){
           editEdgeWithoutDrag(OPERATION_TYPE_ADD_EDGE,data, callback)
         },
         editEdge: {
-          editWithoutDrag: function (data, callback) {
+          editWithoutDrag: function(data, callback) {
             document.getElementById('edge-operation').innerText =
               'Edit Edge'
             editEdgeWithoutDrag(OPERATION_TYPE_EDIT_EDGE, data, callback)
@@ -184,10 +184,10 @@ $(function(){
     $('#edit-node-name').val(data.label)
 
     var title = ''
-    if (data.type == DATA_TYPE_PROPERTY){
+    if (data.type == DATA_TYPE_PROPERTY) {
       title = 'Edit Custom Property'
       $('#edit-type-property').prop('checked', true)
-    }else{
+    } else {
       title = 'Edit Custom Object'
       $('#edit-type-object').prop('checked', true)
     }
@@ -205,11 +205,11 @@ $(function(){
   }
 
   function clearNodePopUp(operation_type) {
-    if(operation_type == OPERATION_TYPE_ADD_NODE){
+    if (operation_type == OPERATION_TYPE_ADD_NODE) {
       document.getElementById('add-node-saveButton').onclick = null
       document.getElementById('add-node-cancelButton').onclick = null
       $('#add-node-popUp').css({'display': 'none'})
-    }else{
+    } else {
       document.getElementById('edit-node-saveButton').onclick = null
       document.getElementById('edit-node-cancelButton').onclick = null
       $('#edit-node-popUp').css({'display': 'none'})
@@ -221,24 +221,24 @@ $(function(){
     callback(null)
   }
 
-  function getNodeBase(operation_type){
-    if(operation_type == OPERATION_TYPE_ADD_NODE){
+  function getNodeBase(operation_type) {
+    if (operation_type == OPERATION_TYPE_ADD_NODE) {
       return $('#add-node-name').val()
-    }else{
+    } else {
       return $('#edit-node-name').val()
     }
   }
 
-  function getNodeType(operation_type){
+  function getNodeType(operation_type) {
     var selector = null
-    if(operation_type == OPERATION_TYPE_ADD_NODE){
+    if (operation_type == OPERATION_TYPE_ADD_NODE) {
       selector = $('#add-type-object')
-    }else{
+    } else {
       selector = $('#edit-type-object')
     }
-    if (selector.prop('checked') == true){
+    if (selector.prop('checked') == true) {
       return DATA_TYPE_OBJECT
-    }else{
+    } else {
       return DATA_TYPE_PROPERTY
     }
   }
@@ -248,35 +248,35 @@ $(function(){
     var node_type = getNodeType(operation_type)
     var before_label = ''
 
-    if (node_base.length == 0){
+    if (node_base.length == 0) {
       alert('Fill the Object or Property Name')
       return
     }
 
     data.label = node_base
-    if(node_type == DATA_TYPE_OBJECT){
+    if (node_type == DATA_TYPE_OBJECT) {
       before_label = data.label
       data.shape = NODE_TYPE_OBJECT
       data.type = DATA_TYPE_OBJECT
-    }else if(node_type == DATA_TYPE_PROPERTY){
+    } else if (node_type == DATA_TYPE_PROPERTY) {
       data.shape = NODE_TYPE_PROPERTY
       data.type = DATA_TYPE_PROPERTY
-    }else{
+    } else {
       alert('Wrong type value')
       return
     }
 
-    if (operation_type == OPERATION_TYPE_ADD_NODE){
-      if(isExistObjectNode(data) == true){
+    if (operation_type == OPERATION_TYPE_ADD_NODE) {
+      if (isExistObjectNode(data) == true) {
         alert('The Same Property or Object Node has already existed.')
         return
       }
       data.color = NODE_DEFAULT_COLOR
-      if (node_type == DATA_TYPE_PROPERTY){
+      if (node_type == DATA_TYPE_PROPERTY) {
         var init_property_node = _init_property_node()
       }
-    }else{
-      if (node_type == DATA_TYPE_OBJECT){
+    } else {
+      if (node_type == DATA_TYPE_OBJECT) {
         inheritProperty(before_label, data.label)
       }
     }
@@ -285,37 +285,37 @@ $(function(){
   }
 
   function inheritProperty(before_label, after_label) {
-    $.each(network.body.nodes,function(key,index){
+    $.each(network.body.nodes, function(key,index) {
       var node = network.body.nodes[key].options
-      if(node.type == DATA_TYPE_PROPERTY){
-        if(node.parent == before_label){
+      if (node.type == DATA_TYPE_PROPERTY) {
+        if (node.parent == before_label) {
           network.body.nodes[key].options.parent = after_label
         }
       }
     })
   }
 
-  function getNode(node_id){
+  function getNode(node_id) {
     var id_ = null
-    if(typeof(node_id) == 'string'){
+    if (typeof(node_id) == 'string') {
       id_ = node_id
-    }else{
+    } else {
       id_ = node_id.id
     }
     return network.body.nodes[id_]
   }
 
-  function isExistObjectNode(node){
+  function isExistObjectNode(node) {
     var ret = false
-    $.each(network.body.nodes, function (key,index){
-      var options = network.body.nodes[key].options
-      if (node.type == DATA_TYPE_OBJECT){
-        if ((options.type == DATA_TYPE_OBJECT) && (options.label == node.label)){
+    $.each(network.body.nodes, function(key,network_node) {
+      var options = network_node.options
+      if (node.type == DATA_TYPE_OBJECT) {
+        if ((options.type == DATA_TYPE_OBJECT) && (options.label == node.label)) {
           ret = true
           return false
         }
-      }else{
-        if ((options.type == DATA_TYPE_PROPERTY) && (options.parent == null) && (options.label == node.label)){
+      } else {
+        if ((options.type == DATA_TYPE_PROPERTY) && (options.parent == null) && (options.label == node.label)) {
           ret = true
           return false
         }
@@ -329,55 +329,55 @@ $(function(){
     var to = getNode(data.to)
 
     data.type = null
-    if (from.options.type == DATA_TYPE_OBJECT){
-      if (to.options.type == DATA_TYPE_OBJECT){
+    if (from.options.type == DATA_TYPE_OBJECT) {
+      if (to.options.type == DATA_TYPE_OBJECT) {
         alert('Cannot create an edge between "OBJECT" type nodes')
         return
-      }else{
+      } else {
         data.type = EDGE_TYPE_CONTAINS
       }
-    }else{
-      if (to.options.type == DATA_TYPE_OBJECT){
+    } else {
+      if (to.options.type == DATA_TYPE_OBJECT) {
         data.type = EDGE_TYPE_CONTAINS
-      }else{
+      } else {
         data.type = EDGE_TYPE_MATCH
       }
     }
 
-    if (data.type == EDGE_TYPE_CONTAINS){
+    if (data.type == EDGE_TYPE_CONTAINS) {
       _set_contains_edge_dialog(operation_type, data, from, to, callback)
-    }else{
+    } else {
       _set_matthing_edge_dialog(operation_type, data, from, to, callback)
     }
   }
 
   function _set_contains_edge_dialog(operation_type, data, from, to, callback) {
-    if(operation_type == OPERATION_TYPE_EDIT_EDGE){
+    if (operation_type == OPERATION_TYPE_EDIT_EDGE) {
       alert('Cannot edit a contains edge')
       callback(null)
       return
     }
     var prop = null
-    if(from.options.type == DATA_TYPE_PROPERTY){
+    if (from.options.type == DATA_TYPE_PROPERTY) {
       prop = data.from
       data.from = to.id
       data.to = from.id
-    }else{
+    } else {
       prop = data.to
       data.from = from.id
       data.to = to.id
     }
     var connect_nodes = network.getConnectedNodes(prop)
     var already_flag = false
-    $.each(connect_nodes,function(key,node_id){
+    $.each(connect_nodes,function(key, node_id) {
       var connect_node = getNode(node_id)
-      if(connect_node.options.type == DATA_TYPE_OBJECT){
+      if (connect_node.options.type == DATA_TYPE_OBJECT) {
         alert('Cannot connect nodes which has already an edge')
         already_flag = true
         return true
       }
     })
-    if(already_flag == true){
+    if (already_flag == true) {
       callback(null)
       return
     }
@@ -396,7 +396,7 @@ $(function(){
   }
 
   function _set_matthing_edge_dialog(operation_type, data, from, to, callback) {
-    if ((from.options.parent == undefined) || (to.options.parent == undefined)){
+    if ((from.options.parent == undefined) || (to.options.parent == undefined)) {
       alert('Cannot connect property nodes which do not define a parent object')
       callback(null)
       return
@@ -405,9 +405,9 @@ $(function(){
     data.to = to.id
 
     var matching_name = null
-    if(operation_type == OPERATION_TYPE_EDIT_EDGE){
+    if (operation_type == OPERATION_TYPE_EDIT_EDGE) {
       matching_name = matching_names[data.id]
-    }else{
+    } else {
       matching_name = ''
     }
     $('#edit-edge-rule-name').val(matching_name)
@@ -453,19 +453,19 @@ $(function(){
     callback(data)
   }
 
-  $('#discard-button').on('click', function(){
+  $('#discard-button').on('click', function() {
     ret = confirm('Would you like to discard the configuration?')
-    if (ret == true){
+    if (ret == true) {
       network.destroy()
       init_draw()
     }
   })
 
-  $('#save-button').on('click', function(){
+  $('#save-button').on('click', function() {
     var work_matching_patterns =  {}
-    $.each(network.body.edges,function(key, edge){
+    $.each(network.body.edges, function(key, edge) {
       var options = edge.options
-      function _get_target_from_node(node){
+      function _get_target_from_node(node) {
         var target = {}
         target.object = node.options.parent
         target.property = node.options.label
@@ -474,8 +474,8 @@ $(function(){
 
       function _has_target(targets, target){
         var flag = false
-        $.each(targets, function(key, elem){
-          if((target.object == elem.object) && (target.property == elem.property)){
+        $.each(targets, function(key, elem) {
+          if ((target.object == elem.object) && (target.property == elem.property)) {
             flag = true
             return true
           }
@@ -483,21 +483,21 @@ $(function(){
         return flag
       }
 
-      function _add_target(matching_name, target){
+      function _add_target(matching_name, target) {
         var targets = null
-        if (matching_name in work_matching_patterns == true){
+        if (matching_name in work_matching_patterns == true) {
           targets = work_matching_patterns[matching_name]
-        }else{
+        } else {
           targets = []
         }
-        if (_has_target(targets, target) == false){
+        if (_has_target(targets, target) == false) {
           targets.push(target)
         }
         work_matching_patterns[matching_name] = targets
         return
       }
 
-      if(options.label == EDGE_TYPE_MATCH){
+      if (options.label == EDGE_TYPE_MATCH) {
         var matching_name = matching_names[edge.id]
         var node = null
         node = _get_target_from_node(edge.from)
@@ -508,7 +508,7 @@ $(function(){
     })
 
     var matching_patterns = []
-    $.each(work_matching_patterns, function(name, targets){
+    $.each(work_matching_patterns, function(name, targets) {
       matching_patterns.push({
         name: name,
         type: 'Exact',
@@ -528,19 +528,19 @@ $(function(){
       cache: false,
       async: false,
     })
-    .done(function (data, textStatus, jqXHR) {
+    .done(function(data, textStatus, jqXHR) {
       alert('Matching Customizer Settings are successfully saved')
     })
-    .fail(function (jqXHR, textStatus, errorThrown) {
-      if(jqXHR.status == 201){
+    .fail(function(jqXHR, textStatus, errorThrown) {
+      if (jqXHR.status == 201) {
         alert('Mathching Customizer Settings are successfully saved')
-      }else{
+      } else {
         alert(jqXHR.statusText)
       }
     })
   })
 
-  function init_draw(){
+  function init_draw() {
     $.ajax({
       url: '/management/matching_customizer/get_configuration/',
       data: {},
@@ -548,10 +548,10 @@ $(function(){
       cache: false,
       async: false,
     })
-    .done(function (data, textStatus, jqXHR) {
+    .done(function(data, textStatus, jqXHR) {
       updateGraph(data)
     })
-    .fail(function (jqXHR, textStatus, errorThrown) {
+    .fail(function(jqXHR, textStatus, errorThrown) {
       alert(jqXHR.statusText)
     })
   }
