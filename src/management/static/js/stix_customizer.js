@@ -1,4 +1,4 @@
-$(function(){
+$(function() {
 
   const NODE_TYPE_OBJECT = 'eclipse'
   const NODE_TYPE_PROPERTY = 'box'
@@ -21,20 +21,18 @@ $(function(){
     }
   }
 
-  function updateGraph(dataSource){
-    if (dataSource == null){
+  function updateGraph(dataSource) {
+    if (dataSource == null) {
       return
     }
     var show_config = $('#enable-visjs-config').prop('checked')
     var nodes = new vis.DataSet([])
     var edges = new vis.DataSet([])
 
-    $.each(dataSource.custom_objects,function(key_obj,index){
-      var co = dataSource.custom_objects[key_obj]
+    $.each(dataSource.custom_objects, function(key_obj, co) {
       var co_node = _get_node_from_object(co)
       nodes.add(co_node)
-      $.each(co.properties, function (key_prop,index){
-        var cp = co.properties[key_prop]
+      $.each(co.properties, function(key_prop, cp) {
         var cp_node = _get_node_from_property(cp, co_node)
         nodes.add(cp_node)
         var edge = _get_edge(co_node.id, cp_node.id)
@@ -44,7 +42,7 @@ $(function(){
     _start_network(nodes, edges, null)
   }
 
-  function _get_node_from_object(co){
+  function _get_node_from_object(co) {
     var d = {
       type:  DATA_TYPE_OBJECT,
       parent: null,
@@ -55,7 +53,7 @@ $(function(){
     return d
   }
 
-  function _init_property_node () {
+  function _init_property_node() {
     var required = false
     var val_type = 'string'
     var regexp = null
@@ -85,16 +83,16 @@ $(function(){
 
   function _get_node_from_property(cp, co_node) {
     var node = _init_property_node()
-    if('required' in cp){
+    if ('required' in cp) {
       node.required = cp['required']
     }
-    if('type' in cp){
+    if ('type' in cp) {
       node.val_type = cp['type']
     }
-    if('regexp' in cp){
+    if ('regexp' in cp) {
       node.regexp = cp['regexp']
     }
-    if('fuzzy_matching' in cp){
+    if ('fuzzy_matching' in cp) {
       node.fuzzy_matching = cp['fuzzy_matching']
     }
     node.parent = co_node.label
@@ -103,7 +101,7 @@ $(function(){
     return node
   }
 
-  function _get_edge(obj_id, prop_id){
+  function _get_edge(obj_id, prop_id) {
     var d = {
       from: obj_id,
       to: prop_id,
@@ -118,7 +116,7 @@ $(function(){
     return d
   }
 
-  function _start_network(nodes, edges, config_dom){
+  function _start_network(nodes, edges, config_dom) {
     var container = document.getElementById('visjs-network')
     var data = {
       nodes: nodes,
@@ -134,13 +132,13 @@ $(function(){
         }
       },
       manipulation: {
-        addNode: function (data, callback) {
+        addNode: function(data, callback) {
           addNode(data, callback)
         },
-        editNode: function (data, callback) {
+        editNode: function(data, callback) {
           editNode(data, callback)
         },
-        addEdge: function (data, callback) {
+        addEdge: function(data, callback) {
           if (data.from == data.to) {
             alert('Can not connect the node to itself.')
             return
@@ -149,7 +147,7 @@ $(function(){
           editEdgeWithoutDrag(data, callback)
         },
         editEdge: {
-          editWithoutDrag: function (data, callback) {
+          editWithoutDrag: function(data, callback) {
             document.getElementById('edge-operation').innerText =
               'Edit Edge'
             editEdgeWithoutDrag(data, callback)
@@ -182,7 +180,7 @@ $(function(){
     $('#edit-node-name').val(data.label)
 
     var title = ''
-    if (data.type == DATA_TYPE_PROPERTY){
+    if (data.type == DATA_TYPE_PROPERTY) {
       title = 'Edit Custom Property'
       $('#edit-type-property').prop('checked', true)
       $('#edit-node-object-div').css({'display': 'none'})
@@ -195,18 +193,18 @@ $(function(){
       $('#edit-fuzzy-zen-han').prop('checked', data.fuzzy_matching.match_zen_han)
       $('#edit-fuzzy-eng-jpn').prop('checked', data.fuzzy_matching.match_eng_jpn)
       $('#edit-fuzzy-list').prop('checked', data.fuzzy_matching.list_matching)
-      if(data.fuzzy_matching.list_matching != true){
+      if (data.fuzzy_matching.list_matching != true) {
         $('.edit-fuzzy-list-textarea').prop('disabled', true)
       }
-      if(data.fuzzy_matching.lists.length != 0){
+      if (data.fuzzy_matching.lists.length != 0) {
         $('#edit-fuzzy-list-init').css({'display': 'none'})
       }
       var list_div = $('#edit-fuzzy-list-div')
       list_div.empty()
-      $.each(data.fuzzy_matching.lists,function(key,index){
+      $.each(data.fuzzy_matching.lists, function(key, fuzzy_matching_list) {
         var list_contents = ''
-        $.each(data.fuzzy_matching.lists[key],function(key2,index2){
-          list_contents += data.fuzzy_matching.lists[key][key2]
+        $.each(fuzzy_matching_list, function(key2, content) {
+          list_contents += content
           list_contents += '\n'
         })
         var textarea = $('<textarea>', {
@@ -216,7 +214,7 @@ $(function(){
         textarea.val(list_contents)
         list_div.append(textarea)
       })
-    }else{
+    } else {
       title = 'Edit Custom Object'
       $('#edit-type-object').prop('checked', true)
       $('#edit-common-color').val(data.color.background)
@@ -237,11 +235,11 @@ $(function(){
   }
 
   function clearNodePopUp(operation_type) {
-    if(operation_type == OPERATION_TYPE_ADD_NODE){
+    if (operation_type == OPERATION_TYPE_ADD_NODE) {
       document.getElementById('add-node-saveButton').onclick = null
       document.getElementById('add-node-cancelButton').onclick = null
       $('#add-node-popUp').css({'display': 'none'})
-    }else{
+    } else {
       document.getElementById('edit-node-saveButton').onclick = null
       document.getElementById('edit-node-cancelButton').onclick = null
       $('#edit-node-popUp').css({'display': 'none'})
@@ -253,24 +251,24 @@ $(function(){
     callback(null)
   }
 
-  function getNodeBase(operation_type){
-    if(operation_type == OPERATION_TYPE_ADD_NODE){
+  function getNodeBase(operation_type) {
+    if (operation_type == OPERATION_TYPE_ADD_NODE) {
       return $('#add-node-name').val()
-    }else{
+    } else {
       return $('#edit-node-name').val()
     }
   }
 
-  function getNodeType(operation_type){
+  function getNodeType(operation_type) {
     var selector = null
-    if(operation_type == OPERATION_TYPE_ADD_NODE){
+    if (operation_type == OPERATION_TYPE_ADD_NODE) {
       selector = $('#add-type-object')
-    }else{
+    } else {
       selector = $('#edit-type-object')
     }
-    if (selector.prop('checked') == true){
+    if (selector.prop('checked') == true) {
       return DATA_TYPE_OBJECT
-    }else{
+    } else {
       return DATA_TYPE_PROPERTY
     }
   }
@@ -280,47 +278,47 @@ $(function(){
     var node_type = getNodeType(operation_type)
     var before_label = ''
 
-    if (node_base.length == 0){
+    if (node_base.length == 0) {
       alert('Fill the Object or Property Name')
       return
     }
-    if ((node_base.startsWith('x-') == true) || (node_base.startsWith('x_') == true)){
+    if ((node_base.startsWith('x-') == true) || (node_base.startsWith('x_') == true)) {
       node_base = node_base.substring(2)
     }
 
-    if(node_type == DATA_TYPE_OBJECT){
+    if (node_type == DATA_TYPE_OBJECT) {
       before_label = data.label
       data.shape = NODE_TYPE_OBJECT
       data.label = 'x-' + node_base
       data.type = DATA_TYPE_OBJECT
-    }else if(node_type == DATA_TYPE_PROPERTY){
+    } else if (node_type == DATA_TYPE_PROPERTY) {
       data.shape = NODE_TYPE_PROPERTY
       data.label = 'x_' + node_base
       data.type = DATA_TYPE_PROPERTY
-    }else{
+    } else {
       alert('Wrong type value')
       return
     }
 
-    if (operation_type == OPERATION_TYPE_ADD_NODE){
-      if(isExistObjectNode(data) == true){
+    if (operation_type == OPERATION_TYPE_ADD_NODE) {
+      if (isExistObjectNode(data) == true) {
         alert('The Same Property or Object Node has already existed.')
         return
       }
 
       data.color = NODE_DEFAULT_COLOR
-      if (node_type == DATA_TYPE_PROPERTY){
+      if (node_type == DATA_TYPE_PROPERTY) {
         var init_property_node = _init_property_node()
         data.required = init_property_node.required
         data.val_type = init_property_node.val_type
         data.regexp = init_property_node.regexp
         data.fuzzy_matching = init_property_node.fuzzy_matching
       }
-    }else{
-      if (node_type == DATA_TYPE_OBJECT){
+    } else {
+      if (node_type == DATA_TYPE_OBJECT) {
         data.color = $('#edit-common-color').val()
         inheritProperty(before_label, data.label, data.color)
-      }else{
+      } else {
         data.required = $('#edit-common-required').prop('checked')
         data.regexp = $('#edit-common-regexp').val()
         var fuzzy_matching = {}
@@ -330,16 +328,15 @@ $(function(){
         fuzzy_matching.match_eng_jpn= $('#edit-fuzzy-eng-jpn').prop('checked')
         fuzzy_matching.list_matching= $('#edit-fuzzy-list').prop('checked')
         var lists = []
-        $.each($('.edit-fuzzy-list-textarea'),function(key,index){
+        $.each($('.edit-fuzzy-list-textarea'), function(key, ta) {
           var fuzzy_list = []
-          var content = $(this).val()
-          if(content.length == 0){
+          var content = ta.value
+          if (content.length == 0) {
             return true
           }
           var lines = content.split('\n')
-          $.each(lines,function(key2,index2){
-            var line = lines[key2]
-            if(line.length == 0){
+          $.each(lines, function(key2, line) {
+            if (line.length == 0) {
               return true
             }
             fuzzy_list.push(line)
@@ -355,10 +352,10 @@ $(function(){
   }
 
   function inheritProperty(before_label, after_label, after_color) {
-    $.each(network.body.nodes,function(key,index){
+    $.each(network.body.nodes, function(key, index) {
       var node = network.body.nodes[key].options
-      if(node.type == DATA_TYPE_PROPERTY){
-        if(node.parent == before_label){
+      if (node.type == DATA_TYPE_PROPERTY) {
+        if (node.parent == before_label) {
           network.body.nodes[key].options.parent = after_label
           network.body.nodes[key].options.color.background = after_color
         }
@@ -366,21 +363,21 @@ $(function(){
     })
   }
 
-  function getNode(node_id){
+  function getNode(node_id) {
     return network.body.nodes[node_id]
   }
 
-  function isExistObjectNode(node){
+  function isExistObjectNode(node) {
     var ret = false
-    $.each(network.body.nodes, function (key,index){
-      var options = network.body.nodes[key].options
-      if (node.type == DATA_TYPE_OBJECT){
-        if ((options.type == DATA_TYPE_OBJECT) && (options.label == node.label)){
+    $.each(network.body.nodes, function(key, network_node) {
+      var options = network_node.options
+      if (node.type == DATA_TYPE_OBJECT) {
+        if ((options.type == DATA_TYPE_OBJECT) && (options.label == node.label)) {
           ret = true
           return false
         }
-      }else{
-        if ((options.type == DATA_TYPE_PROPERTY) && (options.parent == null) && (options.label == node.label)){
+      } else {
+        if ((options.type == DATA_TYPE_PROPERTY) && (options.parent == null) && (options.label == node.label)) {
           ret = true
           return false
         }
@@ -392,18 +389,18 @@ $(function(){
   function editEdgeWithoutDrag(data, callback) {
     var from = getNode(data.from)
     var to = getNode(data.to)
-    if (from.options.type == to.options.type){
+    if (from.options.type == to.options.type) {
       alert('Cannot conect nodes between same types')
       return
     }
 
     var prop = null
-    if(from.options.type == DATA_TYPE_PROPERTY){
+    if (from.options.type == DATA_TYPE_PROPERTY) {
       prop = data.from
-    }else{
+    } else {
       prop = data.to
     }
-    if(network.getConnectedNodes(prop).length != 0){
+    if (network.getConnectedNodes(prop).length != 0) {
       alert('Cannot connect nodes which has already an edge')
       return
     }
@@ -432,7 +429,6 @@ $(function(){
   }
 
   function saveEdgeData(data, from, to, callback) {
-
     data.type = EDGE_TYPE_CONTAINS
     data.smooth = false
     data.chosen = false
@@ -441,20 +437,20 @@ $(function(){
     callback(data)
   }
 
-  $('#edit-fuzzy-list').on('change', function(){
+  $('#edit-fuzzy-list').on('change', function() {
     $('.edit-fuzzy-list-textarea').prop('disabled', !$(this).prop('checked'))
   })
 
-  $('.add-type-radio').on('change', function(){
-    if($('#add-type-object').prop('checked') == true){
+  $('.add-type-radio').on('change', function() {
+    if ($('#add-type-object').prop('checked') == true) {
       $('#add-prefix-span').html('x-&nbsp;&nbsp;')
     }
-    if($('#add-type-property').prop('checked') == true){
+    if ($('#add-type-property').prop('checked') == true) {
       $('#add-prefix-span').html('x_&nbsp;&nbsp;')
     }
   })
 
-  $('#edit-fully-list-plus').on('click' ,function(){
+  $('#edit-fully-list-plus').on('click', function() {
     var list_div = $('#edit-fuzzy-list-div')
     var textarea = $('<textarea>', {
       'class': 'form-control edit-fuzzy-list-textarea',
@@ -463,19 +459,19 @@ $(function(){
     list_div.append(textarea)
   })
 
-  $('#discard-button').on('click', function(){
+  $('#discard-button').on('click', function() {
     ret = confirm('Would you like to discard the configuration?')
-    if (ret == true){
+    if (ret == true) {
       network.destroy()
       init_draw()
     }
   })
 
-  $('#save-button').on('click', function(){
+  $('#save-button').on('click', function() {
     var work_custom_objects = {}
-    $.each(network.body.nodes,function(key,index){
-      var node = network.body.nodes[key].options
-      if(node.type == DATA_TYPE_OBJECT){
+    $.each(network.body.nodes, function(key, network_node) {
+      var node = network_node.options
+      if (node.type == DATA_TYPE_OBJECT) {
         var co = {}
         co.name = node.label
         co.color = node.color.background
@@ -483,11 +479,11 @@ $(function(){
         work_custom_objects[co.name] = co
       }
     })
-    $.each(network.body.nodes,function(key,index){
-      var node = network.body.nodes[key].options
-      if(node.type == DATA_TYPE_PROPERTY){
+    $.each(network.body.nodes, function(key, network_node) {
+      var node = network_node.options
+      if (node.type == DATA_TYPE_PROPERTY) {
         var prop = {}
-        if ('parent' in node == false){
+        if ('parent' in node == false) {
           return true
         }
         var co = work_custom_objects[node.parent]
@@ -501,9 +497,8 @@ $(function(){
     })
 
     var custom_objects = []
-    $.each(work_custom_objects, function(key, index){
-      var co = work_custom_objects[key]
-      if(co.properties.length == 0){
+    $.each(work_custom_objects, function(key, co) {
+      if (co.properties.length == 0) {
         return true
       }
       custom_objects.push(co)
@@ -521,19 +516,19 @@ $(function(){
       cache: false,
       async: false,
     })
-    .done(function (data, textStatus, jqXHR) {
+    .done(function(data, textStatus, jqXHR) {
       alert('Custom Objects are successfully saved')
     })
-    .fail(function (jqXHR, textStatus, errorThrown) {
-      if(jqXHR.status == 201){
+    .fail(function(jqXHR, textStatus, errorThrown) {
+      if (jqXHR.status == 201) {
         alert('Custom Objects are successfully saved')
-      }else{
+      } else {
         alert(jqXHR.statusText)
       }
     })
   })
 
-  function init_draw(){
+  function init_draw() {
     $.ajax({
       url: '/management/stix_customizer/get_configuration/',
       data: {},
@@ -541,10 +536,10 @@ $(function(){
       cache: false,
       async: false,
     })
-    .done(function (data, textStatus, jqXHR) {
+    .done(function(data, textStatus, jqXHR) {
       updateGraph(data)
     })
-    .fail(function (jqXHR, textStatus, errorThrown) {
+    .fail(function(jqXHR, textStatus, errorThrown) {
       alert(jqXHR.statusText)
     })
   }
