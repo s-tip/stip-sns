@@ -351,23 +351,47 @@ $(function() {
     }
   }
 
+  function _is_duplicate_property(object_node, prop_name) {
+    var ret = false
+    $.each(object_node.edges, function(key_edge, edge) {
+      var tmp_prop = null
+      if(edge.fromId == object_node.id){
+        tmp_prop = getNode(edge.toId)
+      } else {
+        tmp_prop = getNode(edge.fromId)
+      }
+      if (tmp_prop.options.label == prop_name) {
+        ret = true
+        return true
+      }
+    })
+    return ret
+  }
+
   function _set_contains_edge_dialog(operation_type, data, from, to, callback) {
     if (operation_type == OPERATION_TYPE_EDIT_EDGE) {
       alert('Cannot edit a contains edge')
       callback(null)
       return
     }
-    var prop = null
+
+    var prop_id = null
+    var prop_name = null
+    var object_node = null
     if (from.options.type == DATA_TYPE_PROPERTY) {
-      prop = data.from
+      prop_id = data.from
+      prop_name = from.options.label
+      object_node = to
       data.from = to.id
       data.to = from.id
     } else {
-      prop = data.to
+      prop_id = data.to
+      prop_name = to.options.label
+      object_node = from
       data.from = from.id
       data.to = to.id
     }
-    var connect_nodes = network.getConnectedNodes(prop)
+    var connect_nodes = network.getConnectedNodes(prop_id)
     var already_flag = false
     $.each(connect_nodes,function(key, node_id) {
       var connect_node = getNode(node_id)
@@ -379,6 +403,10 @@ $(function() {
     })
     if (already_flag == true) {
       callback(null)
+      return
+    }
+    if (_is_duplicate_property(object_node, prop_name) == true) {
+      alert('This object has already the same property')
       return
     }
     save_contains_edge(data, from, to, callback)
