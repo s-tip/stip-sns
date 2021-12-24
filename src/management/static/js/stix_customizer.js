@@ -394,18 +394,46 @@ $(function() {
       return
     }
 
-    var prop = null
+    var prop_id = null
+    var prop_name = null
+    var object_node = null
     if (from.options.type == DATA_TYPE_PROPERTY) {
-      prop = data.from
+      prop_id = data.from
+      prop_name = from.options.label
+      object_node = to
     } else {
-      prop = data.to
+      prop_id = data.to
+      prop_name = to.options.label
+      object_node = from
     }
-    if (network.getConnectedNodes(prop).length != 0) {
+    if (network.getConnectedNodes(prop_id).length != 0) {
       alert('Cannot connect nodes which has already an edge')
+      return
+    }
+    if (_is_duplicate_property(object_node, prop_name) == true) {
+      alert('This object has already the same property')
       return
     }
     data.color = EDGE_DEFAULT_COLOR
     saveEdgeData(data, from, to, callback)
+  }
+
+  function _is_duplicate_property(object_node, prop_name) {
+    var ret = false
+    $.each(object_node.edges, function(key_edge, edge) {
+      var tmp_prop = null
+      if(edge.fromId == object_node.id){
+        tmp_prop = getNode(edge.toId)
+      } else {
+        tmp_prop = getNode(edge.fromId)
+      }
+      console.log(tmp_prop.options.label)
+      if (tmp_prop.options.label == prop_name) {
+        ret = true
+        return true
+      }
+    })
+    return ret
   }
 
   function clearEdgePopUp() {
