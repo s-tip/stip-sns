@@ -16,6 +16,18 @@ import string
 try:
     from jira import JIRA
     imported_jira = True
+    import jira.client
+
+    class CaseInsensitiveDict(dict):
+        def __init__(self, *args, **kw):
+            super(CaseInsensitiveDict, self).__init__(*args, **kw)
+
+            for key, value in self.copy().items():
+                if key != key.lower():
+                    self[key.lower()] = value
+                    self.pop(key, None)
+
+    jira.client.CaseInsensitiveDict = CaseInsensitiveDict
 except ImportError:
     imported_jira = False
 
@@ -44,6 +56,8 @@ from stix.core.stix_package import STIXPackage
 from stix2 import parse
 import stix2.v21.sdo as sdo_21
 import stix2.v20.sdo as sdo_20
+
+
 
 
 FEEDS_NUM_PAGES = 10
