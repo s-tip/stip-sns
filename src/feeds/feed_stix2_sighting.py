@@ -1,4 +1,5 @@
 import json
+import datetime
 from stix2 import parse
 from stix2.v21.sro import Sighting
 from stix2.v21.sdo import ObservedData
@@ -10,6 +11,10 @@ from stix2elevator.options import initialize_options, set_option_value
 from stix2elevator.stix_stepper import step_bundle
 from stix2matcher.matcher import match
 from feeds.feed_stix2 import _get_individual_identity
+
+
+def _str2datetime(s):
+    return datetime.datetime.strptime(s, '%Y/%m/%d %H:%M:%S%z')
 
 
 def insert_sighting_object(
@@ -28,11 +33,12 @@ def insert_sighting_object(
         first_seen = None
     if len(last_seen) == 0:
         last_seen = None
+
     sighting = Sighting(
         created_by_ref=identity,
         sighting_of_ref=indicator,
-        first_seen=first_seen,
-        last_seen=last_seen,
+        first_seen=_str2datetime(first_seen),
+        last_seen=_str2datetime(last_seen),
         count=count,
         external_references=external_references
     )
@@ -190,7 +196,7 @@ def _get_stix2_tlp_red():
 
 
 def _get_observed_data_from_value(type_, value_, identity):
-    od_time_property = str(identity.created)
+    od_time_property = identity.created
     objects = {}
     observed_data_object = None
     if type_ == 'domain':
