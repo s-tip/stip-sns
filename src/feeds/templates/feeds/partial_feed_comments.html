@@ -15,11 +15,17 @@
       {% if comment.screen_instance %}<small class="text feed-tlp">[{{comment.screen_instance}}]</small>{% endif %}
       <small>{{ comment.date }}</small>
     </h4>
-    <div>
+      {% if comment.user.username == "gv_concierge" %}
+      <div>
+      {{ comment.linkfy_post|safe }}
+      </div>
+      {% else %}
+      <div>
       {% autoescape on %}
       {{ comment }}
       {% endautoescape %}
-    </div>
+      </div>
+      {% endif %}
   </li>
 {% empty %}
   <li class="empty">{% trans 'Be the first one to comment' %}</li>

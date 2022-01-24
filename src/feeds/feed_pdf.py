@@ -374,7 +374,7 @@ class FeedPDF(object):
                 d.append(item)
 
             # テーブル作成とスタイル設定
-            cve_table = self._create_table(d, len(exploit_targets), (30*mm, 125*mm))
+            cve_table = self._create_table(d, len(exploit_targets), (35*mm, 120*mm))
             story.append(cve_table)
 
         # 空行
