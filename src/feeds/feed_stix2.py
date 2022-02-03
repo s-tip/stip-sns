@@ -4,6 +4,7 @@ import pytz
 import feeds.extractor.common as fec
 import stip.common.const as const
 from stix2.v21.bundle import Bundle
+from stix2.properties import IDProperty
 from stix2.v21.sdo import Report, Vulnerability, ThreatActor, Indicator, Identity
 from stix2.v21.sro import Relationship
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
@@ -220,10 +221,13 @@ def _get_x_stip_sns_tool():
 
 # stip_user から identity (Individual) を作成する
 def _get_individual_identity(stip_user):
+    id = IDProperty('identity').default()
     identity = Identity(
+        id=id,
         name=stip_user.username,
         identity_class='Individual',
         x_stip_sns_account=stip_user.username,
+        created_by_ref=id,
         allow_custom=True
     )
     return identity
