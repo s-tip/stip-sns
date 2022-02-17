@@ -40,6 +40,7 @@ def insert_sighting_object(
         first_seen=_str2datetime(first_seen),
         last_seen=_str2datetime(last_seen),
         count=count,
+        confidence=stip_user.confidence,
         external_references=external_references
     )
     stix2.objects.append(identity)

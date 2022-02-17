@@ -10,6 +10,8 @@ const CONFIRM_ITEM_TYPE_CLASS = 'confirm-item-type'
 const CONFIRM_ITEM_TYPE_SELECTOR = '.' + CONFIRM_ITEM_TYPE_CLASS
 const CONFIRM_ITEM_STIX2_INDICATOR_TYPES_CLASS = 'confirm-item-stix2-indicator-types'
 const CONFIRM_ITEM_STIX2_INDICATOR_TYPES_SELECTOR = '.' + CONFIRM_ITEM_STIX2_INDICATOR_TYPES_CLASS
+const CONFIRM_ITEM_CONFIDENCE_CLASS = 'confirm-item-confidence'
+const CONFIRM_ITEM_CONFIDENCE_SELECTOR = '.' + CONFIRM_ITEM_CONFIDENCE_CLASS
 const CONFIRM_ITEM_VALUE_CLASS = 'confirm-item-value'
 const CONFIRM_ITEM_VALUE_SELECTOR = '.' + CONFIRM_ITEM_VALUE_CLASS
 const CONFIRM_ITEM_CHECKBOX_ATTR_TABLE_ID = 'table_id'
@@ -271,9 +273,9 @@ function _get_confirm_table (file_name, table_id, items) {
 function _get_confirm_table_tbody (file_id, table_id, items) {
   const tbody = $('<tbody>')
   for (const item of items) {
-    let [type_, value_, title, checked] = item
+    let [type_, value_, title, checked, confidence] = item
     tbody.append(
-      _get_confirm_table_tr(type_, value_, title, file_id, table_id, checked)
+      _get_confirm_table_tr(type_, value_, title, file_id, table_id, checked, confidence)
     )
   }
   return tbody
@@ -300,6 +302,22 @@ function _get_confirm_table_tr_first_td (title, file_id, table_id, checked) {
   label.append(checkbox)
   div.append(label)
   td.append(div)
+  return td
+}
+
+function _get_confirm_table_tr_confidence_td (confidence) {
+  const td = $('<td>')
+  const span = $('<span>', {
+    style: 'display:none'
+  })
+  span.text(confidence)
+  td.append(span)
+  const input_text = $('<input>', {
+    type: 'text',
+    class: `${CONFIRM_ITEM_CONFIDENCE_CLASS} form-control`,
+    value: confidence
+  })
+  td.append(input_text)
   return td
 }
 
@@ -398,7 +416,7 @@ function _get_confirm_table_tr_indicator_td_list (type_) {
   return td_list
 }
 
-function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked) {
+function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked, confidence) {
   let td_list = []
 
   const first_td = _get_confirm_table_tr_first_td(title, file_id, table_id, checked)
@@ -409,6 +427,7 @@ function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked
   } else {
     td_list = _get_confirm_table_tr_indicator_td_list(type_)
   }
+  const confidence_td = _get_confirm_table_tr_confidence_td(confidence)
   const last_td = _get_confirm_table_tr_last_td(value_)
 
   const tr = $('<tr>', {
@@ -418,6 +437,7 @@ function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked
   for (const td of td_list) {
     tr.append(td)
   }
+  tr.append(confidence_td)
   tr.append(last_td)
   return tr
 }
@@ -449,12 +469,17 @@ function _get_confirm_table_head_first (file_id, table_id) {
   return th
 }
 
+function _get_confirm_table_head_confidence () {
+  return $('<th>').text('Confidence')
+}
+
 function _get_confirm_table_head_last () {
   return $('<th>').text('Value')
 }
 
 function _get_confirm_table_head (file_id, table_id) {
   const th_first = _get_confirm_table_head_first(file_id, table_id)
+  const th_confidence = _get_confirm_table_head_confidence()
   const th_last = _get_confirm_table_head_last()
 
   const th_list = []
@@ -476,6 +501,7 @@ function _get_confirm_table_head (file_id, table_id) {
   for (const th of th_list) {
     tr.append(th)
   }
+  tr.append(th_confidence)
   tr.append(th_last)
 
   const thead = $('<thead>')
@@ -493,14 +519,17 @@ function get_confirm_data () {
     if (checkbox_elem.prop('checked') == true) {
       const type_elem = $(element).find(CONFIRM_ITEM_TYPE_SELECTOR)
       const value_elem = $(element).find(CONFIRM_ITEM_VALUE_SELECTOR)
+      const confidence_elem = $(element).find(CONFIRM_ITEM_CONFIDENCE_SELECTOR)
       const file_id = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TARGET)
       const title = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TITLE)
       const type_ = type_elem.attr(LISTBOX_TYPE_ATTR)
+      const confidence = confidence_elem.val()
       const value_ = value_elem.val()
       var stix2_indicator_types = 'malicious-activity'
 
       const item = {}
       item.type = type_
+      item.confidence = confidence
       item.value = value_
       item.title = title
       if (table_id == TABLE_ID_INDICATORS) {

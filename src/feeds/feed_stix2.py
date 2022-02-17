@@ -6,7 +6,6 @@ import stip.common.const as const
 from stix2.v21.bundle import Bundle
 from stix2.properties import IDProperty
 from stix2.v21.sdo import Report, Vulnerability, ThreatActor, Indicator, Identity
-from stix2.v21.sro import Relationship
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
 from stip.common.x_stip_sns import StipSns
 from ctirs.models import SNSConfig
@@ -47,6 +46,7 @@ def _get_language_contents(stix2_titles, stix2_contents):
 # json データから Vulunerability 作成する
 def _get_vulnerability_object(ttp, stip_identity, tlp_marking_object):
     cve = ttp['value']
+    confidence = ttp['confidence']
     mitre_url = fec.CommonExtractor.get_mitre_url_from_json(cve)
 
     external_references = []
@@ -61,6 +61,7 @@ def _get_vulnerability_object(ttp, stip_identity, tlp_marking_object):
         name=cve,
         description=description,
         created_by_ref=stip_identity,
+        confidence=confidence,
         object_marking_refs=[tlp_marking_object],
         external_references=external_references
     )
@@ -70,6 +71,7 @@ def _get_vulnerability_object(ttp, stip_identity, tlp_marking_object):
 # json データから ThreatActor 作成する
 def _get_threat_actor_object(ta, stip_identity, tlp_marking_object):
     name = ta['value']
+    confidence = ta['confidence']
     description = ta['title']
     try:
         threat_actor_types = [ta['type']]
@@ -87,6 +89,7 @@ def _get_threat_actor_object(ta, stip_identity, tlp_marking_object):
         name=name,
         description=description,
         created_by_ref=stip_identity,
+        confidence=confidence,
         object_marking_refs=[tlp_marking_object],
         aliases=aliases,
         threat_actor_types=threat_actor_types)
@@ -99,6 +102,7 @@ def _get_indicator_object(indicator, stip_identity, tlp_marking_object):
     description = indicator['title']
     type_ = indicator['type']
     value = indicator['value']
+    confidence = indicator['confidence']
     try:
         indicator_types = [indicator['stix2_indicator_types']]
     except KeyError:
@@ -129,6 +133,7 @@ def _get_indicator_object(indicator, stip_identity, tlp_marking_object):
         name=name,
         description=description,
         created_by_ref=stip_identity,
+        confidence=confidence,
         object_marking_refs=[tlp_marking_object],
         indicator_types=indicator_types,
         pattern=pattern,
@@ -285,6 +290,7 @@ def get_post_stix2_bundle(
     content,
     tlp,
     referred_url,
+    feed_confidece,
     sharing_range,
     stix2_titles=[],
     stix2_contents=[],
@@ -365,6 +371,7 @@ def get_post_stix2_bundle(
         created_by_ref=individual_identity,
         name=title,
         description=content,
+        confidence=feed_confidece,
         x_stip_sns_type='post',
         x_stip_sns_author=x_stip_sns_author,
         x_stip_sns_post=x_stip_sns_post,
@@ -390,12 +397,13 @@ def get_post_stix2_bundle(
         report_types=['threat-report'],
         object_refs=report_object_refs,
         labels=tags,
+        confidence=feed_confidece,
         allow_custom=True
     )
     bundle.objects.append(report)
 
     # language-content 作成
-    if granular_markings is None:
+    if granular_markings:
         # S-TIP オブジェクト用の language-content 作成
         language_contents = _get_language_contents(stix2_titles, stix2_contents)
         if common_lang in language_contents:
@@ -407,6 +415,7 @@ def get_post_stix2_bundle(
                 object_ref=stip_sns,
                 object_modified=stip_sns.created,
                 contents=language_contents,
+                confidence=feed_confidece,
                 allow_custom=True
             )
             bundle.objects.append(s_tip_lc)
@@ -417,6 +426,7 @@ def get_post_stix2_bundle(
                 created_by_ref=individual_identity,
                 object_modified=report.created,
                 contents=language_contents,
+                confidence=feed_confidece,
                 allow_custom=True
             )
             bundle.objects.append(report_lc)
@@ -427,6 +437,7 @@ def get_post_stix2_bundle(
 def get_attach_stix2_bundle(
     tlp,
     referred_url,
+    feed_confidence,
     sharing_range,
     request_file,
     stip_user=None
@@ -465,6 +476,7 @@ def get_attach_stix2_bundle(
         created_by_ref=individual_identity,
         name=title,
         description=content,
+        confidence=feed_confidence,
         x_stip_sns_type=const.STIP_STIX2_SNS_POST_TYPE_ATTACHMENT,
         x_stip_sns_author=x_stip_sns_author,
         x_stip_sns_post=x_stip_sns_post,
@@ -490,26 +502,6 @@ def _get_x_stip_sns_attachment(request_file):
     content = base64.b64encode(request_file.read())
     d[const.STIP_STIX2_SNS_ATTACHMENT_CONTENT_KEY] = content.decode('utf-8')
     return d
-
-
-# stix2 の x-stip-sns を作成する (attachment)
-def _get_attach_stix2_bundle(stip_sns, tlp_marking_object, feed_file):
-    title = feed_file
-    content = 'File "%s" encoded in BASE64.' % (feed_file.file_name)
-    x_stip_sns_attachment = _get_x_stip_sns_attachment(feed_file)
-
-    stip_sns = StipSns(
-        lang=stip_sns.lang,
-        object_marking_refs=[tlp_marking_object],
-        created_by_ref=stip_sns.created_by_ref,
-        name=title,
-        description=content,
-        x_stip_sns_type=const.STIP_STIX2_SNS_POST_TYPE_ATTACHMENT,
-        x_stip_sns_author=stip_sns.x_stip_sns_author,
-        x_stip_sns_attachment=x_stip_sns_attachment,
-        x_stip_sns_identity=stip_sns.x_stip_sns_identity,
-        x_stip_sns_tool=stip_sns.x_stip_sns_tool)
-    return stip_sns
 
 
 # TLP 文字列に合わせた marking-definition を返却する
@@ -556,6 +548,7 @@ def get_comment_stix2_bundle(
         created_by_ref=individual_identity,
         name=title,
         description=description,
+        confidence=stip_user.confidence,
         x_stip_sns_type=const.STIP_STIX2_SNS_POST_TYPE_COMMENT,
         x_stip_sns_author=x_stip_sns_author,
         x_stip_sns_bundle_id=x_stip_sns_bundle_id,
@@ -614,6 +607,7 @@ def get_like_stix2_bundle(
         created_by_ref=individual_identity,
         name=title,
         description=description,
+        confidence=stip_user.confidence,
         x_stip_sns_type=x_stip_sns_type,
         x_stip_sns_author=x_stip_sns_author,
         x_stip_sns_bundle_id=x_stip_sns_bundle_id,

@@ -120,6 +120,7 @@ def settings(request):
             stip_user.country_code = country_code
             stip_user.ci = form.cleaned_data.get('ci')
             stip_user.language = form.cleaned_data.get('language')
+            stip_user.confidence = form.cleaned_data.get('confidence')
             profile.scan_csv = form.cleaned_data.get('scan_csv')
             profile.scan_pdf = form.cleaned_data.get('scan_pdf')
             profile.scan_post = form.cleaned_data.get('scan_post')
@@ -168,6 +169,7 @@ def settings(request):
             'administrative_area': code,
             'ci': stip_user.ci,
             'language': stip_user.language,
+            'confidence': stip_user.confidence,
             'scan_csv': profile.scan_csv,
             'scan_pdf': profile.scan_pdf,
             'scan_post': profile.scan_post,

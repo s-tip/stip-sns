@@ -143,6 +143,10 @@ class ProfileForm(forms.ModelForm):
         label=_('Splunk Query'),
         widget=forms.Textarea(attrs={'class': 'form-control', 'style': 'resize:none'}),
         required=False)
+    confidence = forms.IntegerField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label=_('Confidence'),
+        required=False)
 
     class Meta:
         model = User
@@ -151,7 +155,8 @@ class ProfileForm(forms.ModelForm):
                   'ci', 'language', 'scan_csv', 'scan_pdf', 'scan_post', 'scan_txt',
                   'threat_actors', 'indicator_white_list', 'timezone',
                   'phantom_host', 'phantom_source_name', 'phantom_playbook_name', 'phantom_auth_token',
-                  'splunk_host', 'splunk_api_port', 'splunk_web_port', 'splunk_username', 'splunk_password', 'splunk_scheme', 'splunk_query']
+                  'splunk_host', 'splunk_api_port', 'splunk_web_port', 'splunk_username', 'splunk_password', 'splunk_scheme', 'splunk_query',
+                  'confidence']
 
 
 class ChangePasswordForm(forms.ModelForm):

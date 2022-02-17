@@ -79,6 +79,7 @@ KEY_STIX2_TITLES = 'stix2_titles'
 KEY_STIX2_CONTENTS = 'stix2_contents'
 KEY_ATTACH_CONFIRM = 'attach_confirm'
 KEY_SCREEN_NAME = 'screen_name'
+KEY_CONFIDENCE = 'confidence'
 
 PUBLICATION_VALUE_GROUP = 'group'
 PUBLICATION_VALUE_PEOPLE = 'people'
@@ -117,6 +118,7 @@ def feeds(request):
         'page': 1,
         'users': users_list,
         'sharing_groups': Group.objects.all(),
+        'user': request.user,
     })
     # r.set_cookie(key='username', value=str(request.user))
     return r
@@ -286,6 +288,7 @@ def post_common(request, user):
     if KEY_TLP not in request.POST:
         raise Exception('No TLP.')
     feed.tlp = request.POST[KEY_TLP]
+    feed.confidence = request.POST[KEY_CONFIDENCE]
 
     # multi language 投稿か？
     stix2_titles = []
@@ -452,6 +455,7 @@ def confirm_indicator(request):
             referred_url = None
     else:
         referred_url = None
+    confidence = request.POST['confidence']
 
     if attach_confirm:
         # threat_actors list を取得する
@@ -481,9 +485,9 @@ def confirm_indicator(request):
         except BaseException:
             pass
     data = {}
-    data[KEY_INDICATORS] = get_json_from_extractor(confirm_indicators)
-    data[KEY_TTPS] = get_json_from_extractor(confirm_ets)
-    data[KEY_TAS] = get_json_from_extractor(confirm_tas)
+    data[KEY_INDICATORS] = get_json_from_extractor(confirm_indicators, confidence)
+    data[KEY_TTPS] = get_json_from_extractor(confirm_ets, confidence)
+    data[KEY_TAS] = get_json_from_extractor(confirm_tas, confidence)
     return JsonResponse(data)
 
 
@@ -515,7 +519,7 @@ def get_threat_actors_list(request):
 
 
 # 抽出した indicators/TTPs/threat_actors から返却データを作成する
-def get_json_from_extractor(datas):
+def get_json_from_extractor(datas, confidence):
     d = {}
     for data in datas:
         type_ = data[0]
@@ -524,9 +528,9 @@ def get_json_from_extractor(datas):
         file_name = data[3]
         checked = data[4]
         if file_name not in d:
-            d[file_name] = [(type_, value_, title, checked)]
+            d[file_name] = [(type_, value_, title, checked, confidence)]
         else:
-            d[file_name].append((type_, value_, title, checked))
+            d[file_name].append((type_, value_, title, checked, confidence))
     return d
 
 
@@ -1423,6 +1427,7 @@ def save_post(request,
         x_stip_sns_attachment_bundle, x_stip_sns_attachment_id = get_attach_stix2_bundle(
             feed.tlp,
             feed.referred_url,
+            feed.confidence,
             sharing_range,
             feed_file,
             request.user)
@@ -1454,6 +1459,7 @@ def save_post(request,
         feed.post_org,
         feed.tlp,
         feed.referred_url,
+        feed.confidence,
         sharing_range,
         stix2_titles,
         stix2_contents,
