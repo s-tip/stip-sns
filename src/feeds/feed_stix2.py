@@ -605,11 +605,13 @@ def get_like_stix2_bundle(
         x_stip_sns_type = const.STIP_STIX2_SNS_POST_TYPE_UNLIKE
         title = 'Unlike to %s' % (x_stip_sns_bundle_id)
         description = 'Unlike to %s' % (x_stip_sns_bundle_id)
+        like = False
     else:
         # unlike -> like
         x_stip_sns_type = const.STIP_STIX2_SNS_POST_TYPE_LIKE
         title = 'Like to %s' % (x_stip_sns_bundle_id)
         description = 'Like to %s' % (x_stip_sns_bundle_id)
+        like = True
 
     stip_sns = StipSns(
         lang=common_lang,
@@ -625,12 +627,6 @@ def get_like_stix2_bundle(
         x_stip_sns_identity=x_stip_sns_identity,
         x_stip_sns_tool=x_stip_sns_tool)
 
-    opinion = Opinion(
-        created_by_ref=individual_identity,
-        opinion='strongly-agree',
-        object_refs=[report_id]
-    )
-
     # bundle 作成
     bundle = Bundle(
         individual_identity,
@@ -639,5 +635,12 @@ def get_like_stix2_bundle(
         allow_custom=True)
     if organization_identity:
         bundle.objects.append(organization_identity)
-    bundle.objects.append(opinion)
+
+    if like:
+        opinion = Opinion(
+            created_by_ref=individual_identity,
+            opinion='strongly-agree',
+            object_refs=[report_id]
+        )
+        bundle.objects.append(opinion)
     return bundle
