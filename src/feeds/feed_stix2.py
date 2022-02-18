@@ -5,7 +5,7 @@ import feeds.extractor.common as fec
 import stip.common.const as const
 from stix2.v21.bundle import Bundle
 from stix2.properties import IDProperty
-from stix2.v21.sdo import Report, Vulnerability, ThreatActor, Indicator, Identity
+from stix2.v21.sdo import Report, Vulnerability, ThreatActor, Indicator, Identity, Opinion, Note
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
 from stip.common.x_stip_sns import StipSns
 from ctirs.models import SNSConfig
@@ -521,6 +521,7 @@ def _get_tlp_markings(tlp):
 # stix2 の Bundle 作成する (comment)
 def get_comment_stix2_bundle(
     x_stip_sns_bundle_id,
+    report_id,
     x_stip_sns_bundle_version,
     description,
     tlp,
@@ -556,6 +557,13 @@ def get_comment_stix2_bundle(
         x_stip_sns_identity=x_stip_sns_identity,
         x_stip_sns_tool=x_stip_sns_tool)
 
+    note = Note(
+        created_by_ref=individual_identity,
+        content=description,
+        authors=[stip_user.screen_name],
+        object_refs=[report_id]
+    )
+
     # bundle 作成
     bundle = Bundle(
         individual_identity,
@@ -564,12 +572,14 @@ def get_comment_stix2_bundle(
         allow_custom=True)
     if organization_identity:
         bundle.objects.append(organization_identity)
+    bundle.objects.append(note)
     return bundle
 
 
 # stix2 の Bundle 作成する (like)
 def get_like_stix2_bundle(
     x_stip_sns_bundle_id,
+    report_id,
     x_stip_sns_bundle_version,
     like,
     tlp,
@@ -615,6 +625,12 @@ def get_like_stix2_bundle(
         x_stip_sns_identity=x_stip_sns_identity,
         x_stip_sns_tool=x_stip_sns_tool)
 
+    opinion = Opinion(
+        created_by_ref=individual_identity,
+        opinion='strongly-agree',
+        object_refs=[report_id]
+    )
+
     # bundle 作成
     bundle = Bundle(
         individual_identity,
@@ -623,4 +639,5 @@ def get_like_stix2_bundle(
         allow_custom=True)
     if organization_identity:
         bundle.objects.append(organization_identity)
+    bundle.objects.append(opinion)
     return bundle

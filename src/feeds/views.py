@@ -569,8 +569,14 @@ def like(request):
     like = myliker in likers
     # Like/Unlike 用の STIX イメージ作成
     x_stip_sns_bundle_version = '2.1'
+
+    origin_stix_file = rs.get_package_info_from_package_id(
+        stip_user, package_id
+    )
+    report_id = _get_report_object(origin_stix_file['content'])
     bundle = get_like_stix2_bundle(
         package_id,
+        report_id,
         x_stip_sns_bundle_version,
         like,
         feed.tlp,
@@ -630,6 +636,14 @@ def comment(request):
                       {'feeds': feeds})
 
 
+def _get_report_object(content):
+    bundle = json.loads(content)
+    for o_ in bundle['objects']:
+        if o_['type'] == 'report':
+            return o_['id']
+    return None
+
+
 # comment postする(共通)
 def post_comment(api_user, original_package_id, post, comment_user):
     # Feed 情報作成
@@ -639,12 +653,14 @@ def post_comment(api_user, original_package_id, post, comment_user):
     if len(post) > 0:
         post = post[:10240]
     # Comment 用の STIX イメージ作成
-    origin_stix_file = rs.get_package_info_from_package_id(
+    origin_stix_file = rs.get_package_info_from_pack3yyage_id(
         api_user, original_package_id
     )
     origin_stix_version = origin_stix_file['version']
+    report_id = _get_report_object(origin_stix_file['content'])
     bundle = get_comment_stix2_bundle(
         original_package_id,
+        report_id,
         origin_stix_version,
         post,
         origin_feed.tlp,
