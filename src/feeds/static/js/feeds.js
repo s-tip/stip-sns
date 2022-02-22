@@ -417,13 +417,11 @@ $(function () {
     var button = $(".btn-post");
 
     //各々の confirm-item-tr ごとに checkbox がついていたら form の引数に追加する
-    var data = get_confirm_data();
+    var confirm_data = get_confirm_data();
 
     //フィールドにファイルを追加したのでajax送信方法を追加
     var fd = new FormData($('#compose-form').get(0));
-    fd.append('indicators', JSON.stringify(data['indicators']));
-    fd.append('ttps', JSON.stringify(data['ttps']));
-    fd.append('tas', JSON.stringify(data['tas']));
+    fd.append('confirm_data', JSON.stringify(confirm_data));
     //複数ある content 情報から言語情報などをまとめる
     fd.append('multi_language', is_multi_language());
     fd.append('stix2_titles', JSON.stringify(get_stix2_title_information()));

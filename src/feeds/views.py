@@ -58,8 +58,6 @@ import stix2.v21.sdo as sdo_21
 import stix2.v20.sdo as sdo_20
 
 
-
-
 FEEDS_NUM_PAGES = 10
 
 KEY_USERNAME = 'username'
@@ -71,6 +69,7 @@ KEY_PUBLICATION = 'publication'
 KEY_REFERRED_URL = 'referred_url'
 KEY_GROUP = 'group'
 KEY_PEOPLE = 'people'
+KEY_CONFIRM_DATA = 'confirm_data'
 KEY_INDICATORS = 'indicators'
 KEY_TTPS = 'ttps'
 KEY_TAS = 'tas'
@@ -363,31 +362,16 @@ def post_common(request, user):
     elif publication == PUBLICATION_VALUE_ALL:
         feed.sharing_range_type = const.SHARING_RANGE_TYPE_KEY_ALL
 
-    # indicators があるか
-    if KEY_INDICATORS in request.POST:
-        indicators = json.loads(request.POST[KEY_INDICATORS])
+    if KEY_CONFIRM_DATA in request.POST:
+        confirm_data = json.loads(request.POST[KEY_CONFIRM_DATA])
     else:
-        indicators = []
-
-    # ttps があるか
-    if KEY_TTPS in request.POST:
-        ttps = json.loads(request.POST[KEY_TTPS])
-    else:
-        ttps = []
-
-    # threat_actors があるか
-    if KEY_TAS in request.POST:
-        tas = json.loads(request.POST[KEY_TAS])
-    else:
-        tas = []
+        confirm_data = None
 
     # POSTする
     save_post(
         request,
         feed, post,
-        indicators,
-        ttps,
-        tas,
+        confirm_data,
         request.FILES.values(),
         stix2_titles,
         stix2_contents)
@@ -1425,9 +1409,7 @@ def get_produced_str(bundle):
 def save_post(request,
               feed,
               post,
-              json_indicators=[],
-              ttps=[],
-              tas=[],
+              confirm_data,
               request_files=[],
               stix2_titles=[],
               stix2_contents=[]):
@@ -1468,9 +1450,7 @@ def save_post(request,
     tags = list(set(post_tags))
 
     bundle = get_post_stix2_bundle(
-        json_indicators,
-        ttps,
-        tas,
+        confirm_data,
         feed.title,
         feed.post_org,
         feed.tlp,
@@ -1569,7 +1549,7 @@ def save_post(request,
                 except Exception:
                     pass
 
-    if len(json_indicators) > 0:
+    if len(confirm_data[KEY_INDICATORS]) > 0:
         run_gv_concierge_bot(request, bundle)
         # run_falcon_concierge_bot(request, bundle)
         # run_falcon_concierge_bot(bundle, json_indicators)

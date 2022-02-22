@@ -283,9 +283,7 @@ def _get_organization_identity(stip_user, individual_identity):
 
 # stix2 の Bundle 作成する (post)
 def get_post_stix2_bundle(
-    indicators,
-    ttps,
-    tas,
+    confirm_data,
     title,
     content,
     tlp,
@@ -298,6 +296,11 @@ def get_post_stix2_bundle(
     stip_user=None,
     tags=[]
 ):
+
+    from feeds.views import KEY_INDICATORS, KEY_TTPS, KEY_TAS
+    indicators = confirm_data[KEY_INDICATORS]
+    ttps = confirm_data[KEY_TTPS]
+    tas = confirm_data[KEY_TAS]
 
     # S-TIP Identity 作成する
     individual_identity = _get_individual_identity(stip_user)
