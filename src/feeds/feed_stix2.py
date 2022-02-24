@@ -3,9 +3,9 @@ import base64
 import pytz
 import feeds.extractor.common as fec
 import stip.common.const as const
+import stix2.v21.sdo as SDO
 from stix2.v21.bundle import Bundle
 from stix2.properties import IDProperty
-from stix2.v21.sdo import Report, Vulnerability, ThreatActor, Indicator, Identity, Opinion, Note
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
 from stip.common.x_stip_sns import StipSns
 from ctirs.models import SNSConfig
@@ -57,7 +57,7 @@ def _get_vulnerability_object(ttp, stip_identity, tlp_marking_object):
     external_references.append(external_reference)
 
     description = fec.CommonExtractor.get_ttp_common_description(ttp)
-    vulnerability = Vulnerability(
+    vulnerability = SDO.Vulnerability(
         name=cve,
         description=description,
         created_by_ref=stip_identity,
@@ -66,6 +66,276 @@ def _get_vulnerability_object(ttp, stip_identity, tlp_marking_object):
         external_references=external_references
     )
     return vulnerability
+
+
+def _get_other_object_boolean_property(prop):
+    if prop:
+        if prop.lower() == 'true':
+            return True
+    return False
+
+
+def _get_other_object_property(prop):
+    return prop if len(prop) else None
+
+
+def _get_custom_attack_pattern_object(j, stip_identity, tlp_marking_object):
+    return SDO.AttackPattern(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        aliases=_get_other_object_property(j['aliases']),
+    )
+
+
+def _get_custom_campaign_object(j, stip_identity, tlp_marking_object):
+    return SDO.Campaign(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        aliases=_get_other_object_property(j['aliases']),
+        objective=_get_other_object_property(j['objective']),
+        first_seen=_get_other_object_property(j['first_seen']),
+        last_seen=_get_other_object_property(j['last_seen']),
+    )
+
+
+def _get_custom_course_of_action_object(j, stip_identity, tlp_marking_object):
+    return SDO.CourseOfAction(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+    )
+
+
+def _get_custom_identity_object(j, stip_identity, tlp_marking_object):
+    return SDO.Identity(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        roles=_get_other_object_property(j['roles']),
+        identity_class=_get_other_object_property(j['identity_class']),
+        sectors=_get_other_object_property(j['sectors']),
+        contact_information=_get_other_object_property(j['contact_information']),
+    )
+
+
+def _get_custom_indicator_object(j, stip_identity, tlp_marking_object):
+    return SDO.Indicator(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        indicator_types=_get_other_object_property(j['indicator_types']),
+        pattern=_get_other_object_property(j['pattern']),
+        pattern_type=_get_other_object_property(j['pattern_type']),
+        pattern_version=_get_other_object_property(j['pattern_version']),
+        valid_from=_get_other_object_property(j['valid_from']),
+        valid_until=_get_other_object_property(j['valid_until']),
+    )
+
+
+def _get_custom_infrastructure_object(j, stip_identity, tlp_marking_object):
+    return SDO.Infrastructure(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        infrastructure_types=_get_other_object_property(j['infrastructure_types']),
+        aliases=_get_other_object_property(j['aliases']),
+        first_seen=_get_other_object_property(j['first_seen']),
+        last_seen=_get_other_object_property(j['last_seen']),
+    )
+
+
+def _get_custom_intrusion_set_object(j, stip_identity, tlp_marking_object):
+    return SDO.IntrusionSet(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        aliases=_get_other_object_property(j['aliases']),
+        first_seen=_get_other_object_property(j['first_seen']),
+        last_seen=_get_other_object_property(j['last_seen']),
+        goals=_get_other_object_property(j['goals']),
+        resource_level=_get_other_object_property(j['resource_level']),
+        primary_motivation=_get_other_object_property(j['primary_motivation']),
+        secondary_motivations=_get_other_object_property(j['secondary_motivations']),
+    )
+
+
+def _get_custom_location_object(j, stip_identity, tlp_marking_object):
+    return SDO.Location(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        latitude=_get_other_object_property(j['latitude']),
+        longitude=_get_other_object_property(j['longitude']),
+        precision=_get_other_object_property(j['precision']),
+        region=_get_other_object_property(j['region']),
+        country=_get_other_object_property(j['country']),
+        administrative_area=_get_other_object_property(j['administrative_area']),
+        city=_get_other_object_property(j['city']),
+        street_address=_get_other_object_property(j['street_address']),
+    )
+
+
+def _get_custom_malware_object(j, stip_identity, tlp_marking_object):
+    return SDO.Malware(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        malware_types=_get_other_object_property(j['malware_types']),
+        is_family=_get_other_object_boolean_property(j['is_family']),
+        aliases=_get_other_object_property(j['aliases']),
+        first_seen=_get_other_object_property(j['first_seen']),
+        last_seen=_get_other_object_property(j['last_seen']),
+        operating_system_refs=_get_other_object_property(j['operating_system_refs']),
+        architecture_execution_envs=_get_other_object_property(j['architecture_execution_envs']),
+        implementation_languages=_get_other_object_property(j['implementation_languages']),
+        capabilities=_get_other_object_property(j['capabilities']),
+        sample_refs=_get_other_object_property(j['sample_refs']),
+    )
+
+
+def _get_custom_malware_analysis_object(j, stip_identity, tlp_marking_object):
+    return SDO.MalwareAnalysis(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        product=_get_other_object_property(j['product']),
+        version=_get_other_object_property(j['version']),
+        host_vm_ref=_get_other_object_property(j['host_vm_ref']),
+        operating_system_ref=_get_other_object_property(j['operating_system_ref']),
+        installed_software_refs=_get_other_object_property(j['installed_software_refs']),
+        configuration_version=_get_other_object_property(j['configuration_version']),
+        modules=_get_other_object_property(j['modules']),
+        analysis_engine_version=_get_other_object_property(j['analysis_engine_version']),
+        analysis_definition_version=_get_other_object_property(j['analysis_definition_version']),
+        submitted=_get_other_object_property(j['submitted']),
+        analysis_started=_get_other_object_property(j['analysis_started']),
+        analysis_ended=_get_other_object_property(j['analysis_ended']),
+        result_name=_get_other_object_property(j['result_name']),
+        result=_get_other_object_property(j['result']),
+        analysis_sco_refs=_get_other_object_property(j['analysis_sco_refs']),
+        sample_ref=_get_other_object_property(j['sample_ref']),
+    )
+
+
+def _get_custom_note_object(j, stip_identity, tlp_marking_object):
+    return SDO.Note(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        abstract=_get_other_object_property(j['abstract']),
+        content=_get_other_object_property(j['content']),
+        authors=_get_other_object_property(j['authors']),
+        object_refs=_get_other_object_property(j['object_refs']),
+    )
+
+
+def _get_custom_opinion_object(j, stip_identity, tlp_marking_object):
+    return SDO.Opinion(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        explanation=_get_other_object_property(j['explanation']),
+        authors=_get_other_object_property(j['authors']),
+        opinion=_get_other_object_property(j['opinion']),
+        object_refs=_get_other_object_property(j['object_refs']),
+    )
+
+
+def _get_custom_report_object(j, stip_identity, tlp_marking_object):
+    return SDO.Report(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        report_types=_get_other_object_property(j['report_types']),
+        published=_get_other_object_property(j['published']),
+        object_refs=_get_other_object_property(j['object_refs']),
+    )
+
+
+def _get_custom_threat_actor_object(j, stip_identity, tlp_marking_object):
+    return SDO.ThreatActor(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        threat_actor_types=_get_other_object_property(j['threat_actor_types']),
+        aliases=_get_other_object_property(j['aliases']),
+        first_seen=_get_other_object_property(j['first_seen']),
+        last_seen=_get_other_object_property(j['last_seen']),
+        roles=_get_other_object_property(j['roles']),
+        goals=_get_other_object_property(j['goals']),
+        sophistication=_get_other_object_property(j['sophistication']),
+        resource_level=_get_other_object_property(j['resource_level']),
+        primary_motivation=_get_other_object_property(j['primary_motivation']),
+        secondary_motivations=_get_other_object_property(j['secondary_motivations']),
+        personal_motivations=_get_other_object_property(j['personal_motivations']),
+    )
+
+
+def _get_custom_tool_object(j, stip_identity, tlp_marking_object):
+    return SDO.Tool(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        tool_types=_get_other_object_property(j['tool_types']),
+        aliases=_get_other_object_property(j['aliases']),
+        tool_version=_get_other_object_property(j['tool_version']),
+    )
+
+
+def _get_custom_vulnerability_object(j, stip_identity, tlp_marking_object):
+    return SDO.Vulnerability(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+    )
+
+
+OO_FUNCS = {
+    'attack-pattern': _get_custom_attack_pattern_object,
+    'campaign': _get_custom_campaign_object,
+    'course-of-action': _get_custom_course_of_action_object,
+    'identity': _get_custom_identity_object,
+    'indicator': _get_custom_indicator_object,
+    'infrastructure': _get_custom_infrastructure_object,
+    'intrusion-set': _get_custom_intrusion_set_object,
+    'location': _get_custom_location_object,
+    'malware': _get_custom_malware_object,
+    'malware-analysis': _get_custom_malware_analysis_object,
+    'note': _get_custom_note_object,
+    'opinion': _get_custom_opinion_object,
+    'report': _get_custom_report_object,
+    'threat-actor': _get_custom_threat_actor_object,
+    'tool': _get_custom_tool_object,
+    'vulnerability': _get_custom_vulnerability_object,
+}
 
 
 # json データから ThreatActor 作成する
@@ -85,7 +355,7 @@ def _get_threat_actor_object(ta, stip_identity, tlp_marking_object):
     else:
         description, aliases = fec.CommonExtractor._get_ta_description_from_attck(name)
 
-    threat_actor = ThreatActor(
+    threat_actor = SDO.ThreatActor(
         name=name,
         description=description,
         created_by_ref=stip_identity,
@@ -129,7 +399,7 @@ def _get_indicator_object(indicator, stip_identity, tlp_marking_object):
     else:
         return None
 
-    indicator_o = Indicator(
+    indicator_o = SDO.Indicator(
         name=name,
         description=description,
         created_by_ref=stip_identity,
@@ -227,7 +497,7 @@ def _get_x_stip_sns_tool():
 # stip_user から identity (Individual) を作成する
 def _get_individual_identity(stip_user):
     id = IDProperty('identity').default()
-    identity = Identity(
+    identity = SDO.Identity(
         id=id,
         name=stip_user.username,
         identity_class='Individual',
@@ -270,7 +540,7 @@ def _get_organization_identity(stip_user, individual_identity):
     if stip_user.affiliation is None or len(stip_user.affiliation) == 0:
         return None
     sectors = _get_organization_identity_sectors(stip_user.ci)
-    identity = Identity(
+    identity = SDO.Identity(
         name=stip_user.affiliation,
         identity_class='Organization',
         created_by_ref=individual_identity,
@@ -297,10 +567,11 @@ def get_post_stix2_bundle(
     tags=[]
 ):
 
-    from feeds.views import KEY_INDICATORS, KEY_TTPS, KEY_TAS
+    from feeds.views import KEY_INDICATORS, KEY_TTPS, KEY_TAS, KEY_OTHER
     indicators = confirm_data[KEY_INDICATORS]
     ttps = confirm_data[KEY_TTPS]
     tas = confirm_data[KEY_TAS]
+    other_objects = confirm_data[KEY_OTHER]
 
     # S-TIP Identity 作成する
     individual_identity = _get_individual_identity(stip_user)
@@ -358,6 +629,14 @@ def get_post_stix2_bundle(
             bundle.objects.append(indicator_o)
             report_object_refs.append(indicator_o)
 
+    for other_object in other_objects:
+        oo_type = other_object['type']
+        if oo_type in OO_FUNCS:
+            f = OO_FUNCS[oo_type]
+            o_ = f(other_object, individual_identity, tlp_marking_object)
+            bundle.objects.append(o_)
+            report_object_refs.append(o_)
+
     # 共通 lang
     common_lang = stip_user.language
     # Report と StipSns に格納する granular_markings を取得する
@@ -389,7 +668,7 @@ def get_post_stix2_bundle(
 
     # ReportObject
     published = format_stix2_datetime(datetime.datetime.now(tz=pytz.utc))
-    report = Report(
+    report = SDO.Report(
         lang=common_lang,
         granular_markings=granular_markings,
         object_marking_refs=[tlp_marking_object],
@@ -560,7 +839,7 @@ def get_comment_stix2_bundle(
         x_stip_sns_identity=x_stip_sns_identity,
         x_stip_sns_tool=x_stip_sns_tool)
 
-    note = Note(
+    note = SDO.Note(
         created_by_ref=individual_identity,
         content=description,
         authors=[stip_user.screen_name],
@@ -640,7 +919,7 @@ def get_like_stix2_bundle(
         bundle.objects.append(organization_identity)
 
     if like:
-        opinion = Opinion(
+        opinion = SDO.Opinion(
             created_by_ref=individual_identity,
             opinion='strongly-agree',
             object_refs=[report_id]

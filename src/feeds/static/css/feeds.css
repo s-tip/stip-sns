@@ -337,3 +337,18 @@ ul.stream li .response-action-menu-li
   background: url("/static/img/processing.gif") center no-repeat;
 }
 
+.div-confirm-item-stix2-properties{
+  display: block;
+}
+
+.input-group-prepend{
+  display: block;
+}
+
+.label-stix2-prop-required{
+  color: #ff0000; 
+}
+
+.label-stix2-prop-optional{
+  color: #0000ff; 
+}

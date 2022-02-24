@@ -290,37 +290,9 @@ $(function () {
         fd.append('query_string', document.getElementById('query_string').value);
         fd.append('screen_name', document.getElementById('screen_name').value);
       }
-      // table_data があれば modal 表示
-      if (Object.keys(table_datas).length > 0) {
-        make_extract_tables(table_datas);
-        is_post = false
-        $('#confirm_indicators_modal_dialog').modal();
-      } else {
-        //存在しない
-        $.ajax({
-          url: '/feeds/post/',
-          method: 'post',
-          data: fd,
-          processData: false,
-          contentType: false,
-          cache: false,
-          beforeSend: function (xhr, settings) {
-            button.prop('disabled', true);
-          }
-        }).done(function (data) {
-          $("ul.stream").prepend(data);
-          $(".compose").slideUp();
-          $(".compose").removeClass("composing");
-          hide_stream_update();
-          toggle_new_cancel_button();
-        }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
-          var msg = XMLHttpRequest.statusText + ': ' + XMLHttpRequest.responseText;
-          alert(msg);
-        }).always(function () {
-          button.prop('disabled', false);
-          is_post = false
-        });
-      }
+      make_extract_tables(table_datas);
+      is_post = false
+      $('#confirm_indicators_modal_dialog').modal();
 
     }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
       var msg = XMLHttpRequest.statusText + ': ' + XMLHttpRequest.responseText;

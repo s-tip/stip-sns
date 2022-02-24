@@ -81,7 +81,278 @@ function make_extract_tables (table_datas) {
     ],
     paging: false
   }
+  var div = _get_other_stix_element()
+  indicator_modal_body.append(div)
   $('.indicator-table').DataTable(opt)
+}
+
+const CONFIRM_ITEM_STIX2_ROOT  = 'confirm-item-stix2-root'
+const CONFIRM_ITEM_STIX2_SDO  = 'confirm-item-stix2-sdo'
+const CONFIRM_ITEM_STIX2_PROPERTIES  = 'confirm-item-stix2-properties'
+
+const STIX2_SDO = {
+  'Attack Pattern': {
+    'properties' : {
+      'required': ['name'],
+      'optional': ['description', 'aliases'] ,
+    },
+    'type' : 'attack-pattern',
+  },
+  'Campaign':  {
+    'properties': {
+      'required': ['name'],
+      'optional': ['description', 'aliases', 'first_seen', 'last_seen', 'objective'],
+    },
+    'type': 'campaign',
+  },
+  'Course Of Action': {
+    'properties': {
+      'required': ['name'],
+      'optional': ['description'],
+    },
+    'type': 'course-of-action',
+
+  },
+  'Identity': {
+    'properties': {
+      'required': ['name'],
+      'optional': ['description', 'roles', 'identity_class', 'sectors', 'contact_information'],
+    },
+    'type': 'identity',
+  },
+  'Indicator': {
+    'properties': {
+      'required': ['pattern', 'pattern_type', 'valid_from'],
+      'optional': ['name', 'description', 'indicator_types', 'pattern_version', 'valid_until'],
+    },
+    'type': 'indicator',
+  },
+  'Infrastructure':  {
+    'properties': {
+      'required': ['name'],
+      'optional': ['description', 'infrastructure_types', 'aliases', 'first_seen', 'last_seen'],
+    },
+    'type': 'infrastructure',
+  },
+  'Intrusion Set':  {
+    'properties': {
+      'required': ['name'],
+      'optional': ['description', 'aliases', 'first_seen', 'last_seen', 'goals', 'resource_level',
+      'primary_motivation', 'secondary_motivations'],
+    },
+    'type': 'intrusion-set',
+  },
+  'Location':  {
+    'properties': {
+      'required': [],
+      'optional': ['name', 'description', 'latitude', 'longitude', 'precision', 'region',
+      'country', 'administrative_area', 'city', 'street_address', 'postal_code'],
+    },
+    'type': 'location',
+  },
+  'Malware':  {
+    'properties': {
+      'required': ['name', 'is_family'],
+      'optional': ['description', 'malware_types', 'aliases', 'first_seen', 'last_seen',
+      'operating_system_refs', 'architecture_execution_envs', 'implementation_languages',
+      'capabilities', 'sample_refs'],
+    },
+    'type': 'malware',
+  },
+  'Malware Analysis':  {
+    'properties': {
+      'required': ['product'],
+      'optional': ['version', 'host_vm_ref', 'operating_system_ref', 'installed_software_refs',
+      'configuration_version', 'modules', 'analysis_engine_version', 'analysis_definition_version',
+      'submitted', 'analysis_started', 'analysis_ended', 'result_name', 'result',
+      'analysis_sco_refs', 'sample_ref'],
+    },
+    'type': 'malware-analysis',
+  },
+  'Note':  {
+    'properties': {
+      'required': ['content', 'object_refs'],
+      'optional': ['abstract', 'authors'],
+    },
+    'type': 'note',
+  },
+  'Opinion':  {
+    'properties': {
+      'required': ['opinion', 'object_refs'],
+      'optional': ['explanation', 'authors'],
+    },
+    'type': 'opinion',
+  },
+  'Report':  {
+    'properties': {
+      'required': ['name', 'published', 'object_refs'],
+      'optional': ['description', 'report_types'],
+    },
+    'type': 'report',
+  },
+  'Threat Actor':  {
+    'properties': {
+      'required': ['name'],
+      'optional': ['description', 'threat_actor_types', 'aliases', 'first_seen', 'last_seen',
+      'roles', 'goals', 'sophistication', 'resource_level', 'primary_motivation',
+      'secondary_motivations', 'personal_motivations'],
+    },
+    'type': 'threat-actor',
+  },
+  'Tool':  {
+    'properties': {
+      'required': ['name'],
+      'optional': ['description', 'tool_types', 'aliases', 'tool_version'],
+    },
+    'type': 'tool',
+  },
+  'Vulnerability':  {
+    'properties': {
+      'required': ['name'],
+      'optional': ['description']
+    },
+    'type': 'vulnerability',
+  },
+}
+
+function _get_other_stix_element () {
+  sdo_div = _get_stix2_sdo_select_div()
+  const div = $('<div>', {
+    'id': `div-${CONFIRM_ITEM_STIX2_ROOT}`
+  })
+  div.append(sdo_div)
+  div.append($('<br>'))
+  return div
+}
+
+function _get_required_label (prop_name, confidence) {
+  const label = $('<label>', {
+   'for': prop_name,
+   'class': 'label-stix2-prop-required',
+  })
+  label.text(`${prop_name}/required (Confidence:${confidence})`)
+  return label
+}
+
+function _get_optional_label (prop_name, confidence) {
+  const label = $('<label>', {
+   'for': prop_name,
+   'class': 'label-stix2-prop-optional',
+  })
+  label.text(`${prop_name}/optional(Confidence:${confidence})`)
+  return label
+}
+
+function _get_stix2_prop_tr (prop_name, sdo_id, confidence, sdo_type, required){
+  const input_id = prop_name
+  const form_div = $('<div>', {
+    'class': 'form-group',
+  })
+  var lebal = null
+  if (required == true) {
+    label = _get_required_label(prop_name, confidence)
+  }else{
+    label = _get_optional_label(prop_name, confidence)
+  }
+
+  const input_val = $('<input>', {
+    'type': 'text',
+    'class': 'form-control other-stix2-input',
+    'id': input_id,
+    'data-sdo': sdo_type,
+    'data-property': prop_name,
+    'data-confidence': confidence,
+    'data-sdo_id': sdo_id,
+    'aria-label': 'Sizing example input',
+    'aria-describedby': input_id,
+  })
+
+  form_div.append(label)
+  form_div.append(input_val)
+    const td = $('<td>', {
+  })
+  td.append(form_div)
+  const tr = $('<tr>', {
+  })
+  tr.append(td)
+  return tr
+}
+
+function _update_stix2_properties_div (sdo, sdo_id) {
+  const properties_div = $('<div>', {
+    'class': `btn-group div-${CONFIRM_ITEM_STIX2_PROPERTIES}`
+  })
+
+  const label = $('<label>', {
+    'class': 'confirm-item-label',
+    'for': `button-${CONFIRM_ITEM_STIX2_PROPERTIES}`,
+  })
+  label.text(`Add Properties of "${sdo}"`)
+  properties_div.append($('<br/>'))
+  properties_div.append(label)
+  properties_div.append($('<br/>'))
+
+  const table = $('<table>', {
+    'class': 'table table-striped table-hover'
+  })
+
+  const sdo_info = STIX2_SDO[sdo]
+  const sdo_properties = sdo_info['properties']
+  const sdo_type = sdo_info['type']
+  const confidence = 54
+
+  for (const prop_name of sdo_properties['required']) {
+    tr = _get_stix2_prop_tr(prop_name, sdo_id, confidence, sdo_type, true)
+    table.append(tr)
+  }
+  for (const prop_name of sdo_properties['optional']) {
+    tr = _get_stix2_prop_tr(prop_name, sdo_id, confidence, sdo_type, false)
+    table.append(tr)
+  }
+
+  properties_div.append(table)
+
+  const root_div = $(`#div-${CONFIRM_ITEM_STIX2_ROOT}`)
+  root_div.find(`.div-${CONFIRM_ITEM_STIX2_PROPERTIES}`).empty()
+  root_div.append(properties_div)
+}
+
+function _get_stix2_sdo_select_div () {
+  const span = $('<span>', {
+    'class': 'caret'
+  })
+  const button = $('<button>', {
+    'class': `btn btn-small dropdown-toggle`,
+    'id': `button-${CONFIRM_ITEM_STIX2_SDO}`,
+    'data-toggle': 'dropdown',
+  })
+  button.text('Choose SDO Class')
+  button.append(span)
+
+  const ul = $('<ul>', {
+    'class': `dropdown-menu ul-${CONFIRM_ITEM_STIX2_SDO}`,
+  })
+
+  for (const sdo_class in STIX2_SDO) {
+    var a =$('<a>')
+    a.text(sdo_class)
+    var li = $('<li>').append(a)
+    ul.append(li)
+  }
+
+  const label = $('<label>', {
+    'class': 'confirm-item-label',
+    'for': `button-${CONFIRM_ITEM_STIX2_SDO}`,
+  })
+  label.text('Add Another SDO')
+  const div = $('<div>', {
+    'class': `btn-group div-${CONFIRM_ITEM_STIX2_SDO}`
+  })
+  div.append(label)
+  div.append($('<br>'))
+  div.append(button)
+  div.append(ul)
+  return div
 }
 
 function _get_file_id_from_file_name (file_name) {
@@ -513,6 +784,7 @@ function get_confirm_data () {
   const indicators = []
   const ttps = []
   const tas = []
+  const other = {}
   $(CONFIRM_ITEM_TR_SELECTOR).each(function (index, element) {
     const checkbox_elem = $(element).find(CONFIRM_ITEM_CHECKBOX_SELECTOR)
     const table_id = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TABLE_ID)
@@ -546,10 +818,23 @@ function get_confirm_data () {
       }
     }
   })
+  $('.other-stix2-input').each(function (index, element) {
+    var item = {}
+    var sdo_id = $(element).data('sdo_id')
+    if (sdo_id in other){
+      item = other[sdo_id]
+    }else {
+      item.type = $(element).data('sdo')
+      item.confidence = $(element).data('confidence')
+    }
+    item[$(element).data('property')] = $(element).val()
+    other[sdo_id] = item
+  })
   return {
     indicators: indicators,
     ttps: ttps,
-    tas: tas
+    tas: tas,
+    other: Object.values(other),
   }
 }
 
@@ -582,6 +867,11 @@ $(function () {
   $(document).on('click', '.dropdown-menu-ta-type li a', function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
     $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
+  })
+  $(document).on('click', `.ul-${CONFIRM_ITEM_STIX2_SDO} li a`, function () {
+    $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
+    $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
+    _update_stix2_properties_div($(this).text(), 'sdo_id_1')
   })
 
   $(document).on('click', ALL_CHECK_SELECTOR, function () {
