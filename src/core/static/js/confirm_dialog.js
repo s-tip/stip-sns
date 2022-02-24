@@ -93,125 +93,245 @@ const CONFIRM_ITEM_STIX2_PROPERTIES  = 'confirm-item-stix2-properties'
 const STIX2_SDO = {
   'Attack Pattern': {
     'properties' : {
-      'required': ['name'],
-      'optional': ['description', 'aliases'] ,
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'external_references' : { 'required': false, 'type' : 'textarea', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
     },
     'type' : 'attack-pattern',
   },
-  'Campaign':  {
-    'properties': {
-      'required': ['name'],
-      'optional': ['description', 'aliases', 'first_seen', 'last_seen', 'objective'],
+  'Campaign': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+      'objective' : { 'required': false, 'type' : 'text', },
     },
     'type': 'campaign',
   },
   'Course Of Action': {
-    'properties': {
-      'required': ['name'],
-      'optional': ['description'],
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
     },
     'type': 'course-of-action',
-
+  },
+  'Grouping': {
+    'properties' : {
+      'name' : { 'required': false, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'context' : { 'required': true, 'type' : 'text', },
+      'object_refs' : { 'required': true, 'type' : 'textarea', },
+    },
+    'type': 'grouping',
   },
   'Identity': {
-    'properties': {
-      'required': ['name'],
-      'optional': ['description', 'roles', 'identity_class', 'sectors', 'contact_information'],
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'roles' : { 'required': false, 'type' : 'textarea', },
+      'identity_class' : { 'required': false, 'type' : 'textarea', },
+      'sectors' : { 'required': false, 'type' : 'textarea', },
+      'contact_information' : { 'required': false, 'type' : 'text', },
     },
     'type': 'identity',
   },
   'Indicator': {
-    'properties': {
-      'required': ['pattern', 'pattern_type', 'valid_from'],
-      'optional': ['name', 'description', 'indicator_types', 'pattern_version', 'valid_until'],
+    'properties' : {
+      'name' : { 'required': false, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'indicator_types' : { 'required': false, 'type' : 'textarea', },
+      'pattern' : { 'required': true, 'type' : 'text', },
+      'pattern_type' : { 'required': true, 'type' : 'text', },
+      'pattern_version' : { 'required': false, 'type' : 'text', },
+      'valid_from' : { 'required': false, 'type' : 'text', },
+      'valid_until' : { 'required': false, 'type' : 'text', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
     },
     'type': 'indicator',
   },
-  'Infrastructure':  {
-    'properties': {
-      'required': ['name'],
-      'optional': ['description', 'infrastructure_types', 'aliases', 'first_seen', 'last_seen'],
+  'Infrastructure': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'infrastructure_types' : { 'required': false, 'type' : 'textarea', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
     },
     'type': 'infrastructure',
   },
-  'Intrusion Set':  {
-    'properties': {
-      'required': ['name'],
-      'optional': ['description', 'aliases', 'first_seen', 'last_seen', 'goals', 'resource_level',
-      'primary_motivation', 'secondary_motivations'],
+  'Intrusion Set': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+      'goals' : { 'required': false, 'type' : 'textarea', },
+      'resource_level' : { 'required': false, 'type' : 'text', },
+      'primary_motivation' : { 'required': false, 'type' : 'text', },
+      'secondary_motivations' : { 'required': false, 'type' : 'textarea', },
     },
     'type': 'intrusion-set',
   },
-  'Location':  {
-    'properties': {
-      'required': [],
-      'optional': ['name', 'description', 'latitude', 'longitude', 'precision', 'region',
-      'country', 'administrative_area', 'city', 'street_address', 'postal_code'],
+  'Location': {
+    'properties' : {
+      'name' : { 'required': false, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'latitude' : { 'required': false, 'type' : 'text', },
+      'longitude' : { 'required': false, 'type' : 'text', },
+      'precision' : { 'required': false, 'type' : 'text', },
+      'region' : { 'required': false, 'type' : 'text', },
+      'country' : { 'required': false, 'type' : 'text', },
+      'administrative_area' : { 'required': false, 'type' : 'text', },
+      'city' : { 'required': false, 'type' : 'text', },
+      'street_address' : { 'required': false, 'type' : 'text', },
+      'postal_code' : { 'required': false, 'type' : 'text', },
     },
     'type': 'location',
   },
-  'Malware':  {
-    'properties': {
-      'required': ['name', 'is_family'],
-      'optional': ['description', 'malware_types', 'aliases', 'first_seen', 'last_seen',
-      'operating_system_refs', 'architecture_execution_envs', 'implementation_languages',
-      'capabilities', 'sample_refs'],
+  'Malware': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'malware_types' : { 'required': false, 'type' : 'textarea', },
+      'is_family' : { 'required': true, 'type' : 'text', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+      'operating_system_refs' : { 'required': false, 'type' : 'textarea', },
+      'architecture_execution_envs' : { 'required': false, 'type' : 'textarea', },
+      'implementation_languages' : { 'required': false, 'type' : 'textarea', },
+      'capabilities' : { 'required': false, 'type' : 'textarea', },
+      'sample_refs' : { 'required': false, 'type' : 'textarea', },
     },
     'type': 'malware',
   },
-  'Malware Analysis':  {
-    'properties': {
-      'required': ['product'],
-      'optional': ['version', 'host_vm_ref', 'operating_system_ref', 'installed_software_refs',
-      'configuration_version', 'modules', 'analysis_engine_version', 'analysis_definition_version',
-      'submitted', 'analysis_started', 'analysis_ended', 'result_name', 'result',
-      'analysis_sco_refs', 'sample_ref'],
+  'Malware Analysis': {
+    'properties' : {
+      'product' : { 'required': true, 'type' : 'text', },
+      'version' : { 'required': false, 'type' : 'text', },
+      'host_vm_ref' : { 'required': false, 'type' : 'text', },
+      'operating_system_ref' : { 'required': false, 'type' : 'text', },
+      'installed_software_refs' : { 'required': false, 'type' : 'textarea', },
+      'configuration_version' : { 'required': false, 'type' : 'text', },
+      'modules' : { 'required': false, 'type' : 'textarea', },
+      'analysis_engine_version' : { 'required': false, 'type' : 'text', },
+      'analysis_definition_version' : { 'required': false, 'type' : 'text', },
+      'submitted' : { 'required': false, 'type' : 'text', },
+      'analysis_started' : { 'required': false, 'type' : 'text', },
+      'analysis_ended' : { 'required': false, 'type' : 'text', },
+      'result_name' : { 'required': false, 'type' : 'text', },
+      'result' : { 'required': false, 'type' : 'text', },
+      'analysis_sco_refs' : { 'required': false, 'type' : 'textarea', },
+      'sample_ref' : { 'required': false, 'type' : 'text', },
     },
     'type': 'malware-analysis',
   },
-  'Note':  {
-    'properties': {
-      'required': ['content', 'object_refs'],
-      'optional': ['abstract', 'authors'],
+  'Note': {
+    'properties' : {
+      'abstract' : { 'required': false, 'type' : 'text', },
+      'content' : { 'required': true, 'type' : 'text', },
+      'authors' : { 'required': false, 'type' : 'textarea', },
+      'object_refs' : { 'required': true, 'type' : 'textarea', },
     },
     'type': 'note',
   },
-  'Opinion':  {
-    'properties': {
-      'required': ['opinion', 'object_refs'],
-      'optional': ['explanation', 'authors'],
+  'Observed Data': {
+    'properties' : {
+      'first_observed' : { 'required': true, 'type' : 'text', },
+      'last_observed' : { 'required': true, 'type' : 'text', },
+      'number_observed' : { 'required': true, 'type' : 'text', },
+      'objects' : { 'required': false, 'type' : 'textarea', },
+      'object_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'observed-data',
+  },
+  'Opinion': {
+    'properties' : {
+      'explanation' : { 'required': false, 'type' : 'text', },
+      'authors' : { 'required': false, 'type' : 'textarea', },
+      'opinion' : { 'required': true, 'type' : 'text', },
+      'object_refs' : { 'required': true, 'type' : 'textarea', },
     },
     'type': 'opinion',
   },
-  'Report':  {
-    'properties': {
-      'required': ['name', 'published', 'object_refs'],
-      'optional': ['description', 'report_types'],
+  'Report': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'report_types' : { 'required': false, 'type' : 'textarea', },
+      'published' : { 'required': true, 'type' : 'text', },
+      'object_refs' : { 'required': true, 'type' : 'textarea', },
     },
     'type': 'report',
   },
-  'Threat Actor':  {
-    'properties': {
-      'required': ['name'],
-      'optional': ['description', 'threat_actor_types', 'aliases', 'first_seen', 'last_seen',
-      'roles', 'goals', 'sophistication', 'resource_level', 'primary_motivation',
-      'secondary_motivations', 'personal_motivations'],
+  'Threat Actor': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'threat_actor_types' : { 'required': false, 'type' : 'textarea', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+      'roles' : { 'required': false, 'type' : 'textarea', },
+      'goals' : { 'required': false, 'type' : 'textarea', },
+      'sophistication' : { 'required': false, 'type' : 'text', },
+      'resource_level' : { 'required': false, 'type' : 'text', },
+      'primary_motivation' : { 'required': false, 'type' : 'text', },
+      'secondary_motivations' : { 'required': false, 'type' : 'textarea', },
+      'personal_motivations' : { 'required': false, 'type' : 'textarea', },
     },
     'type': 'threat-actor',
   },
-  'Tool':  {
-    'properties': {
-      'required': ['name'],
-      'optional': ['description', 'tool_types', 'aliases', 'tool_version'],
+  'Tool': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'tool_types' : { 'required': false, 'type' : 'textarea', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
+      'tool_version' : { 'required': false, 'type' : 'text', },
     },
     'type': 'tool',
   },
-  'Vulnerability':  {
-    'properties': {
-      'required': ['name'],
-      'optional': ['description']
+  'Vulnerability': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'external_references' : { 'required': false, 'type' : 'textarea', },
     },
     'type': 'vulnerability',
+  },
+  'Relationship': {
+    'properties' : {
+      'relationship_type' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'source_ref' : { 'required': true, 'type' : 'text', },
+      'target_ref' : { 'required': true, 'type' : 'text', },
+      'start_time' : { 'required': false, 'type' : 'text', },
+      'stop_time' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'relationship',
+  },
+  'Sighting': {
+    'properties' : {
+      'description' : { 'required': false, 'type' : 'text', },
+      'first_seen' : { 'required': true, 'type' : 'text', },
+      'last_seen' : { 'required': true, 'type' : 'text', },
+      'count' : { 'required': false, 'type' : 'text', },
+      'sighting_of_ref' : { 'required': true, 'type' : 'text', },
+      'observed_data_refs' : { 'required': false, 'type' : 'textarea', },
+      'where_sighted_refs' : { 'required': false, 'type' : 'textarea', },
+      'summary' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'sighting',
   },
 }
 
@@ -243,32 +363,49 @@ function _get_optional_label (prop_name, confidence) {
   return label
 }
 
-function _get_stix2_prop_tr (prop_name, sdo_id, confidence, sdo_type, required){
+function _get_stix2_prop_input (prop_name, sdo_id, confidence, sdo_type, prop_info) {
   const input_id = prop_name
+  if (prop_info['type'] == 'text') {
+    return $('<input>', {
+      'type': 'text',
+      'class': 'form-control other-stix2-input',
+      'id': input_id,
+      'data-sdo': sdo_type,
+      'data-property': prop_name,
+      'data-confidence': confidence,
+      'data-sdo_id': sdo_id,
+      'aria-describedby': input_id,
+    })
+  }
+  else if (prop_info['type'] == 'textarea') {
+    return $('<textarea>', {
+      'class': 'form-control other-stix2-input',
+      'id': input_id,
+      'data-sdo': sdo_type,
+      'data-property': prop_name,
+      'data-confidence': confidence,
+      'data-sdo_id': sdo_id,
+      'aria-describedby': input_id,
+    })
+  }
+
+  return null
+}
+
+function _get_stix2_prop_tr (prop_name, sdo_id, confidence, sdo_type, prop_info) {
   const form_div = $('<div>', {
     'class': 'form-group',
   })
   var lebal = null
-  if (required == true) {
+  if (prop_info['required'] == true) {
     label = _get_required_label(prop_name, confidence)
   }else{
     label = _get_optional_label(prop_name, confidence)
   }
 
-  const input_val = $('<input>', {
-    'type': 'text',
-    'class': 'form-control other-stix2-input',
-    'id': input_id,
-    'data-sdo': sdo_type,
-    'data-property': prop_name,
-    'data-confidence': confidence,
-    'data-sdo_id': sdo_id,
-    'aria-label': 'Sizing example input',
-    'aria-describedby': input_id,
-  })
-
+  const input = _get_stix2_prop_input (prop_name, sdo_id, confidence, sdo_type, prop_info)
   form_div.append(label)
-  form_div.append(input_val)
+  form_div.append(input)
     const td = $('<td>', {
   })
   td.append(form_div)
@@ -300,13 +437,8 @@ function _update_stix2_properties_div (sdo, sdo_id) {
   const sdo_properties = sdo_info['properties']
   const sdo_type = sdo_info['type']
   const confidence = 54
-
-  for (const prop_name of sdo_properties['required']) {
-    tr = _get_stix2_prop_tr(prop_name, sdo_id, confidence, sdo_type, true)
-    table.append(tr)
-  }
-  for (const prop_name of sdo_properties['optional']) {
-    tr = _get_stix2_prop_tr(prop_name, sdo_id, confidence, sdo_type, false)
+  for (const prop_name in sdo_properties) {
+    tr = _get_stix2_prop_tr(prop_name, sdo_id, confidence, sdo_type, sdo_properties[prop_name])
     table.append(tr)
   }
 

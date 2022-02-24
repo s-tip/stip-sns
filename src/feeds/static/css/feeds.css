@@ -352,3 +352,7 @@ ul.stream li .response-action-menu-li
 .label-stix2-prop-optional{
   color: #0000ff; 
 }
+
+.form-control.other-stix2-input{
+  resize: none;
+}

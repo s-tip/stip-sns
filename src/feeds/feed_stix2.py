@@ -1,9 +1,11 @@
 import datetime
 import base64
 import pytz
+import json
 import feeds.extractor.common as fec
 import stip.common.const as const
 import stix2.v21.sdo as SDO
+import stix2.v21.sro as SRO
 from stix2.v21.bundle import Bundle
 from stix2.properties import IDProperty
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
@@ -68,6 +70,12 @@ def _get_vulnerability_object(ttp, stip_identity, tlp_marking_object):
     return vulnerability
 
 
+def _get_other_object_integer_property(prop):
+    if prop:
+        return int(prop)
+    return 0
+
+
 def _get_other_object_boolean_property(prop):
     if prop:
         if prop.lower() == 'true':
@@ -79,6 +87,15 @@ def _get_other_object_property(prop):
     return prop if len(prop) else None
 
 
+def _get_other_object_dict_property(prop):
+    if prop:
+        try:
+            return json.loads(prop)
+        except json.decoder.JSONDecodeError:
+            return prop
+    return None
+
+
 def _get_custom_attack_pattern_object(j, stip_identity, tlp_marking_object):
     return SDO.AttackPattern(
         name=_get_other_object_property(j['name']),
@@ -86,7 +103,9 @@ def _get_custom_attack_pattern_object(j, stip_identity, tlp_marking_object):
         created_by_ref=stip_identity,
         confidence=j['confidence'],
         object_marking_refs=[tlp_marking_object],
-        aliases=_get_other_object_property(j['aliases']),
+        aliases=_get_other_object_dict_property(j['aliases']),
+        external_references=_get_other_object_dict_property(j['external_references']),
+        kill_chain_phases=_get_other_object_dict_property(j['kill_chain_phases']),
     )
 
 
@@ -97,7 +116,7 @@ def _get_custom_campaign_object(j, stip_identity, tlp_marking_object):
         created_by_ref=stip_identity,
         confidence=j['confidence'],
         object_marking_refs=[tlp_marking_object],
-        aliases=_get_other_object_property(j['aliases']),
+        aliases=_get_other_object_dict_property(j['aliases']),
         objective=_get_other_object_property(j['objective']),
         first_seen=_get_other_object_property(j['first_seen']),
         last_seen=_get_other_object_property(j['last_seen']),
@@ -114,6 +133,18 @@ def _get_custom_course_of_action_object(j, stip_identity, tlp_marking_object):
     )
 
 
+def _get_custom_grouping_object(j, stip_identity, tlp_marking_object):
+    return SDO.Grouping(
+        name=_get_other_object_property(j['name']),
+        description=_get_other_object_property(j['description']),
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        context=_get_other_object_property(j['context']),
+        object_refs=_get_other_object_dict_property(j['object_refs']),
+    )
+
+
 def _get_custom_identity_object(j, stip_identity, tlp_marking_object):
     return SDO.Identity(
         name=_get_other_object_property(j['name']),
@@ -121,9 +152,9 @@ def _get_custom_identity_object(j, stip_identity, tlp_marking_object):
         created_by_ref=stip_identity,
         confidence=j['confidence'],
         object_marking_refs=[tlp_marking_object],
-        roles=_get_other_object_property(j['roles']),
+        roles=_get_other_object_dict_property(j['roles']),
         identity_class=_get_other_object_property(j['identity_class']),
-        sectors=_get_other_object_property(j['sectors']),
+        sectors=_get_other_object_dict_property(j['sectors']),
         contact_information=_get_other_object_property(j['contact_information']),
     )
 
@@ -135,12 +166,13 @@ def _get_custom_indicator_object(j, stip_identity, tlp_marking_object):
         created_by_ref=stip_identity,
         confidence=j['confidence'],
         object_marking_refs=[tlp_marking_object],
-        indicator_types=_get_other_object_property(j['indicator_types']),
+        indicator_types=_get_other_object_dict_property(j['indicator_types']),
         pattern=_get_other_object_property(j['pattern']),
         pattern_type=_get_other_object_property(j['pattern_type']),
         pattern_version=_get_other_object_property(j['pattern_version']),
         valid_from=_get_other_object_property(j['valid_from']),
         valid_until=_get_other_object_property(j['valid_until']),
+        kill_chain_phases=_get_other_object_dict_property(j['kill_chain_phases']),
     )
 
 
@@ -151,10 +183,11 @@ def _get_custom_infrastructure_object(j, stip_identity, tlp_marking_object):
         created_by_ref=stip_identity,
         confidence=j['confidence'],
         object_marking_refs=[tlp_marking_object],
-        infrastructure_types=_get_other_object_property(j['infrastructure_types']),
-        aliases=_get_other_object_property(j['aliases']),
+        infrastructure_types=_get_other_object_dict_property(j['infrastructure_types']),
+        aliases=_get_other_object_dict_property(j['aliases']),
         first_seen=_get_other_object_property(j['first_seen']),
         last_seen=_get_other_object_property(j['last_seen']),
+        kill_chain_phases=_get_other_object_dict_property(j['kill_chain_phases']),
     )
 
 
@@ -165,13 +198,13 @@ def _get_custom_intrusion_set_object(j, stip_identity, tlp_marking_object):
         created_by_ref=stip_identity,
         confidence=j['confidence'],
         object_marking_refs=[tlp_marking_object],
-        aliases=_get_other_object_property(j['aliases']),
+        aliases=_get_other_object_dict_property(j['aliases']),
         first_seen=_get_other_object_property(j['first_seen']),
         last_seen=_get_other_object_property(j['last_seen']),
-        goals=_get_other_object_property(j['goals']),
+        goals=_get_other_object_dict_property(j['goals']),
         resource_level=_get_other_object_property(j['resource_level']),
         primary_motivation=_get_other_object_property(j['primary_motivation']),
-        secondary_motivations=_get_other_object_property(j['secondary_motivations']),
+        secondary_motivations=_get_other_object_dict_property(j['secondary_motivations']),
     )
 
 
@@ -200,16 +233,17 @@ def _get_custom_malware_object(j, stip_identity, tlp_marking_object):
         created_by_ref=stip_identity,
         confidence=j['confidence'],
         object_marking_refs=[tlp_marking_object],
-        malware_types=_get_other_object_property(j['malware_types']),
+        malware_types=_get_other_object_dict_property(j['malware_types']),
         is_family=_get_other_object_boolean_property(j['is_family']),
-        aliases=_get_other_object_property(j['aliases']),
+        aliases=_get_other_object_dict_property(j['aliases']),
         first_seen=_get_other_object_property(j['first_seen']),
         last_seen=_get_other_object_property(j['last_seen']),
-        operating_system_refs=_get_other_object_property(j['operating_system_refs']),
-        architecture_execution_envs=_get_other_object_property(j['architecture_execution_envs']),
-        implementation_languages=_get_other_object_property(j['implementation_languages']),
-        capabilities=_get_other_object_property(j['capabilities']),
-        sample_refs=_get_other_object_property(j['sample_refs']),
+        operating_system_refs=_get_other_object_dict_property(j['operating_system_refs']),
+        architecture_execution_envs=_get_other_object_dict_property(j['architecture_execution_envs']),
+        implementation_languages=_get_other_object_dict_property(j['implementation_languages']),
+        capabilities=_get_other_object_dict_property(j['capabilities']),
+        sample_refs=_get_other_object_dict_property(j['sample_refs']),
+        kill_chain_phases=_get_other_object_dict_property(j['kill_chain_phases']),
     )
 
 
@@ -222,9 +256,9 @@ def _get_custom_malware_analysis_object(j, stip_identity, tlp_marking_object):
         version=_get_other_object_property(j['version']),
         host_vm_ref=_get_other_object_property(j['host_vm_ref']),
         operating_system_ref=_get_other_object_property(j['operating_system_ref']),
-        installed_software_refs=_get_other_object_property(j['installed_software_refs']),
+        installed_software_refs=_get_other_object_dict_property(j['installed_software_refs']),
         configuration_version=_get_other_object_property(j['configuration_version']),
-        modules=_get_other_object_property(j['modules']),
+        modules=_get_other_object_dict_property(j['modules']),
         analysis_engine_version=_get_other_object_property(j['analysis_engine_version']),
         analysis_definition_version=_get_other_object_property(j['analysis_definition_version']),
         submitted=_get_other_object_property(j['submitted']),
@@ -232,7 +266,7 @@ def _get_custom_malware_analysis_object(j, stip_identity, tlp_marking_object):
         analysis_ended=_get_other_object_property(j['analysis_ended']),
         result_name=_get_other_object_property(j['result_name']),
         result=_get_other_object_property(j['result']),
-        analysis_sco_refs=_get_other_object_property(j['analysis_sco_refs']),
+        analysis_sco_refs=_get_other_object_dict_property(j['analysis_sco_refs']),
         sample_ref=_get_other_object_property(j['sample_ref']),
     )
 
@@ -244,8 +278,21 @@ def _get_custom_note_object(j, stip_identity, tlp_marking_object):
         object_marking_refs=[tlp_marking_object],
         abstract=_get_other_object_property(j['abstract']),
         content=_get_other_object_property(j['content']),
-        authors=_get_other_object_property(j['authors']),
-        object_refs=_get_other_object_property(j['object_refs']),
+        authors=_get_other_object_dict_property(j['authors']),
+        object_refs=_get_other_object_dict_property(j['object_refs']),
+    )
+
+
+def _get_custom_observed_data_object(j, stip_identity, tlp_marking_object):
+    return SDO.ObservedData(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        first_observed=_get_other_object_property(j['first_observed']),
+        last_observed=_get_other_object_property(j['last_observed']),
+        number_observed=_get_other_object_property(j['number_observed']),
+        objects=_get_other_object_dict_property(j['objects']),
+        object_refs=_get_other_object_dict_property(j['object_refs']),
     )
 
 
@@ -255,9 +302,9 @@ def _get_custom_opinion_object(j, stip_identity, tlp_marking_object):
         confidence=j['confidence'],
         object_marking_refs=[tlp_marking_object],
         explanation=_get_other_object_property(j['explanation']),
-        authors=_get_other_object_property(j['authors']),
+        authors=_get_other_object_dict_property(j['authors']),
         opinion=_get_other_object_property(j['opinion']),
-        object_refs=_get_other_object_property(j['object_refs']),
+        object_refs=_get_other_object_dict_property(j['object_refs']),
     )
 
 
@@ -268,9 +315,9 @@ def _get_custom_report_object(j, stip_identity, tlp_marking_object):
         object_marking_refs=[tlp_marking_object],
         name=_get_other_object_property(j['name']),
         description=_get_other_object_property(j['description']),
-        report_types=_get_other_object_property(j['report_types']),
+        report_types=_get_other_object_dict_property(j['report_types']),
         published=_get_other_object_property(j['published']),
-        object_refs=_get_other_object_property(j['object_refs']),
+        object_refs=_get_other_object_dict_property(j['object_refs']),
     )
 
 
@@ -281,17 +328,17 @@ def _get_custom_threat_actor_object(j, stip_identity, tlp_marking_object):
         object_marking_refs=[tlp_marking_object],
         name=_get_other_object_property(j['name']),
         description=_get_other_object_property(j['description']),
-        threat_actor_types=_get_other_object_property(j['threat_actor_types']),
-        aliases=_get_other_object_property(j['aliases']),
+        threat_actor_types=_get_other_object_dict_property(j['threat_actor_types']),
+        aliases=_get_other_object_dict_property(j['aliases']),
         first_seen=_get_other_object_property(j['first_seen']),
         last_seen=_get_other_object_property(j['last_seen']),
-        roles=_get_other_object_property(j['roles']),
-        goals=_get_other_object_property(j['goals']),
+        roles=_get_other_object_dict_property(j['roles']),
+        goals=_get_other_object_dict_property(j['goals']),
         sophistication=_get_other_object_property(j['sophistication']),
         resource_level=_get_other_object_property(j['resource_level']),
         primary_motivation=_get_other_object_property(j['primary_motivation']),
-        secondary_motivations=_get_other_object_property(j['secondary_motivations']),
-        personal_motivations=_get_other_object_property(j['personal_motivations']),
+        secondary_motivations=_get_other_object_dict_property(j['secondary_motivations']),
+        personal_motivations=_get_other_object_dict_property(j['personal_motivations']),
     )
 
 
@@ -302,9 +349,10 @@ def _get_custom_tool_object(j, stip_identity, tlp_marking_object):
         object_marking_refs=[tlp_marking_object],
         name=_get_other_object_property(j['name']),
         description=_get_other_object_property(j['description']),
-        tool_types=_get_other_object_property(j['tool_types']),
-        aliases=_get_other_object_property(j['aliases']),
+        tool_types=_get_other_object_dict_property(j['tool_types']),
+        aliases=_get_other_object_dict_property(j['aliases']),
         tool_version=_get_other_object_property(j['tool_version']),
+        kill_chain_phases=_get_other_object_dict_property(j['kill_chain_phases']),
     )
 
 
@@ -315,6 +363,37 @@ def _get_custom_vulnerability_object(j, stip_identity, tlp_marking_object):
         object_marking_refs=[tlp_marking_object],
         name=_get_other_object_property(j['name']),
         description=_get_other_object_property(j['description']),
+        external_references=_get_other_object_dict_property(j['external_references']),
+    )
+
+
+def _get_custom_relationship_object(j, stip_identity, tlp_marking_object):
+    return SRO.Relationship(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        relationship_type=_get_other_object_property(j['relationship_type']),
+        description=_get_other_object_property(j['description']),
+        source_ref=_get_other_object_property(j['source_ref']),
+        target_ref=_get_other_object_property(j['target_ref']),
+        start_time=_get_other_object_property(j['start_time']),
+        stop_time=_get_other_object_property(j['stop_time']),
+    )
+
+
+def _get_custom_sighting_object(j, stip_identity, tlp_marking_object):
+    return SRO.Sighting(
+        created_by_ref=stip_identity,
+        confidence=j['confidence'],
+        object_marking_refs=[tlp_marking_object],
+        description=_get_other_object_property(j['description']),
+        first_seen=_get_other_object_property(j['first_seen']),
+        last_seen=_get_other_object_property(j['last_seen']),
+        count=_get_other_object_integer_property(j['count']),
+        sighting_of_ref=_get_other_object_property(j['sighting_of_ref']),
+        observed_data_refs=_get_other_object_dict_property(j['observed_data_refs']),
+        where_sighted_refs=_get_other_object_dict_property(j['where_sighted_refs']),
+        summary=_get_other_object_boolean_property(j['summary']),
     )
 
 
@@ -322,6 +401,7 @@ OO_FUNCS = {
     'attack-pattern': _get_custom_attack_pattern_object,
     'campaign': _get_custom_campaign_object,
     'course-of-action': _get_custom_course_of_action_object,
+    'grouping': _get_custom_grouping_object,
     'identity': _get_custom_identity_object,
     'indicator': _get_custom_indicator_object,
     'infrastructure': _get_custom_infrastructure_object,
@@ -330,11 +410,14 @@ OO_FUNCS = {
     'malware': _get_custom_malware_object,
     'malware-analysis': _get_custom_malware_analysis_object,
     'note': _get_custom_note_object,
+    'observed-data': _get_custom_observed_data_object,
     'opinion': _get_custom_opinion_object,
     'report': _get_custom_report_object,
     'threat-actor': _get_custom_threat_actor_object,
     'tool': _get_custom_tool_object,
     'vulnerability': _get_custom_vulnerability_object,
+    'relationship': _get_custom_relationship_object,
+    'sighting': _get_custom_sighting_object,
 }
 
 
