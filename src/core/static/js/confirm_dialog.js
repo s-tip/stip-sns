@@ -345,25 +345,25 @@ function _get_other_stix_element () {
   return div
 }
 
-function _get_required_label (prop_name, confidence) {
+function _get_required_label (prop_name) {
   const label = $('<label>', {
    'for': prop_name,
    'class': 'label-stix2-prop-required',
   })
-  label.text(`${prop_name}/required (Confidence:${confidence})`)
+  label.text(`${prop_name}/required`)
   return label
 }
 
-function _get_optional_label (prop_name, confidence) {
+function _get_optional_label (prop_name) {
   const label = $('<label>', {
    'for': prop_name,
    'class': 'label-stix2-prop-optional',
   })
-  label.text(`${prop_name}/optional(Confidence:${confidence})`)
+  label.text(prop_name)
   return label
 }
 
-function _get_stix2_prop_input (prop_name, sdo_id, confidence, sdo_type, prop_info) {
+function _get_stix2_prop_input (prop_name, sdo_id, sdo_type, prop_info) {
   const input_id = prop_name
   if (prop_info['type'] == 'text') {
     return $('<input>', {
@@ -372,7 +372,6 @@ function _get_stix2_prop_input (prop_name, sdo_id, confidence, sdo_type, prop_in
       'id': input_id,
       'data-sdo': sdo_type,
       'data-property': prop_name,
-      'data-confidence': confidence,
       'data-sdo_id': sdo_id,
       'aria-describedby': input_id,
     })
@@ -383,7 +382,6 @@ function _get_stix2_prop_input (prop_name, sdo_id, confidence, sdo_type, prop_in
       'id': input_id,
       'data-sdo': sdo_type,
       'data-property': prop_name,
-      'data-confidence': confidence,
       'data-sdo_id': sdo_id,
       'aria-describedby': input_id,
     })
@@ -392,61 +390,65 @@ function _get_stix2_prop_input (prop_name, sdo_id, confidence, sdo_type, prop_in
   return null
 }
 
-function _get_stix2_prop_tr (prop_name, sdo_id, confidence, sdo_type, prop_info) {
-  const form_div = $('<div>', {
-    'class': 'form-group',
-  })
-  var lebal = null
+function _get_stix2_prop_row (prop_name, sdo_id, confidence, sdo_type, prop_info) {
+  var label = null
   if (prop_info['required'] == true) {
-    label = _get_required_label(prop_name, confidence)
+    label = _get_required_label(prop_name)
   }else{
-    label = _get_optional_label(prop_name, confidence)
+    label = _get_optional_label(prop_name)
   }
+  const label_col_div = $('<div>', {
+    'class': 'col-sm-4'
+  })
+  label_col_div.append(label)
 
-  const input = _get_stix2_prop_input (prop_name, sdo_id, confidence, sdo_type, prop_info)
-  form_div.append(label)
-  form_div.append(input)
-    const td = $('<td>', {
+  const input_col_div = $('<div>', {
+    'class': 'col-sm-8'
   })
-  td.append(form_div)
-  const tr = $('<tr>', {
+  const input = _get_stix2_prop_input (prop_name, sdo_id, sdo_type, prop_info)
+  input_col_div.append(input)
+
+  const row_div = $('<div>', {
+    'class': 'row'
   })
-  tr.append(td)
-  return tr
+
+  row_div.append(label_col_div)
+  row_div.append(input_col_div)
+  return row_div
 }
 
 function _update_stix2_properties_div (sdo, sdo_id) {
-  const properties_div = $('<div>', {
-    'class': `btn-group div-${CONFIRM_ITEM_STIX2_PROPERTIES}`
-  })
+  const sdo_info = STIX2_SDO[sdo]
+  const sdo_properties = sdo_info['properties']
+  const sdo_type = sdo_info['type']
+  const confidence = $('input[name="confidence"]').val()
 
+  const container_div = $('<div>', {
+    'class': `container-fluid btn-group div-${CONFIRM_ITEM_STIX2_PROPERTIES}`
+  })
+  const label_row_div = $('<div>', {
+    'class': 'row'
+  })
+  const label_col_div = $('<div>', {
+    'class': 'col-sm-12'
+  })
   const label = $('<label>', {
     'class': 'confirm-item-label',
     'for': `button-${CONFIRM_ITEM_STIX2_PROPERTIES}`,
   })
   label.text(`Add Properties of "${sdo}"`)
-  properties_div.append($('<br/>'))
-  properties_div.append(label)
-  properties_div.append($('<br/>'))
+  label_col_div.append(label)
+  label_row_div.append(label_col_div)
+  container_div.append(label_row_div)
 
-  const table = $('<table>', {
-    'class': 'table table-striped table-hover'
-  })
 
-  const sdo_info = STIX2_SDO[sdo]
-  const sdo_properties = sdo_info['properties']
-  const sdo_type = sdo_info['type']
-  const confidence = 54
   for (const prop_name in sdo_properties) {
-    tr = _get_stix2_prop_tr(prop_name, sdo_id, confidence, sdo_type, sdo_properties[prop_name])
-    table.append(tr)
+    row = _get_stix2_prop_row(prop_name, sdo_id, confidence, sdo_type, sdo_properties[prop_name])
+    container_div.append(row)
   }
-
-  properties_div.append(table)
-
   const root_div = $(`#div-${CONFIRM_ITEM_STIX2_ROOT}`)
   root_div.find(`.div-${CONFIRM_ITEM_STIX2_PROPERTIES}`).empty()
-  root_div.append(properties_div)
+  root_div.append(container_div)
 }
 
 function _get_stix2_sdo_select_div () {
@@ -472,18 +474,56 @@ function _get_stix2_sdo_select_div () {
     ul.append(li)
   }
 
-  const label = $('<label>', {
+  const label_sdo = $('<label>', {
     'class': 'confirm-item-label',
     'for': `button-${CONFIRM_ITEM_STIX2_SDO}`,
   })
-  label.text('Add Another SDO')
-  const div = $('<div>', {
-    'class': `btn-group div-${CONFIRM_ITEM_STIX2_SDO}`
+  label_sdo.text('Add Another SDO')
+  const col_label_sdo = $('<div>', {
+    'class': 'col-sm-4'
   })
-  div.append(label)
-  div.append($('<br>'))
-  div.append(button)
-  div.append(ul)
+  col_label_sdo.append(label_sdo)
+
+  const button_col = $('<div>', {
+    'class': `col-sm-4 btn-group div-${CONFIRM_ITEM_STIX2_SDO}`
+  })
+  button_col.append(button)
+  button_col.append(ul)
+
+  const label_confidence = $('<label>', {
+    'class': 'confirm-item-label',
+    'for': 'input-confidence'
+  })
+  label_confidence.text('Confidence')
+  const col_label_confidence = $('<div>', {
+    'class': 'col-sm-2'
+  })
+  col_label_confidence.append(label_confidence)
+
+  const input_confidence = $('<input>', {
+    'type': 'text',
+    'class': 'form-control',
+    'id': `input-confidence-${CONFIRM_ITEM_STIX2_SDO}`,
+    'aria-describedby': 'input-confidence',
+  })
+  input_confidence.val($('input[name="confidence"]').val())
+  const col_input_confidence = $('<div>', {
+    'class': 'col-sm-2'
+  })
+  col_input_confidence.append(input_confidence)
+
+  const row = $('<div>', {
+    'class': 'row'
+  })
+  row.append(col_label_sdo)
+  row.append(button_col)
+  row.append(col_label_confidence)
+  row.append(col_input_confidence)
+
+  const div = $('<div>', {
+    'class': 'container-fluid'
+  })
+  div.append(row)
   return div
 }
 
@@ -957,7 +997,7 @@ function get_confirm_data () {
       item = other[sdo_id]
     }else {
       item.type = $(element).data('sdo')
-      item.confidence = $(element).data('confidence')
+      item.confidence = $(`#input-confidence-${CONFIRM_ITEM_STIX2_SDO}`).val()
     }
     item[$(element).data('property')] = $(element).val()
     other[sdo_id] = item
