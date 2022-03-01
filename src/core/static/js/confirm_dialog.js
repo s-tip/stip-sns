@@ -200,7 +200,7 @@ const STIX2_SDO = {
       'name' : { 'required': true, 'type' : 'text', },
       'description' : { 'required': false, 'type' : 'text', },
       'malware_types' : { 'required': false, 'type' : 'textarea', },
-      'is_family' : { 'required': true, 'type' : 'text', },
+      'is_family' : { 'required': true, 'type' : 'boolean', },
       'aliases' : { 'required': false, 'type' : 'textarea', },
       'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
       'first_seen' : { 'required': false, 'type' : 'text', },
@@ -386,8 +386,51 @@ function _get_stix2_prop_input (prop_name, sdo_id, sdo_type, prop_info) {
       'aria-describedby': input_id,
     })
   }
-
+  else if (prop_info['type'] == 'boolean') {
+   const div = $('<div>' , {
+     'class': 'form-group'
+   })
+   div.append(_get_boolean_radio_div(sdo_id, sdo_type, prop_name))
+   return div
+  }
   return null
+}
+
+function _get_boolean_radio_input(sdo_id, sdo_type, prop_name, b){
+  const id = prop_name + '_' + Boolean(b).toString()
+  const input =  $('<input>', {
+    'class': 'form-check-input other-stix2-input',
+    'type':  'radio',
+    'name': prop_name,
+    'value': b,
+    'id': id,
+    'data-sdo': sdo_type,
+    'data-property': prop_name,
+    'data-sdo_id': sdo_id,
+    'selected': ''
+  })
+  input.prop('checked', b)
+  return input
+}
+
+function _get_boolean_radio_label(prop_name, b){
+  const id = prop_name + '_' + Boolean(b).toString()
+  return $('<label>', {
+    'class': 'form-check-label',
+    'for' : id,
+    'text': Boolean(b).toString()
+  })
+}
+
+function _get_boolean_radio_div(sdo_id, sdo_type, prop_name){
+  const div = $('<div>' , {
+    'class': 'form-check'
+  })
+  div.append(_get_boolean_radio_input(sdo_id, sdo_type, prop_name, true))
+  div.append(_get_boolean_radio_label(prop_name, true))
+  div.append(_get_boolean_radio_input(sdo_id, sdo_type, prop_name, false))
+  div.append(_get_boolean_radio_label(prop_name, false))
+  return div
 }
 
 function _get_stix2_prop_row (prop_name, sdo_id, confidence, sdo_type, prop_info) {
@@ -999,7 +1042,13 @@ function get_confirm_data () {
       item.type = $(element).data('sdo')
       item.confidence = $(`#input-confidence-${CONFIRM_ITEM_STIX2_SDO}`).val()
     }
-    item[$(element).data('property')] = $(element).val()
+    if($(element).prop('type') == 'radio'){
+      if($(element).prop('checked')){
+        item[$(element).data('property')] = $(element).val()
+      }
+    }else{
+      item[$(element).data('property')] = $(element).val()
+    }
     other[sdo_id] = item
   })
   return {
