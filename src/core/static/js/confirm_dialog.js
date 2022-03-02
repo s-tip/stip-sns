@@ -333,6 +333,222 @@ const STIX2_SDO = {
     },
     'type': 'sighting',
   },
+  'Artifact': {
+    'properties' : {
+      'mime_type' : { 'required': false, 'type' : 'text', },
+      'payload_bin' : { 'required': false, 'type' : 'text', },
+      'url' : { 'required': false, 'type' : 'text', },
+      'hashes' : { 'required': false, 'type' : 'textarea', },
+      'encryption_algorithm' : { 'required': false, 'type' : 'textarea', },
+      'decryption_key' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'artifact',
+  },
+  'Autonomous System': {
+    'properties' : {
+      'number' : { 'required': true, 'type' : 'text', },
+      'name' : { 'required': false, 'type' : 'text', },
+      'rir' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'autonomous-system',
+  },
+  'Directory': {
+    'properties' : {
+      'path' : { 'required': true, 'type' : 'text', },
+      'path_enc' : { 'required': false, 'type' : 'text', },
+      'ctime' : { 'required': false, 'type' : 'text', },
+      'mtime' : { 'required': false, 'type' : 'text', },
+      'atime' : { 'required': false, 'type' : 'text', },
+      'contains_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'directory',
+  },
+  'Domain Name': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+      'resolves_to_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'domain-name',
+  },
+  'Email Address': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+      'display_name' : { 'required': false, 'type' : 'text', },
+      'belongs_to_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'email-addr',
+  },
+  'Email Message': {
+    'properties' : {
+      'is_multipart' : { 'required': true, 'type' : 'boolean', },
+      'date' : { 'required': false, 'type' : 'text', },
+      'content_type' : { 'required': false, 'type' : 'text', },
+      'from_ref' : { 'required': false, 'type' : 'text', },
+      'sender_ref' : { 'required': false, 'type' : 'text', },
+      'to_refs' : { 'required': false, 'type' : 'textarea', },
+      'cc_refs' : { 'required': false, 'type' : 'textarea', },
+      'bcc_refs' : { 'required': false, 'type' : 'textarea', },
+      'message_id' : { 'required': false, 'type' : 'text', },
+      'subject' : { 'required': false, 'type' : 'text', },
+      'received_lines' : { 'required': false, 'type' : 'textarea', },
+      'additional_header_fields' : { 'required': false, 'type' : 'textarea', },
+      'body' : { 'required': false, 'type' : 'textarea', },
+      'body_multipart' : { 'required': false, 'type' : 'textarea', },
+      'raw_email_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'email-message',
+  },
+  'File': {
+    'properties' : {
+      'extensions' : { 'required': false, 'type' : 'textarea', },
+      'hashes' : { 'required': false, 'type' : 'textarea', },
+      'size' : { 'required': false, 'type' : 'text', },
+      'name' : { 'required': false, 'type' : 'text', },
+      'name_enc' : { 'required': false, 'type' : 'text', },
+      'magic_number_hex' : { 'required': false, 'type' : 'text', },
+      'mime_type' : { 'required': false, 'type' : 'text', },
+      'ctime' : { 'required': false, 'type' : 'text', },
+      'mtime' : { 'required': false, 'type' : 'text', },
+      'atime' : { 'required': false, 'type' : 'text', },
+      'parent_directory_ref' : { 'required': false, 'type' : 'text', },
+      'contains_refs' : { 'required': false, 'type' : 'textarea', },
+      'content_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'file',
+  },
+  'IPv4 Address': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+      'resolves_to_refs' : { 'required': false, 'type' : 'textarea', },
+      'belongs_to_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'ipv4-addr',
+  },
+  'IPv6 Address': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+      'resolves_to_refs' : { 'required': false, 'type' : 'textarea', },
+      'belongs_to_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'ipv6-addr',
+  },
+  'MAC Address': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+    },
+    'type': 'mac-addr',
+  },
+  'Mutex': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+    },
+    'type': 'mutex',
+  },
+  'Network': {
+    'properties' : {
+      'extensions' : { 'required': false, 'type' : 'textarea', },
+      'start' : { 'required': false, 'type' : 'text', },
+      'end' : { 'required': false, 'type' : 'text', },
+      'is_active' : { 'required': false, 'type' : 'boolean', },
+      'src_ref' : { 'required': false, 'type' : 'text', },
+      'dst_ref' : { 'required': false, 'type' : 'text', },
+      'src_port' : { 'required': false, 'type' : 'text', },
+      'dst_port' : { 'required': false, 'type' : 'text', },
+      'protocols' : { 'required': true, 'type' : 'textarea', },
+      'src_byte_count' : { 'required': false, 'type' : 'text', },
+      'dst_byte_count' : { 'required': false, 'type' : 'text', },
+      'src_packets' : { 'required': false, 'type' : 'text', },
+      'dst_packets' : { 'required': false, 'type' : 'text', },
+      'ipfix' : { 'required': false, 'type' : 'textarea', },
+      'src_payload_ref' : { 'required': false, 'type' : 'text', },
+      'dst_payload_ref' : { 'required': false, 'type' : 'text', },
+      'encapsulates_refs' : { 'required': false, 'type' : 'textarea', },
+      'encapsulated_by_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'network',
+  },
+  'Process': {
+    'properties' : {
+      'extensions' : { 'required': false, 'type' : 'textarea', },
+      'is_hidden' : { 'required': false, 'type' : 'boolean', },
+      'pid' : { 'required': false, 'type' : 'text', },
+      'created_time' : { 'required': false, 'type' : 'text', },
+      'cwd' : { 'required': false, 'type' : 'text', },
+      'command_line' : { 'required': false, 'type' : 'text', },
+      'environment_variables' : { 'required': false, 'type' : 'textarea', },
+      'opened_connection_refs' : { 'required': false, 'type' : 'textarea', },
+      'creator_user_ref' : { 'required': false, 'type' : 'text', },
+      'image_ref' : { 'required': false, 'type' : 'text', },
+      'parent_ref' : { 'required': false, 'type' : 'text', },
+      'child_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'process',
+  },
+  'Software': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'cpe' : { 'required': false, 'type' : 'text', },
+      'swid' : { 'required': false, 'type' : 'text', },
+      'languages' : { 'required': false, 'type' : 'textarea', },
+      'vendor' : { 'required': false, 'type' : 'text', },
+      'version' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'software',
+  },
+  'URL': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+    },
+    'type': 'url',
+  },
+  'User Account': {
+    'properties' : {
+      'extensions' : { 'required': false, 'type' : 'textarea', },
+      'user_id' : { 'required': false, 'type' : 'text', },
+      'credential' : { 'required': false, 'type' : 'text', },
+      'account_login' : { 'required': false, 'type' : 'text', },
+      'account_type' : { 'required': false, 'type' : 'text', },
+      'display_name' : { 'required': false, 'type' : 'text', },
+      'is_service_account' : { 'required': false, 'type' : 'boolean', },
+      'is_privileged' : { 'required': false, 'type' : 'boolean', },
+      'can_escalate_privs' : { 'required': false, 'type' : 'boolean', },
+      'is_disabled' : { 'required': false, 'type' : 'boolean', },
+      'account_created' : { 'required': false, 'type' : 'text', },
+      'account_expires' : { 'required': false, 'type' : 'text', },
+      'credential_last_changed' : { 'required': false, 'type' : 'text', },
+      'account_first_login' : { 'required': false, 'type' : 'text', },
+      'account_last_login' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'user-account',
+  },
+  'Windows Registry Key': {
+    'properties' : {
+      'key' : { 'required': false, 'type' : 'text', },
+      'values' : { 'required': false, 'type' : 'textarea', },
+      'modified_time' : { 'required': false, 'type' : 'text', },
+      'creator_user_ref' : { 'required': false, 'type' : 'text', },
+      'number_of_subkeys' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'windows-registry-key',
+  },
+  'X.509 Certificate': {
+    'properties' : {
+      'is_self_signed' : { 'required': false, 'type' : 'boolean', },
+      'hashes' : { 'required': false, 'type' : 'textarea', },
+      'version' : { 'required': false, 'type' : 'text', },
+      'serial_number' : { 'required': false, 'type' : 'text', },
+      'signature_algorithm' : { 'required': false, 'type' : 'text', },
+      'issuer' : { 'required': false, 'type' : 'text', },
+      'validity_not_before' : { 'required': false, 'type' : 'text', },
+      'validity_not_after' : { 'required': false, 'type' : 'text', },
+      'subject' : { 'required': false, 'type' : 'text', },
+      'subject_public_key_algorithm' : { 'required': false, 'type' : 'text', },
+      'subject_public_key_modulus' : { 'required': false, 'type' : 'text', },
+      'subject_public_key_exponent' : { 'required': false, 'type' : 'text', },
+      'x509_v3_extensions' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'x509-certificate',
+  },
 }
 
 function _get_other_stix_element () {
@@ -407,9 +623,24 @@ function _get_boolean_radio_input(sdo_id, sdo_type, prop_name, b){
     'data-sdo': sdo_type,
     'data-property': prop_name,
     'data-sdo_id': sdo_id,
-    'selected': ''
   })
-  input.prop('checked', b)
+  input.prop('checked', false)
+  return input
+}
+
+function _get_boolean_radio_input_unset(sdo_id, sdo_type, prop_name){
+  const id = prop_name + '_unset'
+  const input =  $('<input>', {
+    'class': 'form-check-input other-stix2-input',
+    'type':  'radio',
+    'name': prop_name,
+    'value': 'unset',
+    'id': id,
+    'data-sdo': sdo_type,
+    'data-property': prop_name,
+    'data-sdo_id': sdo_id,
+  })
+  input.prop('checked', true)
   return input
 }
 
@@ -422,6 +653,15 @@ function _get_boolean_radio_label(prop_name, b){
   })
 }
 
+function _get_boolean_radio_label_unset(prop_name) {
+  const id = prop_name + '_unset'
+  return $('<label>', {
+    'class': 'form-check-label',
+    'for' : id,
+    'text': 'unset'
+  })
+}
+
 function _get_boolean_radio_div(sdo_id, sdo_type, prop_name){
   const div = $('<div>' , {
     'class': 'form-check'
@@ -430,6 +670,8 @@ function _get_boolean_radio_div(sdo_id, sdo_type, prop_name){
   div.append(_get_boolean_radio_label(prop_name, true))
   div.append(_get_boolean_radio_input(sdo_id, sdo_type, prop_name, false))
   div.append(_get_boolean_radio_label(prop_name, false))
+  div.append(_get_boolean_radio_input_unset(sdo_id, sdo_type, prop_name))
+  div.append(_get_boolean_radio_label_unset(prop_name))
   return div
 }
 

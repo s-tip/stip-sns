@@ -6,6 +6,7 @@ import feeds.extractor.common as fec
 import stip.common.const as const
 import stix2.v21.sdo as SDO
 import stix2.v21.sro as SRO
+import stix2.v21.observables as OBSERVABLES
 from stix2.v21.bundle import Bundle
 from stix2.properties import IDProperty
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
@@ -80,6 +81,8 @@ def _get_other_object_boolean_property(prop):
     if prop:
         if prop.lower() == 'true':
             return True
+        if prop.lower() == 'unset':
+            return None
     return False
 
 
@@ -397,6 +400,238 @@ def _get_custom_sighting_object(j, stip_identity, tlp_marking_object):
     )
 
 
+def _get_custom_artifact_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.Artifact(
+        object_marking_refs=[tlp_marking_object],
+        mime_type=_get_other_object_property(j['mime_type']),
+        payload_bin=_get_other_object_property(j['payload_bin']),
+        url=_get_other_object_property(j['url']),
+        hashes=_get_other_object_dict_property(j['hashes']),
+        encryption_algorithm=_get_other_object_dict_property(j['encryption_algorithm']),
+        decryption_key=_get_other_object_property(j['decryption_key']),
+    )
+
+
+def _get_custom_autonomous_system_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.AutonomousSystem(
+        object_marking_refs=[tlp_marking_object],
+        number=_get_other_object_integer_property(j['number']),
+        name=_get_other_object_property(j['name']),
+        rir=_get_other_object_property(j['rir']),
+    )
+
+
+def _get_custom_directory_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.Directory(
+        object_marking_refs=[tlp_marking_object],
+        path=_get_other_object_property(j['path']),
+        path_enc=_get_other_object_property(j['path_enc']),
+        ctime=_get_other_object_property(j['ctime']),
+        mtime=_get_other_object_property(j['mtime']),
+        atime=_get_other_object_property(j['atime']),
+        contains_refs=_get_other_object_dict_property(j['contains_refs']),
+    )
+
+
+def _get_custom_domain_name_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.DomainName(
+        object_marking_refs=[tlp_marking_object], value=_get_other_object_property(
+            j['value']), resolves_to_refs=_get_other_object_dict_property(
+            j['resolves_to_refs']), )
+
+
+def _get_custom_email_addr_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.EmailAddress(
+        object_marking_refs=[tlp_marking_object],
+        value=_get_other_object_property(j['value']),
+        display_name=_get_other_object_property(j['display_name']),
+        belongs_to_ref=_get_other_object_property(j['belongs_to_ref']),
+    )
+
+
+def _get_custom_email_message_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.EmailMessage(
+        object_marking_refs=[tlp_marking_object],
+        is_multipart=_get_other_object_boolean_property(j['is_multipart']),
+        date=_get_other_object_property(j['date']),
+        content_type=_get_other_object_property(j['content_type']),
+        from_ref=_get_other_object_property(j['from_ref']),
+        sender_ref=_get_other_object_property(j['sender_ref']),
+        to_refs=_get_other_object_dict_property(j['to_refs']),
+        cc_refs=_get_other_object_dict_property(j['cc_refs']),
+        message_id=_get_other_object_property(j['message_id']),
+        subject=_get_other_object_property(j['subject']),
+        received_lines=_get_other_object_dict_property(j['received_lines']),
+        additional_header_fields=_get_other_object_dict_property(j['additional_header_fields']),
+        body=_get_other_object_property(j['body']),
+        body_multipart=_get_other_object_dict_property(j['body_multipart']),
+        raw_email_ref=_get_other_object_property(j['raw_email_ref']),
+    )
+
+
+def _get_custom_file_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.File(
+        object_marking_refs=[tlp_marking_object],
+        extensions=_get_other_object_dict_property(j['extensions']),
+        hashes=_get_other_object_dict_property(j['hashes']),
+        size=_get_other_object_integer_property(j['size']),
+        name=_get_other_object_property(j['name']),
+        name_enc=_get_other_object_property(j['name_enc']),
+        magic_number_hex=_get_other_object_property(j['magic_number_hex']),
+        mime_type=_get_other_object_property(j['mime_type']),
+        ctime=_get_other_object_property(j['ctime']),
+        mtime=_get_other_object_property(j['mtime']),
+        atime=_get_other_object_property(j['atime']),
+        parent_directory_ref=_get_other_object_property(j['parent_directory_ref']),
+        contains_refs=_get_other_object_dict_property(j['contains_refs']),
+        content_ref=_get_other_object_property(j['content_ref']),
+    )
+
+
+def _get_custom_ipv4_addr_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.IPv4Address(
+        object_marking_refs=[tlp_marking_object],
+        value=_get_other_object_property(j['value']),
+        resolves_to_refs=_get_other_object_dict_property(j['resolves_to_refs']),
+        belongs_to_refs=_get_other_object_dict_property(j['belongs_to_refs']),
+    )
+
+
+def _get_custom_ipv6_addr_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.IPv6Address(
+        object_marking_refs=[tlp_marking_object],
+        value=_get_other_object_property(j['value']),
+        resolves_to_refs=_get_other_object_dict_property(j['resolves_to_refs']),
+        belongs_to_refs=_get_other_object_dict_property(j['belongs_to_refs']),
+    )
+
+
+def _get_custom_mac_addr_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.MACAddress(
+        object_marking_refs=[tlp_marking_object],
+        value=_get_other_object_property(j['value']),
+    )
+
+
+def _get_custom_mutex_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.Mutex(
+        object_marking_refs=[tlp_marking_object],
+        name=_get_other_object_property(j['name']),
+    )
+
+
+def _get_custom_network_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.NetworkTraffic(
+        object_marking_refs=[tlp_marking_object],
+        extensions=_get_other_object_dict_property(j['extensions']),
+        start=_get_other_object_property(j['start']),
+        end=_get_other_object_property(j['end']),
+        is_active=_get_other_object_boolean_property(j['is_active']),
+        src_ref=_get_other_object_property(j['src_ref']),
+        dst_ref=_get_other_object_property(j['dst_ref']),
+        src_port=_get_other_object_integer_property(j['src_port']),
+        dst_port=_get_other_object_integer_property(j['dst_port']),
+        protocols=_get_other_object_dict_property(j['protocols']),
+        src_byte_count=_get_other_object_integer_property(j['src_byte_count']),
+        dst_byte_count=_get_other_object_integer_property(j['dst_byte_count']),
+        src_packets=_get_other_object_integer_property(j['src_packets']),
+        dst_packets=_get_other_object_integer_property(j['dst_packets']),
+        ipfix=_get_other_object_dict_property(j['ipfix']),
+        src_payload_ref=_get_other_object_property(j['src_payload_ref']),
+        dst_payload_ref=_get_other_object_property(j['dst_payload_ref']),
+        encapsulates_refs=_get_other_object_dict_property(j['encapsulates_refs']),
+        encapsulated_by_ref=_get_other_object_property(j['encapsulated_by_ref']),
+    )
+
+
+def _get_custom_process_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.Process(
+        object_marking_refs=[tlp_marking_object],
+        extensions=_get_other_object_dict_property(j['extensions']),
+        is_hidden=_get_other_object_boolean_property(j['is_hidden']),
+        pid=_get_other_object_integer_property(j['pid']),
+        created_time=_get_other_object_property(j['created_time']),
+        cwd=_get_other_object_property(j['cwd']),
+        command_line=_get_other_object_property(j['command_line']),
+        environment_variables=_get_other_object_dict_property(j['environment_variables']),
+        opened_connection_refs=_get_other_object_dict_property(j['opened_connection_refs']),
+        creator_user_ref=_get_other_object_property(j['creator_user_ref']),
+        image_ref=_get_other_object_property(j['image_ref']),
+        parent_ref=_get_other_object_property(j['parent_ref']),
+        child_refs=_get_other_object_dict_property(j['child_refs']),
+    )
+
+
+def _get_custom_software_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.Software(
+        object_marking_refs=[tlp_marking_object],
+        name=_get_other_object_property(j['name']),
+        cpe=_get_other_object_property(j['cpe']),
+        swid=_get_other_object_property(j['swid']),
+        languages=_get_other_object_dict_property(j['languages']),
+        vendor=_get_other_object_property(j['vendor']),
+        version=_get_other_object_property(j['version']),
+    )
+
+
+def _get_custom_url_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.URL(
+        object_marking_refs=[tlp_marking_object],
+        value=_get_other_object_property(j['value']),
+    )
+
+
+def _get_custom_user_account_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.UserAccount(
+        object_marking_refs=[tlp_marking_object],
+        extensions=_get_other_object_dict_property(j['extensions']),
+        user_id=_get_other_object_property(j['user_id']),
+        credential=_get_other_object_property(j['credential']),
+        account_login=_get_other_object_property(j['account_login']),
+        account_type=_get_other_object_property(j['account_type']),
+        display_name=_get_other_object_property(j['display_name']),
+        is_service_account=_get_other_object_boolean_property(j['is_service_account']),
+        is_privileged=_get_other_object_boolean_property(j['is_privileged']),
+        can_escalate_privs=_get_other_object_boolean_property(j['can_escalate_privs']),
+        is_disabled=_get_other_object_boolean_property(j['is_disabled']),
+        account_created=_get_other_object_property(j['account_created']),
+        account_expires=_get_other_object_property(j['account_expires']),
+        credential_last_changed=_get_other_object_property(j['credential_last_changed']),
+        account_first_login=_get_other_object_property(j['account_first_login']),
+        account_last_login=_get_other_object_property(j['account_last_login']),
+    )
+
+
+def _get_custom_windows_registry_key_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.WindowsRegistryKey(
+        object_marking_refs=[tlp_marking_object],
+        key=_get_other_object_property(j['key']),
+        values=_get_other_object_dict_property(j['values']),
+        modified_time=_get_other_object_property(j['modified_time']),
+        creator_user_ref=_get_other_object_property(j['creator_user_ref']),
+        number_of_subkeys=_get_other_object_integer_property(j['number_of_subkeys']),
+    )
+
+
+def _get_custom_x509_certificate_object(j, stip_identity, tlp_marking_object):
+    return OBSERVABLES.X509Certificate(
+        object_marking_refs=[tlp_marking_object],
+        is_self_signed=_get_other_object_boolean_property(j['is_self_signed']),
+        hashes=_get_other_object_dict_property(j['hashes']),
+        version=_get_other_object_property(j['version']),
+        serial_number=_get_other_object_property(j['serial_number']),
+        signature_algorithm=_get_other_object_property(j['signature_algorithm']),
+        issuer=_get_other_object_property(j['issuer']),
+        validity_not_before=_get_other_object_property(j['validity_not_before']),
+        validity_not_after=_get_other_object_property(j['validity_not_after']),
+        subject=_get_other_object_property(j['subject']),
+        subject_public_key_algorithm=_get_other_object_property(j['subject_public_key_algorithm']),
+        subject_public_key_modulus=_get_other_object_property(j['subject_public_key_modulus']),
+        subject_public_key_exponent=_get_other_object_integer_property(j['subject_public_key_exponent']),
+        x509_v3_extensions=_get_other_object_dict_property(j['x509_v3_extensions']),
+    )
+
+
 OO_FUNCS = {
     'attack-pattern': _get_custom_attack_pattern_object,
     'campaign': _get_custom_campaign_object,
@@ -418,6 +653,24 @@ OO_FUNCS = {
     'vulnerability': _get_custom_vulnerability_object,
     'relationship': _get_custom_relationship_object,
     'sighting': _get_custom_sighting_object,
+    'artifact': _get_custom_artifact_object,
+    'autonomous-system': _get_custom_autonomous_system_object,
+    'directory': _get_custom_directory_object,
+    'domain-name': _get_custom_domain_name_object,
+    'email-addr': _get_custom_email_addr_object,
+    'email-message': _get_custom_email_message_object,
+    'file': _get_custom_file_object,
+    'ipv4-addr': _get_custom_ipv4_addr_object,
+    'ipv6-addr': _get_custom_ipv6_addr_object,
+    'mac-addr': _get_custom_mac_addr_object,
+    'mutex': _get_custom_mutex_object,
+    'network': _get_custom_network_object,
+    'process': _get_custom_process_object,
+    'software': _get_custom_software_object,
+    'url': _get_custom_url_object,
+    'user-account': _get_custom_user_account_object,
+    'windows-registry-key': _get_custom_windows_registry_key_object,
+    'x509-certificate': _get_custom_x509_certificate_object,
 }
 
 
