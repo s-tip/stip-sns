@@ -638,7 +638,7 @@ def post_comment(api_user, original_package_id, post, comment_user):
     if len(post) > 0:
         post = post[:10240]
     # Comment 用の STIX イメージ作成
-    origin_stix_file = rs.get_package_info_from_pack3yyage_id(
+    origin_stix_file = rs.get_package_info_from_package_id(
         api_user, original_package_id
     )
     origin_stix_version = origin_stix_file['version']
