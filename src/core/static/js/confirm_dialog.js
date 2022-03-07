@@ -628,13 +628,13 @@ function _get_boolean_radio_input(sdo_id, sdo_type, prop_name, b){
   return input
 }
 
-function _get_boolean_radio_input_unset(sdo_id, sdo_type, prop_name){
-  const id = prop_name + '_unset'
+function _get_boolean_radio_input_unspecified(sdo_id, sdo_type, prop_name){
+  const id = prop_name + '_unspecified'
   const input =  $('<input>', {
     'class': 'form-check-input other-stix2-input',
     'type':  'radio',
     'name': prop_name,
-    'value': 'unset',
+    'value': 'unspecified',
     'id': id,
     'data-sdo': sdo_type,
     'data-property': prop_name,
@@ -653,12 +653,12 @@ function _get_boolean_radio_label(prop_name, b){
   })
 }
 
-function _get_boolean_radio_label_unset(prop_name) {
-  const id = prop_name + '_unset'
+function _get_boolean_radio_label_unspecified(prop_name) {
+  const id = prop_name + '_unspecified'
   return $('<label>', {
     'class': 'form-check-label',
     'for' : id,
-    'text': 'unset'
+    'text': 'unspecified'
   })
 }
 
@@ -668,10 +668,12 @@ function _get_boolean_radio_div(sdo_id, sdo_type, prop_name){
   })
   div.append(_get_boolean_radio_input(sdo_id, sdo_type, prop_name, true))
   div.append(_get_boolean_radio_label(prop_name, true))
+  div.append($('<span>').html('&nbsp;'))
   div.append(_get_boolean_radio_input(sdo_id, sdo_type, prop_name, false))
   div.append(_get_boolean_radio_label(prop_name, false))
-  div.append(_get_boolean_radio_input_unset(sdo_id, sdo_type, prop_name))
-  div.append(_get_boolean_radio_label_unset(prop_name))
+  div.append($('<span>').html('&nbsp;:&nbsp;'))
+  div.append(_get_boolean_radio_input_unspecified(sdo_id, sdo_type, prop_name))
+  div.append(_get_boolean_radio_label_unspecified(prop_name))
   return div
 }
 

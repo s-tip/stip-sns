@@ -384,7 +384,6 @@ $(function () {
 
   //確認画面の投稿ボタン押下時
   $('#confirm-compose').click(function () {
-    $('#confirm_indicators_modal_dialog').modal('hide');
     var f = $('#compose-form');
     var button = $(".btn-post");
 
@@ -412,6 +411,7 @@ $(function () {
       contentType: false,
       cache: false,
     }).done(function (data) {
+      $('#confirm_indicators_modal_dialog').modal('hide');
       $("ul.stream").prepend(data);
       $(".compose").slideUp();
       $(".compose").removeClass("composing");

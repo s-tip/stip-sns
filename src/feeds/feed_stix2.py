@@ -81,7 +81,7 @@ def _get_other_object_boolean_property(prop):
     if prop:
         if prop.lower() == 'true':
             return True
-        if prop.lower() == 'unset':
+        if prop.lower() == 'unspecified':
             return None
     return False
 
