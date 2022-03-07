@@ -1257,7 +1257,7 @@ def get_like_stix2_bundle(
     if like:
         opinion = SDO.Opinion(
             created_by_ref=individual_identity,
-            opinion='strongly-agree',
+            opinion='agree',
             object_refs=[report_id]
         )
         bundle.objects.append(opinion)
