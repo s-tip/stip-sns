@@ -832,13 +832,20 @@ def _get_x_stip_sns_tool():
 
 # stip_user から identity (Individual) を作成する
 def _get_individual_identity(stip_user):
-    id = IDProperty('identity').default()
+    if (len(stip_user.identity_id) == 0):
+        id = IDProperty('identity').default()
+        stip_user.identity_id = id
+        stip_user.save()
+    else:
+        id = stip_user.identity_id
     identity = SDO.Identity(
         id=id,
         name=stip_user.username,
         identity_class='Individual',
         x_stip_sns_account=stip_user.username,
         created_by_ref=id,
+        created=stip_user.date_joined,
+        modified=stip_user.updated_at,
         allow_custom=True
     )
     return identity
