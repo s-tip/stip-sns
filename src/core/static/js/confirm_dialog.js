@@ -87,7 +87,7 @@ function make_extract_tables (table_datas) {
 }
 
 const CONFIRM_ITEM_STIX2_ROOT  = 'confirm-item-stix2-root'
-const CONFIRM_ITEM_STIX2_SDO  = 'confirm-item-stix2-sdo'
+const CONFIRM_ITEM_STIX2_OBJECT  = 'confirm-item-stix2-object'
 const CONFIRM_ITEM_STIX2_PROPERTIES  = 'confirm-item-stix2-properties'
 
 const STIX2_SDO = {
@@ -309,6 +309,9 @@ const STIX2_SDO = {
     },
     'type': 'vulnerability',
   },
+}
+
+const STIX2_SRO = {
   'Relationship': {
     'properties' : {
       'relationship_type' : { 'required': true, 'type' : 'text', },
@@ -333,6 +336,9 @@ const STIX2_SDO = {
     },
     'type': 'sighting',
   },
+}
+
+const STIX2_SCO = {
   'Artifact': {
     'properties' : {
       'mime_type' : { 'required': false, 'type' : 'text', },
@@ -551,12 +557,18 @@ const STIX2_SDO = {
   },
 }
 
+const STIX_CATEGORY_TABLE = {
+  'SDO': STIX2_SDO,
+  'SRO': STIX2_SRO,
+  'SCO': STIX2_SCO,
+}
+
 function _get_other_stix_element () {
-  sdo_div = _get_stix2_sdo_select_div()
+  other_div = _get_other_object_select_div()
   const div = $('<div>', {
     'id': `div-${CONFIRM_ITEM_STIX2_ROOT}`
   })
-  div.append(sdo_div)
+  div.append(other_div)
   div.append($('<br>'))
   return div
 }
@@ -579,16 +591,16 @@ function _get_optional_label (prop_name) {
   return label
 }
 
-function _get_stix2_prop_input (prop_name, sdo_id, sdo_type, prop_info) {
+function _get_stix2_prop_input (prop_name, target_id, object_type, prop_info) {
   const input_id = prop_name
   if (prop_info['type'] == 'text') {
     return $('<input>', {
       'type': 'text',
       'class': 'form-control other-stix2-input',
       'id': input_id,
-      'data-sdo': sdo_type,
+      'data-object_type': object_type,
       'data-property': prop_name,
-      'data-sdo_id': sdo_id,
+      'data-target_id': target_id,
       'aria-describedby': input_id,
     })
   }
@@ -596,9 +608,9 @@ function _get_stix2_prop_input (prop_name, sdo_id, sdo_type, prop_info) {
     return $('<textarea>', {
       'class': 'form-control other-stix2-input',
       'id': input_id,
-      'data-sdo': sdo_type,
+      'data-object_type': object_type,
       'data-property': prop_name,
-      'data-sdo_id': sdo_id,
+      'data-target_id': target_id,
       'aria-describedby': input_id,
     })
   }
@@ -606,13 +618,13 @@ function _get_stix2_prop_input (prop_name, sdo_id, sdo_type, prop_info) {
    const div = $('<div>' , {
      'class': 'form-group'
    })
-   div.append(_get_boolean_radio_div(sdo_id, sdo_type, prop_name))
+   div.append(_get_boolean_radio_div(target_id, object_type, prop_name))
    return div
   }
   return null
 }
 
-function _get_boolean_radio_input(sdo_id, sdo_type, prop_name, b){
+function _get_boolean_radio_input(target_id, object_type, prop_name, b){
   const id = prop_name + '_' + Boolean(b).toString()
   const input =  $('<input>', {
     'class': 'form-check-input other-stix2-input',
@@ -620,15 +632,15 @@ function _get_boolean_radio_input(sdo_id, sdo_type, prop_name, b){
     'name': prop_name,
     'value': b,
     'id': id,
-    'data-sdo': sdo_type,
+    'data-object_type': object_type,
     'data-property': prop_name,
-    'data-sdo_id': sdo_id,
+    'data-target_id': target_id,
   })
   input.prop('checked', false)
   return input
 }
 
-function _get_boolean_radio_input_unspecified(sdo_id, sdo_type, prop_name){
+function _get_boolean_radio_input_unspecified(target_id, object_type, prop_name){
   const id = prop_name + '_unspecified'
   const input =  $('<input>', {
     'class': 'form-check-input other-stix2-input',
@@ -636,9 +648,9 @@ function _get_boolean_radio_input_unspecified(sdo_id, sdo_type, prop_name){
     'name': prop_name,
     'value': 'unspecified',
     'id': id,
-    'data-sdo': sdo_type,
+    'data-object_type': object_type,
     'data-property': prop_name,
-    'data-sdo_id': sdo_id,
+    'data-target_id': target_id,
   })
   input.prop('checked', true)
   return input
@@ -662,22 +674,22 @@ function _get_boolean_radio_label_unspecified(prop_name) {
   })
 }
 
-function _get_boolean_radio_div(sdo_id, sdo_type, prop_name){
+function _get_boolean_radio_div(target_id, object_type, prop_name){
   const div = $('<div>' , {
     'class': 'form-check'
   })
-  div.append(_get_boolean_radio_input(sdo_id, sdo_type, prop_name, true))
+  div.append(_get_boolean_radio_input(target_id, object_type, prop_name, true))
   div.append(_get_boolean_radio_label(prop_name, true))
   div.append($('<span>').html('&nbsp;'))
-  div.append(_get_boolean_radio_input(sdo_id, sdo_type, prop_name, false))
+  div.append(_get_boolean_radio_input(target_id, object_type, prop_name, false))
   div.append(_get_boolean_radio_label(prop_name, false))
   div.append($('<span>').html('&nbsp;:&nbsp;'))
-  div.append(_get_boolean_radio_input_unspecified(sdo_id, sdo_type, prop_name))
+  div.append(_get_boolean_radio_input_unspecified(target_id, object_type, prop_name))
   div.append(_get_boolean_radio_label_unspecified(prop_name))
   return div
 }
 
-function _get_stix2_prop_row (prop_name, sdo_id, confidence, sdo_type, prop_info) {
+function _get_stix2_prop_row (prop_name, target_id, object_type, prop_info) {
   var label = null
   if (prop_info['required'] == true) {
     label = _get_required_label(prop_name)
@@ -692,7 +704,7 @@ function _get_stix2_prop_row (prop_name, sdo_id, confidence, sdo_type, prop_info
   const input_col_div = $('<div>', {
     'class': 'col-sm-8'
   })
-  const input = _get_stix2_prop_input (prop_name, sdo_id, sdo_type, prop_info)
+  const input = _get_stix2_prop_input (prop_name, target_id, object_type, prop_info)
   input_col_div.append(input)
 
   const row_div = $('<div>', {
@@ -704,10 +716,11 @@ function _get_stix2_prop_row (prop_name, sdo_id, confidence, sdo_type, prop_info
   return row_div
 }
 
-function _update_stix2_properties_div (sdo, sdo_id) {
-  const sdo_info = STIX2_SDO[sdo]
-  const sdo_properties = sdo_info['properties']
-  const sdo_type = sdo_info['type']
+function _update_stix2_properties_div (object_name, target_id) {
+  const category = $('input:radio[name="other_category"]:checked').val()
+  const info = STIX_CATEGORY_TABLE[category][object_name]
+  const properties = info['properties']
+  const object_type = info['type']
   const confidence = $('input[name="confidence"]').val()
 
   const container_div = $('<div>', {
@@ -723,14 +736,13 @@ function _update_stix2_properties_div (sdo, sdo_id) {
     'class': 'confirm-item-label',
     'for': `button-${CONFIRM_ITEM_STIX2_PROPERTIES}`,
   })
-  label.text(`Add Properties of "${sdo}"`)
+  label.text(`Add Properties of "${object_name}"`)
   label_col_div.append(label)
   label_row_div.append(label_col_div)
   container_div.append(label_row_div)
 
-
-  for (const prop_name in sdo_properties) {
-    row = _get_stix2_prop_row(prop_name, sdo_id, confidence, sdo_type, sdo_properties[prop_name])
+  for (const prop_name in properties) {
+    row = _get_stix2_prop_row(prop_name, target_id, object_type, properties[prop_name])
     container_div.append(row)
   }
   const root_div = $(`#div-${CONFIRM_ITEM_STIX2_ROOT}`)
@@ -738,44 +750,80 @@ function _update_stix2_properties_div (sdo, sdo_id) {
   root_div.append(container_div)
 }
 
-function _get_stix2_sdo_select_div () {
+const STIX_CATEGORY_LABEL_CLASS = 'stix-category-label'
+
+function _get_stix_type_radio () {
+  const div_fg = $('<div>', {
+    'class': 'form-group'
+  })
+  for (const item in STIX_CATEGORY_TABLE) {
+    const id = `${STIX_CATEGORY_LABEL_CLASS}-${item}`
+
+    const label = $('<label>', {
+      'class': 'form-check-label',
+      'for' : id,
+    })
+    label.text(item)
+    const input =  $('<input>', {
+      'class': `form-check-input ${STIX_CATEGORY_LABEL_CLASS}`,
+      'id':  id,
+      'type':  'radio',
+      'name': 'other_category',
+      'value': item,
+    })
+
+    const each_div = $('<div>', {
+      'class': 'form-check form-check-inline'
+    })
+    each_div.append(input)
+    each_div.append(label)
+    div_fg.append(each_div)
+  }
+
+  const form = $('<form>')
+  form.append(div_fg)
+
+  const div = $('<div>')
+  div.append(form)
+  return div
+}
+
+function _get_other_object_select_div () {
   const span = $('<span>', {
     'class': 'caret'
   })
   const button = $('<button>', {
     'class': `btn btn-small dropdown-toggle`,
-    'id': `button-${CONFIRM_ITEM_STIX2_SDO}`,
+    'id': `button-${CONFIRM_ITEM_STIX2_OBJECT}`,
     'data-toggle': 'dropdown',
   })
-  button.text('Choose SDO Class')
+  button.text('Choose Other Class')
+  button.prop('disabled', true)
   button.append(span)
 
   const ul = $('<ul>', {
-    'class': `dropdown-menu ul-${CONFIRM_ITEM_STIX2_SDO}`,
+    'class': `dropdown-menu ul-${CONFIRM_ITEM_STIX2_OBJECT}`,
   })
 
-  for (const sdo_class in STIX2_SDO) {
-    var a =$('<a>')
-    a.text(sdo_class)
-    var li = $('<li>').append(a)
-    ul.append(li)
-  }
-
-  const label_sdo = $('<label>', {
+  const label_select = $('<label>', {
     'class': 'confirm-item-label',
-    'for': `button-${CONFIRM_ITEM_STIX2_SDO}`,
   })
-  label_sdo.text('Add Another SDO')
-  const col_label_sdo = $('<div>', {
+  label_select.text('Choose STIX Object Type')
+
+  const radio = _get_stix_type_radio()
+  const col_radio = $('<div>', {
     'class': 'col-sm-4'
   })
-  col_label_sdo.append(label_sdo)
+  col_radio.append(label_select)
+  col_radio.append($('<br/>'))
+  col_radio.append($('<br/>'))
+  col_radio.append(radio)
 
-  const button_col = $('<div>', {
-    'class': `col-sm-4 btn-group div-${CONFIRM_ITEM_STIX2_SDO}`
+  const col_button = $('<div>', {
+    'class': `col-sm-4 btn-group div-${CONFIRM_ITEM_STIX2_OBJECT}`
   })
-  button_col.append(button)
-  button_col.append(ul)
+  col_button.append(button)
+  col_button.append(ul)
 
   const label_confidence = $('<label>', {
     'class': 'confirm-item-label',
@@ -790,7 +838,7 @@ function _get_stix2_sdo_select_div () {
   const input_confidence = $('<input>', {
     'type': 'text',
     'class': 'form-control',
-    'id': `input-confidence-${CONFIRM_ITEM_STIX2_SDO}`,
+    'id': `input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`,
     'aria-describedby': 'input-confidence',
   })
   input_confidence.val($('input[name="confidence"]').val())
@@ -802,8 +850,8 @@ function _get_stix2_sdo_select_div () {
   const row = $('<div>', {
     'class': 'row'
   })
-  row.append(col_label_sdo)
-  row.append(button_col)
+  row.append(col_radio)
+  row.append(col_button)
   row.append(col_label_confidence)
   row.append(col_input_confidence)
 
@@ -1279,12 +1327,12 @@ function get_confirm_data () {
   })
   $('.other-stix2-input').each(function (index, element) {
     var item = {}
-    var sdo_id = $(element).data('sdo_id')
-    if (sdo_id in other){
-      item = other[sdo_id]
+    var target_id = $(element).data('target_id')
+    if (target_id in other){
+      item = other[target_id]
     }else {
-      item.type = $(element).data('sdo')
-      item.confidence = $(`#input-confidence-${CONFIRM_ITEM_STIX2_SDO}`).val()
+      item.type = $(element).data('object_type')
+      item.confidence = $(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`).val()
     }
     if($(element).prop('type') == 'radio'){
       if($(element).prop('checked')){
@@ -1293,7 +1341,7 @@ function get_confirm_data () {
     }else{
       item[$(element).data('property')] = $(element).val()
     }
-    other[sdo_id] = item
+    other[target_id] = item
   })
   return {
     indicators: indicators,
@@ -1333,10 +1381,25 @@ $(function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
     $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
   })
-  $(document).on('click', `.ul-${CONFIRM_ITEM_STIX2_SDO} li a`, function () {
+  $(document).on('click', `.ul-${CONFIRM_ITEM_STIX2_OBJECT} li a`, function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
     $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
-    _update_stix2_properties_div($(this).text(), 'sdo_id_1')
+    _update_stix2_properties_div($(this).text(), 'other_object_id_1')
+  })
+  $(document).on('change', `.${STIX_CATEGORY_LABEL_CLASS}`, function () {
+    const category = $(this).val()
+    const button = $(`#button-${CONFIRM_ITEM_STIX2_OBJECT}`)
+    button.prop('disabled', false)
+
+    const ul = $(`.ul-${CONFIRM_ITEM_STIX2_OBJECT}`)
+    ul.empty()
+
+    for (const class_name in STIX_CATEGORY_TABLE[category]) {
+      var a =$('<a>')
+      a.text(class_name)
+      var li = $('<li>').append(a)
+      ul.append(li)
+    }
   })
 
   $(document).on('click', ALL_CHECK_SELECTOR, function () {
