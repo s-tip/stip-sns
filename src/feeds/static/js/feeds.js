@@ -1138,6 +1138,25 @@ $(function () {
     count_span.text(length);
   });
 
+  $('#confidence-post-slider').on('change', function () {
+    on_change_slider(
+      $('#confidence-post-slider'),
+      $('#confidence-post-text'),
+      $('#confidence-post-eval-text'))
+  });
+
+  $('#confidence-post-text').on('change', function () {
+    on_change_confidence_text(
+      $('#confidence-post-slider'),
+      $('#confidence-post-text'),
+      $('#confidence-post-eval-text'))
+  });
+
+  on_change_slider(
+    $('#confidence-post-slider'),
+    $('#confidence-post-text'),
+    $('#confidence-post-eval-text'))
+
   //Title Link クリックした時
   $('.title-link').click(function () {
     var expanded_str = $(this).attr("aria-expanded");

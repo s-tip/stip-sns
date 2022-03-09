@@ -812,7 +812,7 @@ function _get_other_object_select_div () {
 
   const radio = _get_stix_type_radio()
   const col_radio = $('<div>', {
-    'class': 'col-sm-4'
+    'class': 'col-sm-3'
   })
   col_radio.append(label_select)
   col_radio.append($('<br/>'))
@@ -820,40 +820,86 @@ function _get_other_object_select_div () {
   col_radio.append(radio)
 
   const col_button = $('<div>', {
-    'class': `col-sm-4 btn-group div-${CONFIRM_ITEM_STIX2_OBJECT}`
+    'class': `col-sm-3 btn-group div-${CONFIRM_ITEM_STIX2_OBJECT}`
   })
   col_button.append(button)
   col_button.append(ul)
 
+
+  const col_confidence = $('<div>', {
+    'class': 'col-sm-6'
+  })
+
+  const row_confidence = $('<div>', {
+    'class': 'row'
+  })
+  const col_confidence_label = $('<div>', {
+    'class': 'col-sm-12'
+  })
   const label_confidence = $('<label>', {
     'class': 'confirm-item-label',
     'for': 'input-confidence'
   })
   label_confidence.text('Confidence')
-  const col_label_confidence = $('<div>', {
-    'class': 'col-sm-2'
-  })
-  col_label_confidence.append(label_confidence)
+  col_confidence_label.append(label_confidence)
+  row_confidence.append(col_confidence_label)
+  col_confidence.append(row_confidence)
 
+  const row_confidence_slider = $('<div>', {
+    'class': 'row'
+  })
+  const col_confidence_slider = $('<div>', {
+    'class': 'col-sm-6'
+  })
+  const div_slider = $('<div>', {
+    'class': 'slidercontainer',
+  })
+  const input_slider = $('<input>', {
+    'type': 'range',
+    'min': '0',
+    'max': '100',
+    'class': 'slider',
+    'id': 'confidence-object-slider',
+  })
+  const confidence = $('input[name="confidence"]').val()
+  input_slider.val(confidence)
+  col_confidence_slider.append(input_slider)
+  row_confidence_slider.append(col_confidence_slider)
+ 
+  const col_confidence_text = $('<div>', {
+    'class': 'col-sm-3'
+  })
   const input_confidence = $('<input>', {
     'type': 'text',
     'class': 'form-control',
     'id': `input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`,
     'aria-describedby': 'input-confidence',
   })
-  input_confidence.val($('input[name="confidence"]').val())
-  const col_input_confidence = $('<div>', {
-    'class': 'col-sm-2'
-  })
-  col_input_confidence.append(input_confidence)
+  input_confidence.val(confidence)
+  col_confidence_text.append(input_confidence)
+  row_confidence_slider.append(col_confidence_text)
 
+  const col_confidence_eval_text = $('<div>', {
+    'class': 'col-sm-3'
+  })
+  const input_confidence_eval = $('<input>', {
+    'type': 'text',
+    'class': 'form-control',
+    'disabled': true,
+    'id': `input-confidence-eval-${CONFIRM_ITEM_STIX2_OBJECT}`,
+  })
+  input_confidence_eval.val(get_confidence_eval_string (confidence))
+  col_confidence_eval_text.append(input_confidence_eval)
+  row_confidence_slider.append(col_confidence_eval_text)
+  col_confidence.append(row_confidence_slider)
+ 
   const row = $('<div>', {
     'class': 'row'
   })
   row.append(col_radio)
   row.append(col_button)
-  row.append(col_label_confidence)
-  row.append(col_input_confidence)
+  row.append(col_confidence)
+  
 
   const div = $('<div>', {
     'class': 'container-fluid'
@@ -1368,6 +1414,45 @@ function get_table_id_from_confirm_item (elem) {
   return elem.attr('table_id')
 }
 
+function on_change_slider(slider, confidence_text, eval_text) {
+  const confidence = Number(slider.val())
+  confidence_text.val(confidence)
+  set_confidence_eval(confidence, eval_text)
+}
+
+function on_change_confidence_text(slider, confidence_text, eval_text) {
+  if ($.isNumeric(confidence_text.val()) == false) {
+    alert('Integer (0-100) only')
+    return false
+  }
+  const confidence = Number(confidence_text.val())
+  if ((confidence < 0) || (100 < confidence)) {
+    alert('Integer (0-100) only')
+    return false
+  }
+  slider.val(confidence)
+  set_confidence_eval(confidence, eval_text)
+  return
+}
+
+function get_confidence_eval_string (confidence) {
+  if (confidence == 0) {
+    eval_string = 'None'
+  } else if (confidence < 30) {
+    eval_string = 'Low'
+  } else if (confidence < 70) {
+    eval_string = 'Middle'
+  } else {
+    eval_string = 'High'
+  }
+  return eval_string
+}
+ 
+function set_confidence_eval(confidence, eval_elem) {
+  var eval_string = get_confidence_eval_string(confidence)
+  eval_elem.val(eval_string)
+} 
+
 $(function () {
   $(document).on('click', '.dropdown-menu-indicator-type li a', function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
@@ -1402,6 +1487,16 @@ $(function () {
     }
   })
 
+  $(document).on('change', '#confidence-object-slider', function () {
+    on_change_slider($('#confidence-object-slider'),
+      $(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`),
+      $(`#input-confidence-eval-${CONFIRM_ITEM_STIX2_OBJECT}`))
+  })
+  $(document).on('change', `#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`, function () {
+    on_change_confidence_text($('#confidence-object-slider'),
+      $(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`),
+      $(`#input-confidence-eval-${CONFIRM_ITEM_STIX2_OBJECT}`))
+  })
   $(document).on('click', ALL_CHECK_SELECTOR, function () {
     toggle_confirm_table_checkbox(get_target_from_confirm_item($(this)), get_table_id_from_confirm_item($(this)), true)
   })
