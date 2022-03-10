@@ -940,7 +940,6 @@ $(function () {
           $(input).val("");
         },
         success: function (data) {
-          console.log(data)
           $("ol", container).html(data);
           var post_container = $(container).closest(".post");
           $(".comment-count", post_container).text($("ol li", container).length);

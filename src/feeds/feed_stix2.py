@@ -8,9 +8,9 @@ import stix2.v21.sdo as SDO
 import stix2.v21.sro as SRO
 import stix2.v21.observables as OBSERVABLES
 from stix2.v21.bundle import Bundle
-from stix2.properties import IDProperty
 from stix2.v21.common import LanguageContent, GranularMarking, TLP_WHITE, TLP_GREEN, TLP_AMBER, TLP_RED
 from stip.common.x_stip_sns import StipSns
+from stip.common.stip_stix2 import _get_stip_individual_identity
 from ctirs.models import SNSConfig
 
 # S-TIP オブジェクトに格納する固定値
@@ -830,26 +830,6 @@ def _get_x_stip_sns_tool():
     return d
 
 
-# stip_user から identity (Individual) を作成する
-def _get_individual_identity(stip_user):
-    if (len(stip_user.identity_id) == 0):
-        id = IDProperty('identity').default()
-        stip_user.identity_id = id
-        stip_user.save()
-    else:
-        id = stip_user.identity_id
-    identity = SDO.Identity(
-        id=id,
-        name=stip_user.username,
-        identity_class='Individual',
-        x_stip_sns_account=stip_user.username,
-        created_by_ref=id,
-        created=stip_user.date_joined,
-        modified=stip_user.updated_at,
-        allow_custom=True
-    )
-    return identity
-
 
 def _get_organization_identity_sectors(ci):
     ci_table = {
@@ -917,7 +897,7 @@ def get_post_stix2_bundle(
     other_objects = confirm_data[KEY_OTHER]
 
     # S-TIP Identity 作成する
-    individual_identity = _get_individual_identity(stip_user)
+    individual_identity = _get_stip_individual_identity(stip_user)
     organization_identity = _get_organization_identity(stip_user, individual_identity)
 
     # x_stip_sns_author
@@ -1069,7 +1049,7 @@ def get_attach_stix2_bundle(
 ):
 
     # S-TIP Identity 作成する
-    individual_identity = _get_individual_identity(stip_user)
+    individual_identity = _get_stip_individual_identity(stip_user)
     organization_identity = _get_organization_identity(stip_user, individual_identity)
     # x_stip_sns_author
     x_stip_sns_author = _get_x_stip_sns_author(stip_user)
@@ -1154,7 +1134,7 @@ def get_comment_stix2_bundle(
 ):
 
     # S-TIP Identity 作成する
-    individual_identity = _get_individual_identity(stip_user)
+    individual_identity = _get_stip_individual_identity(stip_user)
     organization_identity = _get_organization_identity(stip_user, individual_identity)
     # x_stip_sns_author
     x_stip_sns_author = _get_x_stip_sns_author(stip_user)
@@ -1212,7 +1192,7 @@ def get_like_stix2_bundle(
 ):
 
     # S-TIP Identity 作成する
-    individual_identity = _get_individual_identity(stip_user)
+    individual_identity = _get_stip_individual_identity(stip_user)
     organization_identity = _get_organization_identity(stip_user, individual_identity)
     # x_stip_sns_author
     x_stip_sns_author = _get_x_stip_sns_author(stip_user)
