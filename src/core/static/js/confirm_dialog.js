@@ -808,11 +808,11 @@ function _get_other_object_select_div () {
   const label_select = $('<label>', {
     'class': 'confirm-item-label',
   })
-  label_select.text('Choose STIX Object Type')
+  label_select.text('Add More STIX Object')
 
   const radio = _get_stix_type_radio()
   const col_radio = $('<div>', {
-    'class': 'col-sm-3'
+    'class': 'col-sm-3',
   })
   col_radio.append(label_select)
   col_radio.append($('<br/>'))
@@ -820,14 +820,16 @@ function _get_other_object_select_div () {
   col_radio.append(radio)
 
   const col_button = $('<div>', {
-    'class': `col-sm-3 btn-group div-${CONFIRM_ITEM_STIX2_OBJECT}`
+    'class': `col-sm-3 btn-group div-${CONFIRM_ITEM_STIX2_OBJECT}`,
+    'id': 'div-other-stix-radio',
   })
   col_button.append(button)
   col_button.append(ul)
 
 
   const col_confidence = $('<div>', {
-    'class': 'col-sm-6'
+    'class': 'col-sm-6',
+    'id': 'div-other-stix-confidence',
   })
 
   const row_confidence = $('<div>', {
@@ -850,9 +852,6 @@ function _get_other_object_select_div () {
   })
   const col_confidence_slider = $('<div>', {
     'class': 'col-sm-6'
-  })
-  const div_slider = $('<div>', {
-    'class': 'slidercontainer',
   })
   const input_slider = $('<input>', {
     'type': 'range',
@@ -899,6 +898,8 @@ function _get_other_object_select_div () {
   row.append(col_radio)
   row.append(col_button)
   row.append(col_confidence)
+  col_button.hide()
+  col_confidence.hide()
   
 
   const div = $('<div>', {
@@ -1473,6 +1474,10 @@ $(function () {
   })
   $(document).on('change', `.${STIX_CATEGORY_LABEL_CLASS}`, function () {
     const category = $(this).val()
+
+    $('#div-other-stix-radio').show()
+    $('#div-other-stix-confidence').show()
+
     const button = $(`#button-${CONFIRM_ITEM_STIX2_OBJECT}`)
     button.prop('disabled', false)
 
