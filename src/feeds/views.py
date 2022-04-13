@@ -44,7 +44,7 @@ from django.shortcuts import get_object_or_404, render
 from django.template.context_processors import csrf
 from django.template.loader import render_to_string
 
-from ctirs.models import AttachFile, Feed, Group, SNSConfig, STIPUser, System
+from ctirs.models import AttachFile, Feed, Group, SNSConfig, STIPUser, System, Profile
 from feeds.adapter.phantom import call_run_phantom_playbook
 from feeds.adapter.splunk import get_sightings
 from feeds.extractor.base import Extractor
@@ -94,11 +94,54 @@ sharp_underbar_reg = re.compile('^#_+$')
 sharp_underbar_numeric_reg = re.compile('^#[_0-9０-９]+$')
 
 
+def _get_filter(request):
+    user = request.user
+    sns_profile = user.sns_profile
+    sns_filter = sns_profile.sns_filter
+    if sns_filter is None:
+        sns_filter = Profile.DEFAULT_SNS_FILTER
+        sns_profile.sns_filter = sns_filter
+        sns_profile.save()
+        user.sns_profile = sns_profile
+        user.save()
+    return sns_filter
+
+
+@ajax_required
+def modify_sns_filter(request):
+    ignore_accounts = request.GET.get('ignore_accounts')
+    ignore_na = request.GET.get('ignore_na')
+    user = request.user
+    sns_profile = user.sns_profile
+    sns_filter = sns_profile.sns_filter
+    if sns_filter is None:
+        sns_filter = Profile.DEFAULT_SNS_FILTER
+    temp_list = list(set(ignore_accounts.split(' ')))
+    if len(temp_list):
+        try:
+            temp_list.remove('')
+        except ValueError:
+            pass
+        sns_filter['ignore_accounts'] = temp_list
+    else:
+        sns_filter['ignore_accounts'] = []
+    if ignore_na.lower() == 'true':
+        sns_filter['ignore_na'] = True
+    else:
+        sns_filter['ignore_na'] = False
+    sns_profile.sns_filter = sns_filter
+    sns_profile.save()
+    user.sns_profile = sns_profile
+    user.save()
+    return JsonResponse(sns_filter)
+
+
 @login_required
 def feeds(request):
     feeds = Feed.get_feeds(
         api_user=request.user,
         index=0,
+        filter=_get_filter(request),
         size=FEEDS_NUM_PAGES)
     # 最終更新時間
     last_reload = str(datetime.datetime.now())
@@ -110,6 +153,17 @@ def feeds(request):
         from_feed = feeds[0].package_id
     else:
         from_feed = None
+    ignore_accounts_str = ''
+    ignore_accounts = request.user.sns_profile.sns_filter['ignore_accounts']
+    if ignore_accounts is not None:
+        for ignore_account in ignore_accounts:
+            ignore_accounts_str += ignore_account
+            ignore_accounts_str += ' '
+    try:
+        ignore_na = request.user.sns_profile.sns_filter['ignore_na']
+    except KeyError:
+        ignore_na = True
+
     r = render(request, 'feeds/feeds.html', {
         'feeds': feeds,
         'jira': imported_jira,
@@ -118,6 +172,8 @@ def feeds(request):
         'page': 1,
         'users': users_list,
         'sharing_groups': Group.objects.all(),
+        'ignore_accounts': ignore_accounts_str,
+        'ignore_na': ignore_na,
         'user': request.user,
     })
     # r.set_cookie(key='username', value=str(request.user))
@@ -138,6 +194,7 @@ def load(request):
     from_feed = request.GET.get('from_feed')
     page = int(request.GET.get('page'))
     feed_source = request.GET.get('feed_source')
+    filter = _get_filter(request)
     user_id = None
     query_string = request.GET.get(key='query_string', default=None)
     if feed_source is not None:
@@ -160,6 +217,7 @@ def load(request):
             user_id=user_id,
             index=index,
             query_string=query_string,
+            filter=filter,
             size=FEEDS_NUM_PAGES)
     else:
         # from_feed が設定されていない場合 (投稿がない場合)
@@ -182,11 +240,15 @@ def load(request):
     return HttpResponse(html)
 
 
-def _html_feeds(last_feed_datetime, user, csrf_token, feed_source='all'):
+def _html_feeds(last_feed_datetime, user, csrf_token, filter=None, feed_source='all'):
     user_id = None
     if feed_source != 'all':
         user_id = feed_source
-    feeds = Feed.get_feeds_after(last_feed_datetime=last_feed_datetime, api_user=user, user_id=user_id)
+    feeds = Feed.get_feeds_after(
+        last_feed_datetime=last_feed_datetime,
+        api_user=user,
+        filter=filter,
+        user_id=user_id)
     html = ''
     for feed in feeds:
         html = '{0}{1}'.format(
@@ -221,13 +283,15 @@ def load_new(request):
     last_feed_datetime = get_datetime_from_string(request.GET.get('last_feed'))
     user = request.user
     csrf_token = (csrf(request)['csrf_token'])
-    html = _html_feeds(last_feed_datetime, user, csrf_token)
+    filter = _get_filter(request)
+    html = _html_feeds(last_feed_datetime, user, csrf_token, filter=filter)
     return HttpResponse(html)
 
 
 @ajax_required
 def check(request):
     last_feed_datetime = get_datetime_from_string(request.GET.get('last_feed'))
+    filter = _get_filter(request)
     # feed_source は 全員のフィード取得の際は ALL,それ以外は STIPUserのid数値文字列
     feed_source = request.GET.get('feed_source')
     user = None
@@ -237,6 +301,7 @@ def check(request):
     feeds = Feed.get_feeds_after(
         last_feed_datetime=last_feed_datetime,
         api_user=request.user,
+        filter=filter,
         user_id=user)
     count = len(feeds)
     return HttpResponse(count)

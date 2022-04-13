@@ -877,11 +877,9 @@ $(function () {
       $(".comments", post).show();
       $(".comments", post).addClass("tracking");
       $(".comments input[name='post']", post).focus();
-      //var feed = $(post).closest("li").attr("feed-id");
       var package_id = $(post).closest("li").attr("package-id");
       $.ajax({
         url: '/feeds/comment/',
-        //data: { 'feed': feed },
         data: { 'package_id': package_id },
         cache: false,
         beforeSend: function () {
@@ -1041,7 +1039,6 @@ $(function () {
 
   $("input,textarea").attr("autocomplete", "off");
 
-  //定期時間ごとに like,comment 情報を更新しているが処理速度低下のため一旦コメントアウトする
   function update_feeds() {
     if (is_post === true){
       window.setTimeout(update_feeds, check_interval);
@@ -1151,10 +1148,36 @@ $(function () {
       $('#confidence-post-eval-text'))
   });
 
-  on_change_slider(
-    $('#confidence-post-slider'),
-    $('#confidence-post-text'),
-    $('#confidence-post-eval-text'))
+  if ($('#confidence-post-slider').length){
+    on_change_slider(
+      $('#confidence-post-slider'),
+      $('#confidence-post-text'),
+      $('#confidence-post-eval-text'))
+  }
+
+  function _get_filter_option () {
+    var d = {
+      'ignore_accounts': $('#text-ignore-accounts').val(),
+      'ignore_na': $('#check-ignore-na').prop('checked'),
+    }
+    return d
+  }
+
+  $('#button-submit-ignore-accounts').on('click', function () {
+    var filter_option = _get_filter_option()
+    $.ajax({
+      url: '/feeds/modify_sns_filter/',
+      method: 'get',
+      data: filter_option,
+      cache: false,
+      asyc: false,
+    }).done(function (data) {
+      window.location.reload()
+    }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+      alert(XMLHttpRequest.statusText)
+    }).always(function () {
+    });
+  })
 
   //Title Link クリックした時
   $('.title-link').click(function () {

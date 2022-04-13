@@ -1,3 +1,4 @@
+from cProfile import Profile
 import io
 import os
 import json
@@ -21,6 +22,7 @@ from django.utils.translation import ugettext
 import stip.common.login as login_views
 from stip.common.login import set_language_setting
 from ctirs.models import STIPUser as User
+from ctirs.models import Profile as SNS_Profile
 from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
 from ctirs.models.rs.models import STIPUser
@@ -142,6 +144,7 @@ def settings(request):
                 profile.splunk_password = splunk_password
             profile.splunk_scheme = form.cleaned_data.get('splunk_scheme')
             profile.splunk_query = form.cleaned_data.get('splunk_query')
+            profile.sns_filter = form.cleaned_data.get('sns_filter')
             stip_user.save()
             profile.save()
             messages.add_message(request,
@@ -157,6 +160,10 @@ def settings(request):
         else:
             country = stip_user.region.country_code
             code = stip_user.region.code
+            if profile.sns_filter:
+                sns_filter = profile.sns_filter
+            else:
+                sns_filter = SNS_Profile.DEFAULT_SNS_FILTER
         form = ProfileForm(instance=profile, initial={
             'screen_name': stip_user.screen_name,
             'affiliation': stip_user.affiliation,
@@ -188,6 +195,7 @@ def settings(request):
             'splunk_password': profile.splunk_password,
             'splunk_scheme': profile.splunk_scheme,
             'splunk_query': profile.splunk_query,
+            'sns_filter': sns_filter,
         })
         form.fields['administrative_area'].choices = Region.get_administrative_areas_choices(country)
 
