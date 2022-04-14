@@ -13,6 +13,7 @@ import iocextract
 import urllib
 import pytz
 import string
+import stix2
 try:
     from jira import JIRA
     imported_jira = True
@@ -624,12 +625,21 @@ def like(request):
         stip_user, package_id
     )
     report_id = _get_report_object(origin_stix_file['content'])
-    bundle = get_like_stix2_bundle(
+    origin_opinion = None
+    if like:
+        from ctirs.models import Notification
+        try:
+            notification = Notification.objects.filter(notification_type='L').get(package_id=package_id)
+            origin_opinion = stix2.parse(notification.opinion)
+        except Exception:
+            pass
+    bundle, opinion = get_like_stix2_bundle(
         package_id,
         report_id,
         x_stip_sns_bundle_version,
         like,
         feed.tlp,
+        origin_opinion,
         stip_user
     )
     _regist_bundle(stip_user, bundle)
@@ -639,7 +649,7 @@ def like(request):
         stip_user.unotify_liked(package_id, feed.user)
     else:
         # notify の like処理
-        stip_user.notify_liked(package_id, feed.user)
+        stip_user.notify_liked(package_id, feed.user, opinion.serialize(sort_keys=True))
     # 現在の Like 情報を取得する
     likers = rs.get_likers_from_rs(stip_user, package_id)
     return HttpResponse(len(likers))

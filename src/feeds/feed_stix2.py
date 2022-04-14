@@ -1188,6 +1188,7 @@ def get_like_stix2_bundle(
     x_stip_sns_bundle_version,
     like,
     tlp,
+    origin_opinion=None,
     stip_user=None
 ):
 
@@ -1248,4 +1249,13 @@ def get_like_stix2_bundle(
             object_refs=[report_id]
         )
         bundle.objects.append(opinion)
-    return bundle
+    else:
+        opinion = SDO.Opinion(
+            id=origin_opinion.id,
+            created_by_ref=origin_opinion.created_by_ref,
+            created=origin_opinion.created,
+            opinion=origin_opinion.opinion,
+            object_refs=origin_opinion.object_refs,
+            revoked=True)
+        bundle.objects.append(opinion)
+    return bundle, opinion
