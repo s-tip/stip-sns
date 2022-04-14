@@ -31,6 +31,14 @@ const TYPE_EMAIL_ADDRESS = 'email_address'
 const TYPE_CVE = 'cve'
 const TYPE_THREAT_ACTOR = 'threat_actor'
 const LISTBOX_TYPE_ATTR = 'type'
+const DIV_OTHER_OBJECT_SELECT_CLASS = 'div-other-object-select'
+const DIV_OTHER_OBJECT_SELECT_SELECTOR = '.' + DIV_OTHER_OBJECT_SELECT_CLASS
+const DIV_OTHER_STIX_RADIO_CLASS = 'div-other-stix-radio'
+const DIV_OTHER_STIX_RADIO_SELECTOR = '.' + DIV_OTHER_STIX_RADIO_CLASS
+const DIV_OTHER_STIX_CONFIDENCE_CLASS = 'div-other-stix-confidence'
+const DIV_OTHER_STIX_CONFIDENCE_SELECTOR = '.' + DIV_OTHER_STIX_CONFIDENCE_CLASS
+const DIV_OTHER_STIX_PROPERTIES_CLASS = 'div-other-stix-properties'
+const DIV_OTHER_STIX_PROPERTIES_SELECTOR = '.' + DIV_OTHER_STIX_PROPERTIES_CLASS
 
 function display_confirm_dialog (data) {
   const table_datas = []
@@ -564,11 +572,11 @@ const STIX_CATEGORY_TABLE = {
 }
 
 function _get_other_stix_element () {
-  other_div = _get_other_object_select_div()
+  single_other_div = _create_single_other_object_select_div()
   const div = $('<div>', {
     'id': `div-${CONFIRM_ITEM_STIX2_ROOT}`
   })
-  div.append(other_div)
+  div.append(single_other_div)
   div.append($('<br>'))
   return div
 }
@@ -716,12 +724,12 @@ function _get_stix2_prop_row (prop_name, target_id, object_type, prop_info) {
   return row_div
 }
 
-function _update_stix2_properties_div (object_name, target_id) {
-  const category = $('input:radio[name="other_category"]:checked').val()
+function _update_stix2_properties_div (object_name, root_div) {
+  const category = root_div.find('input:radio[name="other_category"]:checked').val()
   const info = STIX_CATEGORY_TABLE[category][object_name]
   const properties = info['properties']
   const object_type = info['type']
-  const confidence = $('input[name="confidence"]').val()
+  const confidence = root_div.find('input[name="confidence"]').val()
 
   const container_div = $('<div>', {
     'class': `container-fluid btn-group div-${CONFIRM_ITEM_STIX2_PROPERTIES}`
@@ -741,13 +749,14 @@ function _update_stix2_properties_div (object_name, target_id) {
   label_row_div.append(label_col_div)
   container_div.append(label_row_div)
 
+  const object_id = root_div.data('object_id')
   for (const prop_name in properties) {
-    row = _get_stix2_prop_row(prop_name, target_id, object_type, properties[prop_name])
+    row = _get_stix2_prop_row(prop_name, object_id, object_type, properties[prop_name])
     container_div.append(row)
   }
-  const root_div = $(`#div-${CONFIRM_ITEM_STIX2_ROOT}`)
-  root_div.find(`.div-${CONFIRM_ITEM_STIX2_PROPERTIES}`).empty()
-  root_div.append(container_div)
+  const div = root_div.find(DIV_OTHER_STIX_PROPERTIES_SELECTOR)
+  div.empty()
+  div.append(container_div)
 }
 
 const STIX_CATEGORY_LABEL_CLASS = 'stix-category-label'
@@ -788,7 +797,26 @@ function _get_stix_type_radio () {
   return div
 }
 
-function _get_other_object_select_div () {
+$(document).on('click', '.other-object-plus-button', function() {
+  const other_div = _create_single_other_object_select_div()
+  const root_div = $(`#div-${CONFIRM_ITEM_STIX2_ROOT}`)
+  root_div.append(other_div)
+  root_div.append($('<br>'))
+})
+
+$(document).on('click', '.other-object-remove-button', function() {
+  $(DIV_OTHER_OBJECT_SELECT_SELECTOR).length
+  const remove_div = $(this).parents(DIV_OTHER_OBJECT_SELECT_SELECTOR)
+  remove_div.remove()
+  if ($(DIV_OTHER_OBJECT_SELECT_SELECTOR).length == 0) {
+    const indicator_modal_body = $('#indicator-modal-body')
+    indicator_modal_body.empty()
+    var div = _get_other_stix_element()
+    indicator_modal_body.append(div)
+  }
+})
+
+function _create_single_other_object_select_div () {
   const span = $('<span>', {
     'class': 'caret'
   })
@@ -805,31 +833,37 @@ function _get_other_object_select_div () {
     'class': `dropdown-menu ul-${CONFIRM_ITEM_STIX2_OBJECT}`,
   })
 
+  const span_plus_button = $('<span>', {
+    'class': 'glyphicon glyphicon-plus-sign btn-sm btn-info other-object-plus-button'
+  })
+  const span_remove_button = $('<span>', {
+    'class': 'glyphicon glyphicon-remove-sign btn-sm btn-danger other-object-remove-button'
+  })
   const label_select = $('<label>', {
     'class': 'confirm-item-label',
   })
-  label_select.text('Add More STIX Object')
+  label_select.html('Add More STIX Object&nbsp;')
+  label_select.append(span_plus_button)
+  label_select.append(span_remove_button)
 
   const radio = _get_stix_type_radio()
   const col_radio = $('<div>', {
-    'class': 'col-sm-3',
+    'class': 'col-sm-4',
   })
   col_radio.append(label_select)
   col_radio.append($('<br/>'))
   col_radio.append($('<br/>'))
   col_radio.append(radio)
 
-  const col_button = $('<div>', {
-    'class': `col-sm-3 btn-group div-${CONFIRM_ITEM_STIX2_OBJECT}`,
-    'id': 'div-other-stix-radio',
+  const div_button = $('<div>', {
+    'class': `col-sm-3 btn-group ${DIV_OTHER_STIX_RADIO_CLASS}`,
   })
-  col_button.append(button)
-  col_button.append(ul)
+  div_button.append(button)
+  div_button.append(ul)
 
 
   const col_confidence = $('<div>', {
-    'class': 'col-sm-6',
-    'id': 'div-other-stix-confidence',
+    'class': `col-sm-5 ${DIV_OTHER_STIX_CONFIDENCE_CLASS}`,
   })
 
   const row_confidence = $('<div>', {
@@ -857,8 +891,7 @@ function _get_other_object_select_div () {
     'type': 'range',
     'min': '0',
     'max': '100',
-    'class': 'slider',
-    'id': 'confidence-object-slider',
+    'class': 'slider confidence-object-slider',
   })
   const confidence = $('input[name="confidence"]').val()
   input_slider.val(confidence)
@@ -870,7 +903,7 @@ function _get_other_object_select_div () {
   })
   const input_confidence = $('<input>', {
     'type': 'text',
-    'class': 'form-control',
+    'class': 'form-control input-confidence',
     'id': `input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`,
     'aria-describedby': 'input-confidence',
   })
@@ -892,20 +925,30 @@ function _get_other_object_select_div () {
   row_confidence_slider.append(col_confidence_eval_text)
   col_confidence.append(row_confidence_slider)
  
-  const row = $('<div>', {
+  const row_1 = $('<div>', {
     'class': 'row'
   })
-  row.append(col_radio)
-  row.append(col_button)
-  row.append(col_confidence)
-  col_button.hide()
+  row_1.append(col_radio)
+  row_1.append(div_button)
+  row_1.append(col_confidence)
+  div_button.hide()
   col_confidence.hide()
-  
 
   const div = $('<div>', {
-    'class': 'container-fluid'
+    'class': `container-fluid ${DIV_OTHER_OBJECT_SELECT_CLASS}`
   })
-  div.append(row)
+  const object_id = new Date().getTime().toString();
+  div.data('object_id', object_id)
+  div.append(row_1)
+
+  const row_2 = $('<div>', {
+    'class': 'row'
+  })
+  const col_stix2_properties = $('<div>', {
+    'class': `col-sm-12 ${DIV_OTHER_STIX_PROPERTIES_CLASS}`
+  })
+  row_2.append(col_stix2_properties)
+  div.append(row_2)
   return div
 }
 
@@ -1372,6 +1415,7 @@ function get_confirm_data () {
       }
     }
   })
+
   $('.other-stix2-input').each(function (index, element) {
     var item = {}
     var target_id = $(element).data('target_id')
@@ -1379,7 +1423,7 @@ function get_confirm_data () {
       item = other[target_id]
     }else {
       item.type = $(element).data('object_type')
-      item.confidence = $(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`).val()
+      item.confidence = $(element).parents(DIV_OTHER_OBJECT_SELECT_SELECTOR).find(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`).val()
     }
     if($(element).prop('type') == 'radio'){
       if($(element).prop('checked')){
@@ -1470,18 +1514,23 @@ $(function () {
   $(document).on('click', `.ul-${CONFIRM_ITEM_STIX2_OBJECT} li a`, function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
     $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
-    _update_stix2_properties_div($(this).text(), 'other_object_id_1')
+    const root_div = $(this).parents(DIV_OTHER_OBJECT_SELECT_SELECTOR)
+    _update_stix2_properties_div($(this).text(), root_div)
   })
+
   $(document).on('change', `.${STIX_CATEGORY_LABEL_CLASS}`, function () {
     const category = $(this).val()
 
-    $('#div-other-stix-radio').show()
-    $('#div-other-stix-confidence').show()
+    const root_div = $(this).parents(DIV_OTHER_OBJECT_SELECT_SELECTOR)
+    const select_div = root_div.find(DIV_OTHER_STIX_RADIO_SELECTOR).show()
+    const confidence_div = root_div.find(DIV_OTHER_STIX_CONFIDENCE_SELECTOR)
+    confidence_div.show()
 
-    const button = $(`#button-${CONFIRM_ITEM_STIX2_OBJECT}`)
+
+    const button = select_div.find(`#button-${CONFIRM_ITEM_STIX2_OBJECT}`)
     button.prop('disabled', false)
 
-    const ul = $(`.ul-${CONFIRM_ITEM_STIX2_OBJECT}`)
+    const ul = root_div.find(`.ul-${CONFIRM_ITEM_STIX2_OBJECT}`)
     ul.empty()
 
     for (const class_name in STIX_CATEGORY_TABLE[category]) {
@@ -1492,15 +1541,27 @@ $(function () {
     }
   })
 
-  $(document).on('change', '#confidence-object-slider', function () {
-    on_change_slider($('#confidence-object-slider'),
-      $(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`),
-      $(`#input-confidence-eval-${CONFIRM_ITEM_STIX2_OBJECT}`))
+  function _get_confidence_text(elem) {
+    return elem.parents(DIV_OTHER_STIX_CONFIDENCE_SELECTOR).find(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`)
+  }
+  function _get_eval_text(elem) {
+    return elem.parents(DIV_OTHER_STIX_CONFIDENCE_SELECTOR).find(`#input-confidence-eval-${CONFIRM_ITEM_STIX2_OBJECT}`)
+  }
+  function _get_confidence_slider(elem) {
+    return elem.parents(DIV_OTHER_STIX_CONFIDENCE_SELECTOR).find('.confidence-object-slider')
+  }
+
+  $(document).on('change', '.confidence-object-slider', function () {
+    const confidence_text = _get_confidence_text($(this))
+    const eval_text = _get_eval_text($(this))
+    on_change_slider($(this), confidence_text, eval_text)
   })
-  $(document).on('change', `#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`, function () {
-    on_change_confidence_text($('#confidence-object-slider'),
-      $(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`),
-      $(`#input-confidence-eval-${CONFIRM_ITEM_STIX2_OBJECT}`))
+
+  $(document).on('change', `.input-confidence`, function () {
+    const confidence_slider = _get_confidence_slider($(this))
+    const confidence_text = _get_confidence_text($(this))
+    const eval_text = _get_eval_text($(this))
+    on_change_confidence_text(confidence_slider, confidence_text, eval_text)
   })
   $(document).on('click', ALL_CHECK_SELECTOR, function () {
     toggle_confirm_table_checkbox(get_target_from_confirm_item($(this)), get_table_id_from_confirm_item($(this)), true)

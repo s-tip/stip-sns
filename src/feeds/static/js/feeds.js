@@ -337,7 +337,6 @@ $(function () {
     var append_div = $('<div class="row compose-title-div"><br/></div>');
     append_div.append(compose_title_div.html());
     $('#compose-title-root-div').append(append_div);
-    // stip_ajax.js start_suggset()
     start_suggest(id_name, "suggest-block");
   });
 
