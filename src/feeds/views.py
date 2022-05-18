@@ -155,11 +155,12 @@ def feeds(request):
     else:
         from_feed = None
     ignore_accounts_str = ''
-    ignore_accounts = request.user.sns_profile.sns_filter['ignore_accounts']
-    if ignore_accounts is not None:
-        for ignore_account in ignore_accounts:
-            ignore_accounts_str += ignore_account
-            ignore_accounts_str += ' '
+    if 'ignore_accounts' in request.user.sns_profile.sns_filter:
+        ignore_accounts = request.user.sns_profile.sns_filter['ignore_accounts']
+        if ignore_accounts is not None:
+            for ignore_account in ignore_accounts:
+                ignore_accounts_str += ignore_account
+                ignore_accounts_str += ' '
     try:
         ignore_na = request.user.sns_profile.sns_filter['ignore_na']
     except KeyError:
