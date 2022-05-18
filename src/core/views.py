@@ -160,10 +160,12 @@ def settings(request):
         else:
             country = stip_user.region.country_code
             code = stip_user.region.code
-            if profile.sns_filter:
-                sns_filter = profile.sns_filter
-            else:
-                sns_filter = SNS_Profile.DEFAULT_SNS_FILTER
+
+        if profile.sns_filter:
+            sns_filter = profile.sns_filter
+        else:
+            sns_filter = SNS_Profile.DEFAULT_SNS_FILTER
+
         form = ProfileForm(instance=profile, initial={
             'screen_name': stip_user.screen_name,
             'affiliation': stip_user.affiliation,
