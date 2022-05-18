@@ -145,6 +145,7 @@ if not dev_over_http:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_DOMAIN = cookie_domain_name
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 MEDIA_ROOT = PROJECT_DIR.parent.child('media')
 MEDIA_URL = '/media/'
