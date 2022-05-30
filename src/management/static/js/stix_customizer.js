@@ -139,6 +139,9 @@ $(function() {
         editNode: function(data, callback) {
           editNode(data, callback)
         },
+        deleteNode: function(data, callback) {
+          deleteNode(data, callback)
+        },
         addEdge: function(data, callback) {
           if (data.from == data.to) {
             alert('Can not connect the node to itself.')
@@ -152,6 +155,9 @@ $(function() {
               'Edit Edge'
             editEdgeWithoutDrag(data, callback)
           },
+        },
+        deleteEdge: function(data, callback) {
+          deleteEdge(data, callback)
         },
       }
     }
@@ -174,6 +180,35 @@ $(function() {
     $('#add-prefix-span').html('x-&nbsp;')
     $('#add-type-object').prop('checked', true)
     $('#add-node-popUp').css({'display': 'block'})
+  }
+
+  function deleteNode(data, callback) {
+    $.each(data.nodes, function(index, node_id) {
+      const node = getNode(node_id)
+      const node_type = node.options.type
+      if (node_type == 'property'){
+        callback(data)
+      } else{
+        if(data.edges.length > 0){
+          const ret = confirm('Would you like to remove the object node and connected property nodes? \nCancel: Remove the object node only\nOK: Remove the connected nodes.')
+          if (ret == true){
+            const connected_nodes = network.getConnectedNodes(node_id)
+            data.nodes = data.nodes.concat(connected_nodes)
+            callback(data)
+          } else {
+            callback(data)
+          }
+        } else{
+          callback(data)
+        }
+      }
+    })
+    return
+  }
+
+  function deleteEdge(data, callback) {
+    callback(data)
+    return
   }
 
   function editNode(data, callback) {
@@ -427,7 +462,6 @@ $(function() {
       } else {
         tmp_prop = getNode(edge.fromId)
       }
-      console.log(tmp_prop.options.label)
       if (tmp_prop.options.label == prop_name) {
         ret = true
         return true
