@@ -145,6 +145,9 @@ $(function() {
         editNode: function(data, callback) {
           editNode(data, callback)
         },
+        deleteNode: function(data, callback) {
+          deleteNode(data, callback)
+        },
         addEdge: function(data, callback) {
           if (data.from == data.to) {
             alert('Can not connect the node to itself.')
@@ -158,6 +161,9 @@ $(function() {
               'Edit Edge'
             editEdgeWithoutDrag(OPERATION_TYPE_EDIT_EDGE, data, callback)
           },
+        },
+        deleteEdge: function(data, callback) {
+          deleteEdge(data, callback)
         },
       }
     }
@@ -178,6 +184,27 @@ $(function() {
       clearNodePopUp.bind(this, OPERATION_TYPE_ADD_NODE, callback)
     $('#add-type-object').prop('checked', true)
     $('#add-node-popUp').css({'display': 'block'})
+  }
+
+  function deleteNode(data, callback) {
+    $.each(data.nodes, function(index, node_id) {
+      const node = getNode(node_id)
+      const node_type = node.options.type
+      if(data.edges.length != 0){
+        alert ('Cannot remove the node with link.')
+        data.nodes = []
+        data.edges = []
+        callback(data)
+      } else {
+        callback(data)
+      }
+    })
+    return
+  }
+
+  function deleteEdge(data, callback) {
+    callback(data)
+    return
   }
 
   function editNode(data, callback) {
