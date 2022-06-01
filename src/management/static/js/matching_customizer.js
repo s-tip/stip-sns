@@ -5,7 +5,7 @@ $(function() {
   const NODE_DEFAULT_COLOR = '#D2E5FF'
 
   const EDGE_TYPE_CONTAINS = 'contains'
-  const EDGE_TYPE_MATCH = 'match'
+  const EDGE_TYPE_MATCHES = 'matches'
 
   const DATA_TYPE_OBJECT = 'object'
   const DATA_TYPE_PROPERTY = 'property'
@@ -67,7 +67,7 @@ $(function() {
       $.each(matches, function(key_source, source) {
         $.each(matches, function(key_target, target) {
           if (key_source < key_target) {
-            var edge = _get_edge(source.id, target.id, EDGE_TYPE_MATCH, mp.name)
+            var edge = _get_edge(source.id, target.id, EDGE_TYPE_MATCHES, mp.name)
             edges.add(edge)
             matching_names[edge.id] = mp.name
           }
@@ -367,7 +367,7 @@ $(function() {
       if (to.options.type == DATA_TYPE_OBJECT) {
         data.type = EDGE_TYPE_CONTAINS
       } else {
-        data.type = EDGE_TYPE_MATCH
+        data.type = EDGE_TYPE_MATCHES
       }
     }
 
@@ -541,7 +541,7 @@ $(function() {
         return
       }
 
-      if (options.label == EDGE_TYPE_MATCH) {
+      if (options.label == EDGE_TYPE_MATCHES) {
         var matching_name = matching_names[edge.id]
         var node = null
         node = _get_target_from_node(edge.from)
