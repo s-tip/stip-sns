@@ -52,7 +52,9 @@ $(function() {
       parent: null,
       label: co.name,
       color: co.color,
-      shape: NODE_TYPE_OBJECT
+      shape: NODE_TYPE_OBJECT,
+      borderWidth: 1,
+      shapeProperties: { borderDashes: [10, 10] },
     }
     return d
   }
@@ -80,7 +82,9 @@ $(function() {
       val_type: val_type,
       regexp: regexp,
       fuzzy_matching: fuzzy_matching,
-      shape: NODE_TYPE_PROPERTY
+      shape: NODE_TYPE_PROPERTY,
+      borderWidth: 1,
+      shapeProperties: { borderDashes: [10, 10] },
     }
     return prop
   }
