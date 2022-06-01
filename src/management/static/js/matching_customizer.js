@@ -83,7 +83,9 @@ $(function() {
       parent: null,
       color: NODE_DEFAULT_COLOR, 
       label: obj_name,
-      shape: NODE_TYPE_OBJECT
+      shape: NODE_TYPE_OBJECT,
+      borderWidth: 1,
+      shapeProperties: { borderDashes: [10, 10] },
     }
     return d
   }
@@ -94,7 +96,9 @@ $(function() {
       parent: null,
       color: NODE_DEFAULT_COLOR, 
       label: '',
-      shape: NODE_TYPE_PROPERTY
+      shape: NODE_TYPE_PROPERTY,
+      borderWidth: 1,
+      shapeProperties: { borderDashes: [10, 10] },
     }
     return prop
   }
