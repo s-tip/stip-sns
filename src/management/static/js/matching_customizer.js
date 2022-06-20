@@ -378,7 +378,7 @@ $(function() {
     if (data.type == EDGE_TYPE_CONTAINS) {
       _set_contains_edge_dialog(operation_type, data, from, to, callback)
     } else {
-      _set_matthing_edge_dialog(operation_type, data, from, to, callback)
+      _set_matching_edge_dialog(operation_type, data, from, to, callback)
     }
   }
 
@@ -443,7 +443,7 @@ $(function() {
     save_contains_edge(data, from, to, callback)
   }
 
-  function _set_matthing_edge_dialog(operation_type, data, from, to, callback) {
+  function _set_matching_edge_dialog(operation_type, data, from, to, callback) {
     if ((from.options.parent == undefined) || (to.options.parent == undefined)) {
       alert('Cannot connect property nodes which do not define a parent object')
       callback(null)
