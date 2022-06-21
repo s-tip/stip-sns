@@ -16,18 +16,16 @@ logging.getLogger("pdfminer").setLevel(logging.WARNING)
 class PDFExtractor(FileExtractor):
     TARGET_EXT_STRING = '.pdf'
 
-    # 指定の PDF ファイルを開き、indicators, cve, threat_actor の要素を返却する
     @classmethod
-    def _get_element_from_target_file(cls, file_, ta_list=[], white_list=[]):
+    def _get_element_from_target_file(cls, file_, list_param):
         outfp = StringIO()
 
-        # PDF ファイルを解析する
         pdf_device = TextConverter(pdf_rsrcmgr, outfp, codec=pdf_codec, laparams=pdf_laparams)
         with open(file_.file_path, 'rb') as fp:
             interpreter = PDFPageInterpreter(pdf_rsrcmgr, pdf_device)
             for page in PDFPage.get_pages(fp, set(), maxpages=0, caching=True, check_extractable=True):
                 interpreter.process_page(page)
         pdf_device.close()
-        confirm_indicators, confirm_ttps, confirm_tas = cls._get_extract_lists(outfp, file_.file_name, ta_list, white_list)
+        eeb = cls._get_extract_lists(outfp, file_.file_name, list_param)
         outfp.close()
-        return confirm_indicators, confirm_ttps, confirm_tas
+        return eeb

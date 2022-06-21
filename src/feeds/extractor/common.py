@@ -2,6 +2,9 @@ import datetime
 import re
 import os
 import fnmatch
+import MeCab
+import nltk
+from django.conf import settings
 from stix.indicator.indicator import Indicator
 from stix.common import Statement
 from stix.exploit_target import ExploitTarget
@@ -18,7 +21,15 @@ from stip.common.tld import TLD
 from feeds.mongo import Cve
 from feeds.adapter.att_ck import ATTCK_Taxii_Server
 from feeds.adapter.crowd_strike import query_actors, get_actor_entities
+from stip.common.stix_customizer import StixCustomizer
 from ctirs.models import SNSConfig
+
+if settings.NLP_TYPE == 'mecab':
+    mecab = MeCab.Tagger('-d /usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ipadic-neologd ')
+
+if settings.NLP_TYPE == 'nltk':
+    nltk.download('punkt')
+    nltk.download('averaged_perceptron_tagger')
 
 # regular expression
 ipv4_reg_expression = r'.*?((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[\[(\{]{0,1}\.[\])\}]{0,1}){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)).*?$'
@@ -71,6 +82,48 @@ JSON_OBJECT_TYPE_SHA512 = 'sha512'
 JSON_OBJECT_TYPE_DOMAIN = 'domain'
 JSON_OBJECT_TYPE_FILE_NAME = 'file_name'
 JSON_OBJECT_TYPE_EMAIL_ADDRESS = 'email_address'
+
+
+class CTIElementExtractorBean(object):
+    def __init__(self):
+        self.indicators = []
+        self.ttps = []
+        self.tas = []
+        self.custom_objects = []
+
+    def extend(self, eeb):
+        if eeb is None:
+            return
+        if not isinstance(eeb, CTIElementExtractorBean):
+            return
+        self.indicators.extend(eeb.indicators)
+        self.ttps.extend(eeb.ttps)
+        self.tas.extend(eeb.tas)
+        self.custom_objects.extend(eeb.custom_objects)
+        
+    def append_indicator(self, indicator):
+        self.indicators.append(indicator)
+
+    def append_ttp(self, ttp):
+        self.ttps.append(ttp)
+
+    def append_ta(self, ta):
+        self.tas.append(ta)
+
+    def append_custom_object(self, custom_object):
+        self.custom_objects.append(custom_object)
+
+    def get_indicators(self):
+        return self.indicators
+
+    def get_ttps(self):
+        return self.ttps
+
+    def get_tas(self):
+        return self.tas
+
+    def get_custom_objects(self):
+        return self.custom_objects
 
 
 class BaseExtractor(object):
@@ -141,16 +194,16 @@ class BaseExtractor(object):
     # 2.含まれている cve を自動判別し tuple リストを作成する
     # 3.含まれている ta_list を自動判別し tuple リストを作成する
     @classmethod
-    def _get_extract_lists(cls, outfp, title_base_name, ta_list, white_list):
+    def _get_extract_lists(cls, outfp, title_base_name, list_param):
         # 改行ごとにリストとする
         contents = outfp.getvalue()
         extract_dict = {}
-        confirm_indicators = []
-        confirm_ttps = []
-        confirm_tas = []
+        eeb = CTIElementExtractorBean()
         indicator_index = 1
         ttp_index = 1
         ta_index = 1
+        ta_list = list_param.ta_list
+        white_list = list_param.white_list
 
         # 一行から半角文字郡のリストを抽出する
         words = cls._get_words_from_line(contents)
@@ -169,7 +222,7 @@ class BaseExtractor(object):
                         # white_list check
                         white_flag = cls._is_included_white_list(value, white_list)
                         # white_list に含まれない場合に checked をつける
-                        confirm_indicators.append((cls.decode(type_), cls.decode(value), cls.decode(title), cls.decode(title_base_name), (white_flag is False)))
+                        eeb.append_indicator((cls.decode(type_), cls.decode(value), cls.decode(title), cls.decode(title_base_name), (white_flag is False)))
                         indicator_index += 1
                 # cve チェック
                 cve = CommonExtractor.get_cve_from_word(word)
@@ -178,7 +231,7 @@ class BaseExtractor(object):
                     if not duplicate_flag:
                         # 重複していないので登録
                         title = '%s-%04d' % (title_base_name, ttp_index)
-                        confirm_ttps.append((cls.decode(cls.CVE_TYPE_STR), cls.decode(cve), cls.decode(title), cls.decode(title_base_name), True))
+                        eeb.append_ttp((cls.decode(cls.CVE_TYPE_STR), cls.decode(cve), cls.decode(title), cls.decode(title_base_name), True))
                         ttp_index += 1
             for index, word in enumerate(words):
                 ta = CommonExtractor.get_ta_from_words(words[index:], ta_list)
@@ -187,9 +240,63 @@ class BaseExtractor(object):
                     if not duplicate_flag:
                         # 重複していないので登録
                         title = '%s-%04d' % (title_base_name, ta_index)
-                        confirm_tas.append((cls.decode(cls.TA_TYPE_STR), cls.decode(ta), cls.decode(title), cls.decode(title_base_name), True))
+                        eeb.append_ta((cls.decode(cls.TA_TYPE_STR), cls.decode(ta), cls.decode(title), cls.decode(title_base_name), True))
                         ta_index += 1
-        return confirm_indicators, confirm_ttps, confirm_tas
+
+        custom_objects = StixCustomizer.get_instance().get_custom_objects()
+        if custom_objects is None:
+            return eeb
+
+        contents = contents.replace('\r', ' ') 
+        contents = contents.replace('\n', ' ') 
+        custom_object_index = 1
+        for custom_object in custom_objects:
+            for custom_property in custom_object['properties']:
+                if custom_property['pattern'] is None:
+                    continue
+                matches = custom_property['pattern'].findall(contents)
+                values = []
+                for obj_value in matches:
+                    if obj_value in values:
+                        continue
+                    values.append(obj_value)
+                    title = '%s-%04d' % (title_base_name, custom_object_index)
+                    type_ = 'CUSTOM_OBJECT:%s/%s' % (custom_object['name'], custom_property['name'])
+                    eeb.append_custom_object((cls.decode(type_), cls.decode(obj_value), cls.decode(title), cls.decode(title_base_name), True))
+                    custom_object_index += 1
+
+        if settings.NLP_TYPE is None:
+            return eeb
+
+        nlp_extract_list = []
+        if settings.NLP_TYPE == 'mecab':
+            mecab.parse('')
+            node = mecab.parseToNode(contents)
+            while node:
+                word = node.surface
+                pos = node.feature.split(',')[1]
+                if pos == '固有名詞':
+                    if word not in nlp_extract_list:
+                        nlp_extract_list.append(word)
+                node = node.next
+
+        if settings.NLP_TYPE == 'nltk':
+            allowed_nltk_types = ['NNP', 'NNPS']
+            words = nltk.word_tokenize(contents)
+            for tag in nltk.pos_tag(words):
+                word, type_ = tag
+                if type_ in allowed_nltk_types:
+                    if word not in nlp_extract_list:
+                        nlp_extract_list.append(word)
+
+        for word in nlp_extract_list:
+            obj_name = '----'
+            prop_name = '----'
+            type_ = 'CUSTOM_OBJECT:%s/%s' % (obj_name, prop_name)
+            title = '%s-%04d' % (title_base_name, custom_object_index)
+            eeb.append_custom_object((cls.decode(type_), cls.decode(word), cls.decode(title), cls.decode(title_base_name), False))
+            custom_object_index += 1
+        return eeb
 
 
 class FileExtractor(BaseExtractor):
@@ -197,21 +304,18 @@ class FileExtractor(BaseExtractor):
 
     # ファイルから STIX 要素 (indicator, Exploit_Targets) を作成する
     @classmethod
-    def get_stix_elements(cls, files, ta_list=[], white_list=[], **kwargs):
+    def get_stix_elements(cls, param):
+        files = param.post_param.files
         target_files = cls._get_target_files(files)
         # 該当ファイルがないので Indicators を作成しない
         if len(target_files) == 0:
-            return None, None, None
-        confirm_indicatorss = []
-        confirm_ttpss = []
-        confirm_tass = []
+            return None
+        eeb = CTIElementExtractorBean()
         for file_ in target_files:
             # Observable の Object リストと cve リストを Web Browser で確認用の indicators リストを取得する
-            confirm_indicators, confirm_ttps, confirm_tas = cls._get_element_from_target_file(file_, ta_list=ta_list, white_list=white_list)
-            confirm_indicatorss.extend(confirm_indicators)
-            confirm_ttpss.extend(confirm_ttps)
-            confirm_tass.extend(confirm_tas)
-        return confirm_indicatorss, confirm_ttpss, confirm_tass
+            this_eeb = cls._get_element_from_target_file(file_, param.list_param)
+            eeb.extend(this_eeb)
+        return eeb
 
     # Extract 対象ファイルを返却
     @classmethod

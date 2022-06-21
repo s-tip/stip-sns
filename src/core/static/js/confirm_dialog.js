@@ -10,6 +10,8 @@ const CONFIRM_ITEM_TYPE_CLASS = 'confirm-item-type'
 const CONFIRM_ITEM_TYPE_SELECTOR = '.' + CONFIRM_ITEM_TYPE_CLASS
 const CONFIRM_ITEM_STIX2_INDICATOR_TYPES_CLASS = 'confirm-item-stix2-indicator-types'
 const CONFIRM_ITEM_STIX2_INDICATOR_TYPES_SELECTOR = '.' + CONFIRM_ITEM_STIX2_INDICATOR_TYPES_CLASS
+const CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_CLASS = 'confirm-item-custom-property-type'
+const CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_SELECTOR = '.' + CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_CLASS
 const CONFIRM_ITEM_VALUE_CLASS = 'confirm-item-value'
 const CONFIRM_ITEM_VALUE_SELECTOR = '.' + CONFIRM_ITEM_VALUE_CLASS
 const CONFIRM_ITEM_CHECKBOX_ATTR_TABLE_ID = 'table_id'
@@ -18,6 +20,7 @@ const CONFIRM_ITEM_CHECKBOX_ATTR_TITLE = 'title'
 const TABLE_ID_INDICATORS = 'indicators'
 const TABLE_ID_TTPS = 'ttps'
 const TABLE_ID_TAS = 'tas'
+const TABLE_ID_CUSTOM_OBJECTS = 'custom_objects'
 const TYPE_IPV4 = 'ipv4'
 const TYPE_MD5 = 'md5'
 const TYPE_SHA1 = 'sha1'
@@ -27,6 +30,7 @@ const TYPE_DOMAIN = 'domain'
 const TYPE_FILE_NAME = 'file_name'
 const TYPE_EMAIL_ADDRESS = 'email_address'
 const TYPE_CVE = 'cve'
+const TYPE_CUSTOM_OBJECT_PREFIX = 'CUSTOM_OBJECT:'
 const TYPE_THREAT_ACTOR = 'threat_actor'
 const LISTBOX_TYPE_ATTR = 'type'
 
@@ -56,6 +60,21 @@ function display_confirm_dialog (data) {
       table_datas[file_name][TABLE_ID_TAS] = data.tas[file_name]
     }
   }
+
+  var custom_object_dict = {}
+  if (Object.keys(data['custom_object_dict']).length > 0) {
+    custom_object_dict = data['custom_object_dict']
+  }
+  $('#confirm_indicators_modal_dialog').data('custom_object_dict', custom_object_dict)
+  if (Object.keys(data.custom_objects).length > 0) {
+    for (file_name in data.custom_objects) {
+      if (!(file_name in table_datas)) {
+        table_datas[file_name] = []
+      }
+      table_datas[file_name][TABLE_ID_CUSTOM_OBJECTS] = data.tas[file_name]
+    }
+  }
+
   if (Object.keys(table_datas).length > 0) {
     make_extract_tables(table_datas)
     $('#confirm_indicators_modal_dialog').modal()
@@ -96,6 +115,9 @@ function _get_ttps_collapse_id (file_name) {
 }
 function _get_tas_collapse_id (file_name) {
   return 'collapse-tas-' + _get_file_id_from_file_name(file_name)
+}
+function _get_custom_objects_collapse_id (file_name) {
+  return 'collapse-custom-objects-' + _get_file_id_from_file_name(file_name)
 }
 
 function _get_file_modal_body_panel_group (file_name, table_datas) {
@@ -172,6 +194,12 @@ function _get_file_modal_body_panel_collapse (file_name, table_datas) {
     div_tas.append(_get_tas_modal_body_panel_collapse(file_name, table_data[TABLE_ID_TAS]))
     div.append(div_tas)
   }
+   if (TABLE_ID_CUSTOM_OBJECTS in table_data) {
+    const div_custom_objects = div_template.clone()
+    div_custom_objects.append(_get_custom_objects_modal_body_panel_heading(file_name))
+    div_custom_objects.append(_get_custom_objects_modal_body_panel_collapse(file_name, table_data[TABLE_ID_CUSTOM_OBJECTS]))
+    div.append(div_custom_objects)
+  }
   return div
 }
 
@@ -202,6 +230,11 @@ function _get_tas_modal_body_panel_heading (file_name) {
    _get_tas_modal_body_panel_heading_anchor(file_name))
 }
 
+function _get_custom_objects_modal_body_panel_heading (file_name) {
+ return _get_common_modal_body_panel_heading(
+   _get_custom_objects_modal_body_panel_heading_anchor(file_name))
+}
+
 function _get_common_modal_body_panel_heading_anchor (id_, text) {
   const anchor = '#' + id_
   const a = $('<a>', {
@@ -230,6 +263,12 @@ function _get_tas_modal_body_panel_heading_anchor (file_name) {
    'Threat Actors')
 }
 
+function _get_custom_objects_modal_body_panel_heading_anchor (file_name) {
+ return _get_common_modal_body_panel_heading_anchor(
+   _get_custom_objects_collapse_id(file_name),
+   'Custom Objects')
+}
+
 function _get_common_modal_body_panel_collapse (id_, table) {
   const div = $('<div>', {
     id: id_,
@@ -255,6 +294,12 @@ function _get_tas_modal_body_panel_collapse (file_name, tas) {
   return _get_common_modal_body_panel_collapse (
     _get_tas_collapse_id(file_name),
     _get_confirm_table(file_name, TABLE_ID_TAS, tas))
+}
+
+function _get_custom_objects_modal_body_panel_collapse (file_name, custom_objects) {
+  return _get_common_modal_body_panel_collapse (
+    _get_custom_objects_collapse_id(file_name),
+    _get_confirm_table(file_name, TABLE_ID_CUSTOM_OBJECTS, custom_objects))
 }
 
 function _get_confirm_table (file_name, table_id, items) {
@@ -372,6 +417,53 @@ function _get_confirm_table_tr_ta_td_list () {
   return td_list
 }
 
+function _get_custom_objects_list () {
+  return Object.keys($('#confirm_indicators_modal_dialog').data('custom_object_dict')).sort()
+}
+
+function _get_custom_properties_list (custom_object) {
+  const custom_object_dict = $('#confirm_indicators_modal_dialog').data('custom_object_dict')
+  if (custom_object in custom_object_dict) {
+    return custom_object_dict[custom_object].sort()
+  } else{
+    const l = []
+    $.each(custom_object_dict,function (key, properties) {
+      $.merge( l , properties )
+    })
+    return $.unique(l).sort()
+  }
+}
+
+function _get_confirm_table_tr_custom_object_td_list (type_) {
+  const custom_info = type_.split('CUSTOM_OBJECT:')[1]
+  const index = custom_info.indexOf('/')
+  const custom_object = custom_info.substr(0,index)
+  const custom_property = custom_info.substr(index + 1)
+  const CUSTOM_OBJECT_LIST = _get_custom_objects_list()
+  const CUSTOM_PROPERTY_LIST = _get_custom_properties_list(custom_object)
+
+  const td_list = []
+  const button = $('<button>', {
+    class: `btn btn-small dropdown-toggle ${CONFIRM_ITEM_TYPE_CLASS}`,
+    'data-toggle': 'dropdown',
+    type: custom_object
+  })
+  button.text(custom_object)
+  const td = _get_confirtm_table_tr_td_pulldown(button, CUSTOM_OBJECT_LIST, 'dropdown-menu-custom-object-type')
+  td_list.push(td)
+
+  const button_2 = $('<button>', {
+    class: `btn btn-small dropdown-toggle ${CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_CLASS}`,
+    'data-toggle': 'dropdown',
+    enable: false,
+    type: custom_property
+  })
+  button_2.text(custom_property)
+  const td_2 = _get_confirtm_table_tr_td_pulldown(button_2, CUSTOM_PROPERTY_LIST, 'dropdown-menu-custom-property-type')
+  td_list.push(td_2)
+  return td_list
+}
+
 function _get_confirm_table_tr_indicator_td_list (type_) {
   const DEFAULT_STIX2_INDICATOR_TYPES = 'malicious-activity'
   const INDICATOR_LIST = [TYPE_IPV4, TYPE_MD5, TYPE_SHA1, TYPE_SHA256, TYPE_SHA512, TYPE_DOMAIN, TYPE_FILE_NAME, TYPE_EMAIL_ADDRESS]
@@ -406,7 +498,10 @@ function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked
     td_list = _get_confirm_table_tr_cve_td_list(type_)
   } else if (type_ == TYPE_THREAT_ACTOR) {
     td_list = _get_confirm_table_tr_ta_td_list()
-  } else {
+  } else if (type_.indexOf(TYPE_CUSTOM_OBJECT_PREFIX) === 0) {
+    td_list = _get_confirm_table_tr_custom_object_td_list(type_)
+  }
+  else {
     td_list = _get_confirm_table_tr_indicator_td_list(type_)
   }
   const last_td = _get_confirm_table_tr_last_td(value_)
@@ -466,6 +561,11 @@ function _get_confirm_table_head (file_id, table_id) {
   } else if (table_id == TABLE_ID_TAS) {
     const th = $('<th>').text('STIX2 Threat Actors Type')
     th_list.push(th)
+  } else if (table_id == TABLE_ID_CUSTOM_OBJECTS) {
+    const th_1 = $('<th>').text('Custom Object')
+    th_list.push(th_1)
+    const th_2 = $('<th>').text('Custom Property')
+    th_list.push(th_2)
   } else {
     const th = $('<th>').text('Type')
     th_list.push(th)
@@ -487,13 +587,14 @@ function get_confirm_data () {
   const indicators = []
   const ttps = []
   const tas = []
+  const custom_objects = []
+  let error_flag = false
   $(CONFIRM_ITEM_TR_SELECTOR).each(function (index, element) {
     const checkbox_elem = $(element).find(CONFIRM_ITEM_CHECKBOX_SELECTOR)
     const table_id = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TABLE_ID)
     if (checkbox_elem.prop('checked') == true) {
       const type_elem = $(element).find(CONFIRM_ITEM_TYPE_SELECTOR)
       const value_elem = $(element).find(CONFIRM_ITEM_VALUE_SELECTOR)
-      const file_id = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TARGET)
       const title = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TITLE)
       const type_ = type_elem.attr(LISTBOX_TYPE_ATTR)
       const value_ = value_elem.val()
@@ -515,12 +616,27 @@ function get_confirm_data () {
       if (table_id == TABLE_ID_TAS) {
         tas.push(item)
       }
+      if (table_id == TABLE_ID_CUSTOM_OBJECTS) {
+        const custom_property_elem = $(element).find(CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_SELECTOR)
+        const custom_property = custom_property_elem.attr(LISTBOX_TYPE_ATTR)
+        if(custom_property === undefined){
+          alert('Set a custom property')
+          error_flag = true
+          return null
+        }
+        item.type = `${item.type}/${custom_property}`
+        custom_objects.push(item)
+      }
     }
   })
+  if (error_flag === true){
+    return null
+  }
   return {
     indicators: indicators,
     ttps: ttps,
-    tas: tas
+    tas: tas,
+    custom_objects: custom_objects
   }
 }
 
@@ -551,6 +667,29 @@ $(function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
   })
   $(document).on('click', '.dropdown-menu-ta-type li a', function () {
+    $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
+    $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
+  })
+
+  $(document).on('click', '.dropdown-menu-custom-object-type li a', function () {
+    $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
+    $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
+    const tr = $(this).parents('.confirm-item-tr')
+    const ul = tr.find('.dropdown-menu-custom-property-type')
+    ul.empty()
+    const undefined_text ='-----'
+    const li = $('<li>').append($('<a>').text(undefined_text))
+    ul.append(li)
+    for (const li_name of _get_custom_properties_list($(this).text())) {
+        const li = $('<li>').append($('<a>').text(li_name))
+        ul.append(li)
+    }
+    const button = ul.parents('.btn-group').find('.confirm-item-custom-property-type')
+    button.attr(LISTBOX_TYPE_ATTR, null)
+    button.text(undefined_text)
+  })
+
+  $(document).on('click', '.dropdown-menu-custom-property-type li a', function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
     $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
   })

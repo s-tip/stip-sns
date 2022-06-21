@@ -14,22 +14,22 @@ from feeds.extractor.txt import TxtExtractor
 class WebExtractor(BaseExtractor):
     # referred_url に GET でアクセスし、その文章を対象に STIX 要素 (indicator, Exploit_Targets) を作成する
     @classmethod
-    def get_stix_elements(cls, ta_list=[], white_list=[], **kwargs):
-        referred_url = kwargs['referred_url']
+    def get_stix_elements(cls, param):
+        referred_url = param.post_param.referred_url
         # referred_url が無指定の場合は None 返却
         if referred_url is None:
-            return None, None, None
-        return WebExtractor._get_element_from_referred_url(referred_url, ta_list, white_list)
+            return None
+        return WebExtractor._get_element_from_referred_url(referred_url, param.list_param)
 
     # 指定の content から indicators, cve, threat_actor の要素を返却する
     @classmethod
-    def _get_element_from_post(cls, content, referred_url, ta_list=[], white_list=[]):
+    def _get_element_from_post(cls, content, referred_url, list_param):
         INDICATOR_BASE = 'Referred-URL:'
         outfp = io.StringIO(content)
         title_base_name = '%s %s' % (INDICATOR_BASE, referred_url)
-        confirm_indicators, confirm_ttps, confirm_tas = cls._get_extract_lists(outfp, title_base_name, ta_list, white_list)
+        eeb = cls._get_extract_lists(outfp, title_base_name, list_param)
         outfp.close()
-        return confirm_indicators, confirm_ttps, confirm_tas
+        return eeb
 
     @classmethod
     # referred_url からファイル名を取得し、 content の内容を格納したファイルを作成した AttachFile を返却
@@ -51,7 +51,7 @@ class WebExtractor(BaseExtractor):
 
     @classmethod
     # referred_url から get でアクセスして stix 要素を抽出する
-    def _get_element_from_referred_url(cls, referred_url, ta_list, white_list):
+    def _get_element_from_referred_url(cls, referred_url, list_param):
         extractors = {
             'application/pdf': PDFExtractor._get_element_from_target_file,
             'text/csv': CSVExtractor._get_element_from_target_file,
@@ -62,7 +62,13 @@ class WebExtractor(BaseExtractor):
             file_ = None
             if 'text/html' in content_type:
                 bs = bs4.BeautifulSoup(resp.text, 'lxml')
-                return WebExtractor._get_element_from_post(bs.body.text, referred_url, ta_list=ta_list, white_list=white_list)
+                for script in bs(["script", "style"]):
+                    script.decompose()
+                lines = []
+                for line in bs.get_text().splitlines():
+                    lines.append(line.strip())
+                content = "\n".join(line for line in lines if line)
+                return WebExtractor._get_element_from_post(content, referred_url, list_param)
             else:
                 # content_type が extractros の何かにマッチすればその処理を行う
                 for extractor_key in list(extractors.keys()):
@@ -71,17 +77,17 @@ class WebExtractor(BaseExtractor):
                         file_ = WebExtractor._get_temp_file(referred_url, resp.content)
                         try:
                             # それぞれの処理を行う
-                            confirm_indicators, confirm_ttps, confirm_tas = extractors[extractor_key](file_, ta_list=ta_list, white_list=white_list)
+                            eeb = extractors[extractor_key](file_, list_param)
                             # 一時ファイルを削除してスキップ
                             if file_ is not None and file_.file_path is not None:
                                 os.remove(file_.file_path)
-                            return confirm_indicators, confirm_ttps, confirm_tas
+                            return eeb
                         except BaseException:
                             # 失敗した場合は None
-                            return None, None, None
-            return None, None, None
+                            return None
+            return None
 
         except Exception:
             import traceback
             traceback.print_exc()
-            return None, None, None
+            return None

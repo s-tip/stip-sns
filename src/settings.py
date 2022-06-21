@@ -2,6 +2,8 @@ import os
 from decouple import Csv, config, UndefinedValueError
 from unipath import Path
 import stip.common.const as const
+from stip.common.stix_customizer import StixCustomizer
+from stip.common.matching_customizer import MatchingCustomizer
 
 PROJECT_DIR = Path(__file__).parent
 
@@ -41,6 +43,23 @@ try:
     cookie_domain_name = config('COOKIE_DOMAIN_NAME')
 except UndefinedValueError:
     cookie_domain_name = None
+
+stix_customizer = StixCustomizer.get_instance()
+try:
+    stix_customizer.init_customizer_conf(config('STIX_CUSTOMIZER_CONF_PATH'))
+except UndefinedValueError:
+    pass
+
+matching_customizer = MatchingCustomizer.get_instance()
+try:
+    matching_customizer.init_customizer_conf(config('MATCHING_CUSTOMIZER_CONF_PATH'))
+except UndefinedValueError:
+    pass
+
+try:
+    NLP_TYPE = config('NLP_TYPE').lower()
+except UndefinedValueError:
+    NLP_TYPE = None
 
 DATABASES = {
     'default': {

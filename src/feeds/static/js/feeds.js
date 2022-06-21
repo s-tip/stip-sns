@@ -286,6 +286,21 @@ $(function () {
           table_datas[file_name][TABLE_ID_TAS] = data['tas'][file_name]
         }
       }
+      var custom_property_dict = {}
+      if (Object.keys(data['custom_object_dict']).length > 0) {
+        custom_object_dict = data['custom_object_dict']
+      } else {
+        custom_object_dict = {}
+      }
+      $('#confirm_indicators_modal_dialog').data('custom_object_dict', custom_object_dict)
+      if (Object.keys(data['custom_objects']).length > 0) {
+        for (file_name in data['custom_objects']) {
+          if (!(file_name in table_datas)) {
+            table_datas[file_name] = []
+          }
+          table_datas[file_name][TABLE_ID_CUSTOM_OBJECTS] = data['custom_objects'][file_name]
+        }
+      }
       if (screen_type == 'search') {
         fd.append('query_string', document.getElementById('query_string').value);
         fd.append('screen_name', document.getElementById('screen_name').value);
@@ -412,18 +427,23 @@ $(function () {
 
   //確認画面の投稿ボタン押下時
   $('#confirm-compose').click(function () {
+    //各々の confirm-item-tr ごとに checkbox がついていたら form の引数に追加する
+    var data = get_confirm_data();
+    if (data == null){
+      return
+    }
+
     $('#confirm_indicators_modal_dialog').modal('hide');
     var f = $('#compose-form');
     var button = $(".btn-post");
 
-    //各々の confirm-item-tr ごとに checkbox がついていたら form の引数に追加する
-    var data = get_confirm_data();
 
     //フィールドにファイルを追加したのでajax送信方法を追加
     var fd = new FormData($('#compose-form').get(0));
     fd.append('indicators', JSON.stringify(data['indicators']));
     fd.append('ttps', JSON.stringify(data['ttps']));
     fd.append('tas', JSON.stringify(data['tas']));
+    fd.append('custom_objects', JSON.stringify(data['custom_objects']));
     //複数ある content 情報から言語情報などをまとめる
     fd.append('multi_language', is_multi_language());
     fd.append('stix2_titles', JSON.stringify(get_stix2_title_information()));
@@ -970,7 +990,6 @@ $(function () {
           $(input).val("");
         },
         success: function (data) {
-          console.log(data)
           $("ol", container).html(data);
           var post_container = $(container).closest(".post");
           $(".comment-count", post_container).text($("ol li", container).length);
