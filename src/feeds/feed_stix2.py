@@ -910,10 +910,7 @@ def _get_organization_identity(stip_user, individual_identity):
 
 # stix2 の Bundle 作成する (post)
 def get_post_stix2_bundle(
-    indicators,
-    ttps,
-    tas,
-    custom_objects,
+    confirm_data,
     title,
     content,
     tlp,
@@ -926,6 +923,13 @@ def get_post_stix2_bundle(
     stip_user=None,
     tags=[]
 ):
+
+    from feeds.views import KEY_INDICATORS, KEY_TTPS, KEY_TAS, KEY_CUSTOM_OBJECTS, KEY_OTHER
+    indicators = confirm_data[KEY_INDICATORS]
+    ttps = confirm_data[KEY_TTPS]
+    tas = confirm_data[KEY_TAS]
+    custom_objects = confirm_data[KEY_CUSTOM_OBJECTS]
+    other_objects = confirm_data[KEY_OTHER]
 
     # S-TIP Identity 作成する
     individual_identity = _get_stip_individual_identity(stip_user)
@@ -989,6 +993,14 @@ def get_post_stix2_bundle(
         if custom_o is not None:
             bundle.objects.append(custom_o)
             report_object_refs.append(custom_o)
+
+    for other_object in other_objects:
+        oo_type = other_object['type']
+        if oo_type in OO_FUNCS:
+            f = OO_FUNCS[oo_type]
+            o_ = f(other_object, individual_identity, tlp_marking_object)
+            bundle.objects.append(o_)
+            report_object_refs.append(o_)
 
     # 共通 lang
     common_lang = stip_user.language

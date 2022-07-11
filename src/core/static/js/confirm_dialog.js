@@ -1482,6 +1482,7 @@ function get_confirm_data () {
   const ttps = []
   const tas = []
   const custom_objects = []
+  var other = {}
   let error_flag = false
   $(CONFIRM_ITEM_TR_SELECTOR).each(function (index, element) {
     const checkbox_elem = $(element).find(CONFIRM_ITEM_CHECKBOX_SELECTOR)
@@ -1554,7 +1555,8 @@ function get_confirm_data () {
     indicators: indicators,
     ttps: ttps,
     tas: tas,
-    custom_objects: custom_objects
+    custom_objects: custom_objects,
+    other: Object.values(other)
   }
 }
 

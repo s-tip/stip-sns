@@ -76,6 +76,7 @@ KEY_INDICATORS = 'indicators'
 KEY_TTPS = 'ttps'
 KEY_TAS = 'tas'
 KEY_CUSTOM_OBJECTS = 'custom_objects'
+KEY_OTHER = 'other'
 KEY_CUSTOM_OBJECT_DICT = 'custom_object_dict'
 KEY_MULTI_LANGUAGE = 'multi_language'
 KEY_STIX2_TITLES = 'stix2_titles'
@@ -437,19 +438,11 @@ def post_common(request, user):
     else:
         confirm_data = None
 
-    if KEY_CUSTOM_OBJECTS in request.POST:
-        custom_objects = json.loads(request.POST[KEY_CUSTOM_OBJECTS])
-    else:
-        custom_objects = []
-
     # POSTする
     save_post(
         request,
         feed, post,
-        indicators,
-        ttps,
-        tas,
-        custom_objects,
+        confirm_data,
         request.FILES.values(),
         stix2_titles,
         stix2_contents)
@@ -549,10 +542,10 @@ def confirm_indicator(request):
         except BaseException:
             pass
     data = {}
-    data[KEY_INDICATORS] = get_json_from_extractor(eeb.get_indicators())
-    data[KEY_TTPS] = get_json_from_extractor(eeb.get_ttps())
-    data[KEY_TAS] = get_json_from_extractor(eeb.get_tas())
-    data[KEY_CUSTOM_OBJECTS] = get_json_from_extractor(eeb.get_custom_objects())
+    data[KEY_INDICATORS] = get_json_from_extractor(eeb.get_indicators(), confidence)
+    data[KEY_TTPS] = get_json_from_extractor(eeb.get_ttps(), confidence)
+    data[KEY_TAS] = get_json_from_extractor(eeb.get_tas(), confidence)
+    data[KEY_CUSTOM_OBJECTS] = get_json_from_extractor(eeb.get_custom_objects(), confidence)
     customizer = StixCustomizer.get_instance()
     data[KEY_CUSTOM_OBJECT_DICT] = customizer.get_custom_object_dict()
     return JsonResponse(data)
@@ -1501,10 +1494,7 @@ def get_produced_str(bundle):
 def save_post(request,
               feed,
               post,
-              json_indicators=[],
-              ttps=[],
-              tas=[],
-              custom_objects=[],
+              confirm_data,
               request_files=[],
               stix2_titles=[],
               stix2_contents=[]):
@@ -1545,10 +1535,7 @@ def save_post(request,
     tags = list(set(post_tags))
 
     bundle = get_post_stix2_bundle(
-        json_indicators,
-        ttps,
-        tas,
-        custom_objects,
+        confirm_data,
         feed.title,
         feed.post_org,
         feed.tlp,
