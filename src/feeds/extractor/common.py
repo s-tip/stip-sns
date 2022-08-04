@@ -2,8 +2,6 @@ import datetime
 import re
 import os
 import fnmatch
-import MeCab
-import nltk
 from django.conf import settings
 from stix.indicator.indicator import Indicator
 from stix.common import Statement
@@ -24,12 +22,6 @@ from feeds.adapter.crowd_strike import query_actors, get_actor_entities
 from stip.common.stix_customizer import StixCustomizer
 from ctirs.models import SNSConfig
 
-if settings.NLP_TYPE == 'mecab':
-    mecab = MeCab.Tagger('-d /usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ipadic-neologd ')
-
-if settings.NLP_TYPE == 'nltk':
-    nltk.download('punkt')
-    nltk.download('averaged_perceptron_tagger')
 
 # regular expression
 ipv4_reg_expression = r'.*?((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[\[(\{]{0,1}\.[\])\}]{0,1}){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)).*?$'
@@ -264,38 +256,6 @@ class BaseExtractor(object):
                     type_ = 'CUSTOM_OBJECT:%s/%s' % (custom_object['name'], custom_property['name'])
                     eeb.append_custom_object((cls.decode(type_), cls.decode(obj_value), cls.decode(title), cls.decode(title_base_name), True))
                     custom_object_index += 1
-
-        if settings.NLP_TYPE is None:
-            return eeb
-
-        nlp_extract_list = []
-        if settings.NLP_TYPE == 'mecab':
-            mecab.parse('')
-            node = mecab.parseToNode(contents)
-            while node:
-                word = node.surface
-                pos = node.feature.split(',')[1]
-                if pos == '固有名詞':
-                    if word not in nlp_extract_list:
-                        nlp_extract_list.append(word)
-                node = node.next
-
-        if settings.NLP_TYPE == 'nltk':
-            allowed_nltk_types = ['NNP', 'NNPS']
-            words = nltk.word_tokenize(contents)
-            for tag in nltk.pos_tag(words):
-                word, type_ = tag
-                if type_ in allowed_nltk_types:
-                    if word not in nlp_extract_list:
-                        nlp_extract_list.append(word)
-
-        for word in nlp_extract_list:
-            obj_name = '----'
-            prop_name = '----'
-            type_ = 'CUSTOM_OBJECT:%s/%s' % (obj_name, prop_name)
-            title = '%s-%04d' % (title_base_name, custom_object_index)
-            eeb.append_custom_object((cls.decode(type_), cls.decode(word), cls.decode(title), cls.decode(title_base_name), False))
-            custom_object_index += 1
         return eeb
 
 
