@@ -2,7 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http.response import HttpResponseForbidden
 from django.contrib import messages
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 from ctirs.models import Group
 from groups.forms import GroupForm
 from ctirs.models import STIPUser

@@ -3,7 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render
 from django.http.response import HttpResponseForbidden, HttpResponseNotAllowed, HttpResponse, JsonResponse
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 from ctirs.models import SNSConfig
 from management.forms import SNSConfigForm
 from feeds.mongo import Attck

@@ -1,4 +1,3 @@
-from cProfile import Profile
 import io
 import os
 import json
@@ -17,8 +16,14 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http.response import HttpResponse
 from django.utils import translation
-from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ugettext
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
+try:
+    from django.utils.translation import ugettext as __ugettext
+except ImportError:
+    from django.utils.translation import gettext as __ugettext
 import stip.common.login as login_views
 from stip.common.login import set_language_setting
 from ctirs.models import STIPUser as User
@@ -322,7 +327,7 @@ def get_administrative_area(request):
     dump = []
     for item in Region.get_administrative_areas(country_code):
         d = {}
-        d['administraive_area'] = ugettext(item.administrative_area)
+        d['administraive_area'] = __ugettext(item.administrative_area)
         d['code'] = item.code
         dump.append(d)
     data = json.dumps(dump)

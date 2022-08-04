@@ -1,7 +1,10 @@
 import pytz
 from django import forms
 from ctirs.models import STIPUser as User
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 from ctirs.models import Region, Country, Profile
 from stip.common.const import TLP_CHOICES, CRITICAL_INFRASTRUCTURE_CHOICES, LANGUAGES
 
