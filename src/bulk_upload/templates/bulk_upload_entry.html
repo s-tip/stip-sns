@@ -66,17 +66,17 @@
         <div class="colxl-4 col-lg-4 col-md-4 col-sm-4 col-xs-4">
             <div class="form-group">
                 <div class="btn-group" data-toggle="buttons" id="tlp-div">
-                    <label class="btn btn-default btn-sm {% ifequal user.tlp 'RED' %}active{% endifequal %} label-tlp" id="label-tlp-red">
-                        <input type="radio" autocomplate="off" name="TLP" value="RED" class="radio-tlp" id="radio-tlp-red" {%ifequal user.tlp "RED" %}checked{% endifequal %}/>RED
+                    <label class="btn btn-default btn-sm {% if user.tlp == 'RED' %}active{% endif %} label-tlp" id="label-tlp-red">
+                        <input type="radio" autocomplate="off" name="TLP" value="RED" class="radio-tlp" id="radio-tlp-red" {%if user.tlp == "RED" %}checked{% endif %}/>RED
                     </label>
-                    <label class="btn btn-default btn-sm {% ifequal user.tlp 'AMBER' %}active{% endifequal %} label-tlp" id="label-tlp-amber">
-                        <input type="radio" autocomplate="off" name="TLP" value="AMBER" class="radio-tlp" id="radio-tlp-amber" {%ifequal user.tlp "AMBER" %}checked{% endifequal %}/>AMBER
+                    <label class="btn btn-default btn-sm {% if user.tlp == 'AMBER' %}active{% endif %} label-tlp" id="label-tlp-amber">
+                        <input type="radio" autocomplate="off" name="TLP" value="AMBER" class="radio-tlp" id="radio-tlp-amber" {%if user.tlp == "AMBER" %}checked{% endif %}/>AMBER
                     </label>
-                    <label class="btn btn-default btn-sm {% ifequal user.tlp 'GREEN' %}active{% endifequal %} label-tlp" id="label-tlp-green">
-                        <input type="radio" autocomplate="off" name="TLP" value="GREEN" class="radio-tlp" id="radio-tlp-green" {%ifequal user.tlp "GREEN" %}checked{% endifequal %}/>GREEN
+                    <label class="btn btn-default btn-sm {% if user.tlp == 'GREEN' %}active{% endif %} label-tlp" id="label-tlp-green">
+                        <input type="radio" autocomplate="off" name="TLP" value="GREEN" class="radio-tlp" id="radio-tlp-green" {%if user.tlp == "GREEN" %}checked{% endif %}/>GREEN
                     </label>
-                    <label class="btn btn-default btn-sm {% ifequal user.tlp 'WHITE' %}active{% endifequal %} label-tlp" id="label-tlp-white">
-                        <input type="radio" autocomplate="off" name="TLP" value="WHITE" class="radio-tlp" id="radio-tlp-white" {%ifequal user.tlp "WHITE" %}checked{% endifequal %}/>WHITE
+                    <label class="btn btn-default btn-sm {% if user.tlp == 'WHITE' %}active{% endif %} label-tlp" id="label-tlp-white">
+                        <input type="radio" autocomplate="off" name="TLP" value="WHITE" class="radio-tlp" id="radio-tlp-white" {%if user.tlp == "WHITE" %}checked{% endif %}/>WHITE
                     </label>
                 </div> <!-- btn-group -->
             </div> <!--  form-group -->
@@ -123,11 +123,11 @@
                         </button>
                         <ul class="dropdown-menu" id="dropdown-sharing-group" aria-labelledby="sharing-menu">
                             {% for group in sharing_groups %}
-                                {% ifequal group.locale user.language %}
+                                {% if group.locale == user.language %}
                                     <li><a data-value="{{group.en_name}}">{{group.local_name}}</a></li>
                                 {% else %}
                                     <li><a data-value="{{group.en_name}}">{{group.en_name}}</a></li>
-                                {% endifequal %}
+                                {% endif %}
                             {% endfor %}
                         </ul>
                         <input type="hidden" name="group" value="">
