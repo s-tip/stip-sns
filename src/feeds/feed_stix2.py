@@ -768,17 +768,21 @@ def _get_custom_object(custom_object, stip_identity, tlp_marking_object):
         }
 
     custom_o = None
-    for co in StixCustomizer.get_instance().get_custom_objects():
-        if custom_object_name != co['name']:
-            continue
-        custom_o = co['class'](
-            name=name,
-            description=description,
-            created_by_ref=stip_identity,
-            object_marking_refs=[tlp_marking_object],
-            **kwargs
-        )
-        break
+    cos = StixCustomizer.get_instance().get_custom_objects()
+    print('>>>1')
+    print(cos)
+    if cos is not None:
+        for co in cos:
+            if custom_object_name != co['name']:
+                continue
+            custom_o = co['class'](
+                name=name,
+                description=description,
+                created_by_ref=stip_identity,
+                object_marking_refs=[tlp_marking_object],
+                **kwargs
+            )
+            break
     return custom_o
 
 
