@@ -60,18 +60,18 @@
       <i>{{feed.screen_name}} {% if feed.screen_affiliation %}@ {{feed.screen_affiliation}}{% endif %}</i>
       {% endif %}
         {% if feed.screen_instance %}<small class="text feed-tlp">[{{feed.screen_instance}}]</small>{% endif %}
-        {% ifequal feed.tlp  "RED" %}
+        {% if feed.tlp ==  "RED" %}
         <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-red">RED</small>
-        {% endifequal %}
-        {% ifequal feed.tlp  "AMBER" %}
+        {% endif %}
+        {% if feed.tlp == "AMBER" %}
         <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-amber">AMBER</small>
-        {% endifequal %}
-        {% ifequal feed.tlp  "GREEN" %}
+        {% endif %}
+        {% if feed.tlp == "GREEN" %}
         <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-green">GREEN</small>
-        {% endifequal %}
-        {% ifequal feed.tlp  "WHITE" %}
+        {% endif %}
+        {% if feed.tlp == "WHITE" %}
         <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-white">WHITE</small>
-        {% endifequal %}
+        {% endif %}
         {% if not feed.tlp %}
         <small class="text feed-tlp">TLP: </small><small class="feed-tlp feed-tlp-unedefined">undefined</small>
         {% endif %}
@@ -91,7 +91,7 @@
 	      </div>
           <div class="interaction">
             <div class="boxContainer">
-   	          {% ifequal feed.tlp "RED" %}
+   	          {% if feed.tlp == "RED" %}
     	      {% else %}
               <div class="box download-stix-div">
                 <a class="download-stix">
@@ -124,7 +124,7 @@
                   <span class="text">PDF</span>
                 </a>
               </div> <!-- box -->
-    	      {% endifequal %}
+    	      {% endif %}
               <div class="box share-ctim-gv-div">
                 <a class="share-ctim-gv" data-package-id="{{feed.package_id}}">
                   <span class="glyphicon glyphicon-share-alt"></span>
@@ -187,23 +187,23 @@
               <span class="glyphicon glyphicon-comment"></span> {% trans 'Comment' %}
               (<span class="comment-count">{{ feed.comments }}</span>)
             </a>
-            {% ifequal feed.sharing_range_type 'all' %}
+            {% if feed.sharing_range_type == 'all' %}
             <span class="text feed-sharing"><b>{% trans 'Sharing Range' %}:</b> {% trans 'All' %}</span>
-            {% endifequal %}
-            {% ifequal feed.sharing_range_type 'group' %}
+            {% endif %}
+            {% if feed.sharing_range_type == 'group' %}
             <span class="text feed-sharing"><b>{% trans 'Sharing Range' %}:</b> [{% trans 'group' %}] 
-              {% ifequal feed.sharing_group.locale user.language %}
+              {% if feed.sharing_group.locale == user.language %}
                 {{ feed.sharing_group.local_name }}
               {% else %}
                 {{ feed.sharing_group.en_name }}
-              {% endifequal %}
+              {% endif %}
             </span>
-            {% endifequal %}
-            {% ifequal feed.sharing_range_type 'people' %}
+            {% endif %}
+            {% if feed.sharing_range_type == 'people' %}
             <span class="text feed-sharing" title="This post is shared with{%if feed.sharing_people.all|length == 1%} {{feed.sharing_people.all.0.get_screen_name}}.{%else%}{% for sharing_user in feed.sharing_people.all %} {% if forloop.last %}and {{sharing_user.get_screen_name}}.{%else%}{{sharing_user.get_screen_name}},{%endif%}{% endfor %}{%endif%}">
               <b>{% trans 'Sharing Range' %}:</b> {{ feed.sharing_people.all.0.get_screen_name }} {% if feed.sharing_people.all|length > 1 %}, ...{% endif %}
             </span>
-            {% endifequal %}
+            {% endif %}
 
             {% if feed.referred_url %}
             <br>

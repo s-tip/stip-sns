@@ -3,7 +3,6 @@ from decouple import Csv, config, UndefinedValueError
 from unipath import Path
 import stip.common.const as const
 from stip.common.stix_customizer import StixCustomizer
-from stip.common.matching_customizer import MatchingCustomizer
 
 PROJECT_DIR = Path(__file__).parent
 
@@ -50,17 +49,6 @@ try:
 except UndefinedValueError:
     pass
 
-matching_customizer = MatchingCustomizer.get_instance()
-try:
-    matching_customizer.init_customizer_conf(config('MATCHING_CUSTOMIZER_CONF_PATH'))
-except UndefinedValueError:
-    pass
-
-try:
-    NLP_TYPE = config('NLP_TYPE').lower()
-except UndefinedValueError:
-    NLP_TYPE = None
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -96,7 +84,7 @@ INSTALLED_APPS = (
     'ctirs',
 )
 
-MIDDLEWARE = [ 
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -164,6 +152,7 @@ if not dev_over_http:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_DOMAIN = cookie_domain_name
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 MEDIA_ROOT = PROJECT_DIR.parent.child('media')
 MEDIA_URL = '/media/'

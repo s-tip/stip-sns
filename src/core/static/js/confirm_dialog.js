@@ -10,6 +10,8 @@ const CONFIRM_ITEM_TYPE_CLASS = 'confirm-item-type'
 const CONFIRM_ITEM_TYPE_SELECTOR = '.' + CONFIRM_ITEM_TYPE_CLASS
 const CONFIRM_ITEM_STIX2_INDICATOR_TYPES_CLASS = 'confirm-item-stix2-indicator-types'
 const CONFIRM_ITEM_STIX2_INDICATOR_TYPES_SELECTOR = '.' + CONFIRM_ITEM_STIX2_INDICATOR_TYPES_CLASS
+const CONFIRM_ITEM_CONFIDENCE_CLASS = 'confirm-item-confidence'
+const CONFIRM_ITEM_CONFIDENCE_SELECTOR = '.' + CONFIRM_ITEM_CONFIDENCE_CLASS
 const CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_CLASS = 'confirm-item-custom-property-type'
 const CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_SELECTOR = '.' + CONFIRM_ITEM_CUSTOM_PROPERTY_TYPE_CLASS
 const CONFIRM_ITEM_VALUE_CLASS = 'confirm-item-value'
@@ -33,6 +35,14 @@ const TYPE_CVE = 'cve'
 const TYPE_CUSTOM_OBJECT_PREFIX = 'CUSTOM_OBJECT:'
 const TYPE_THREAT_ACTOR = 'threat_actor'
 const LISTBOX_TYPE_ATTR = 'type'
+const DIV_OTHER_OBJECT_SELECT_CLASS = 'div-other-object-select'
+const DIV_OTHER_OBJECT_SELECT_SELECTOR = '.' + DIV_OTHER_OBJECT_SELECT_CLASS
+const DIV_OTHER_STIX_RADIO_CLASS = 'div-other-stix-radio'
+const DIV_OTHER_STIX_RADIO_SELECTOR = '.' + DIV_OTHER_STIX_RADIO_CLASS
+const DIV_OTHER_STIX_CONFIDENCE_CLASS = 'div-other-stix-confidence'
+const DIV_OTHER_STIX_CONFIDENCE_SELECTOR = '.' + DIV_OTHER_STIX_CONFIDENCE_CLASS
+const DIV_OTHER_STIX_PROPERTIES_CLASS = 'div-other-stix-properties'
+const DIV_OTHER_STIX_PROPERTIES_SELECTOR = '.' + DIV_OTHER_STIX_PROPERTIES_CLASS
 
 function display_confirm_dialog (data) {
   const table_datas = []
@@ -98,7 +108,867 @@ function make_extract_tables (table_datas) {
     ],
     paging: false
   }
+  var div = _get_other_stix_element()
+  indicator_modal_body.append(div)
   $('.indicator-table').DataTable(opt)
+}
+
+const CONFIRM_ITEM_STIX2_ROOT  = 'confirm-item-stix2-root'
+const CONFIRM_ITEM_STIX2_OBJECT  = 'confirm-item-stix2-object'
+const CONFIRM_ITEM_STIX2_PROPERTIES  = 'confirm-item-stix2-properties'
+
+const STIX2_SDO = {
+  'Attack Pattern': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'external_references' : { 'required': false, 'type' : 'textarea', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type' : 'attack-pattern',
+  },
+  'Campaign': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+      'objective' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'campaign',
+  },
+  'Course Of Action': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'course-of-action',
+  },
+  'Grouping': {
+    'properties' : {
+      'name' : { 'required': false, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'context' : { 'required': true, 'type' : 'text', },
+      'object_refs' : { 'required': true, 'type' : 'textarea', },
+    },
+    'type': 'grouping',
+  },
+  'Identity': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'roles' : { 'required': false, 'type' : 'textarea', },
+      'identity_class' : { 'required': false, 'type' : 'textarea', },
+      'sectors' : { 'required': false, 'type' : 'textarea', },
+      'contact_information' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'identity',
+  },
+  'Indicator': {
+    'properties' : {
+      'name' : { 'required': false, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'indicator_types' : { 'required': false, 'type' : 'textarea', },
+      'pattern' : { 'required': true, 'type' : 'text', },
+      'pattern_type' : { 'required': true, 'type' : 'text', },
+      'pattern_version' : { 'required': false, 'type' : 'text', },
+      'valid_from' : { 'required': false, 'type' : 'text', },
+      'valid_until' : { 'required': false, 'type' : 'text', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'indicator',
+  },
+  'Infrastructure': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'infrastructure_types' : { 'required': false, 'type' : 'textarea', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'infrastructure',
+  },
+  'Intrusion Set': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+      'goals' : { 'required': false, 'type' : 'textarea', },
+      'resource_level' : { 'required': false, 'type' : 'text', },
+      'primary_motivation' : { 'required': false, 'type' : 'text', },
+      'secondary_motivations' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'intrusion-set',
+  },
+  'Location': {
+    'properties' : {
+      'name' : { 'required': false, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'latitude' : { 'required': false, 'type' : 'text', },
+      'longitude' : { 'required': false, 'type' : 'text', },
+      'precision' : { 'required': false, 'type' : 'text', },
+      'region' : { 'required': false, 'type' : 'text', },
+      'country' : { 'required': false, 'type' : 'text', },
+      'administrative_area' : { 'required': false, 'type' : 'text', },
+      'city' : { 'required': false, 'type' : 'text', },
+      'street_address' : { 'required': false, 'type' : 'text', },
+      'postal_code' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'location',
+  },
+  'Malware': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'malware_types' : { 'required': false, 'type' : 'textarea', },
+      'is_family' : { 'required': true, 'type' : 'boolean', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+      'operating_system_refs' : { 'required': false, 'type' : 'textarea', },
+      'architecture_execution_envs' : { 'required': false, 'type' : 'textarea', },
+      'implementation_languages' : { 'required': false, 'type' : 'textarea', },
+      'capabilities' : { 'required': false, 'type' : 'textarea', },
+      'sample_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'malware',
+  },
+  'Malware Analysis': {
+    'properties' : {
+      'product' : { 'required': true, 'type' : 'text', },
+      'version' : { 'required': false, 'type' : 'text', },
+      'host_vm_ref' : { 'required': false, 'type' : 'text', },
+      'operating_system_ref' : { 'required': false, 'type' : 'text', },
+      'installed_software_refs' : { 'required': false, 'type' : 'textarea', },
+      'configuration_version' : { 'required': false, 'type' : 'text', },
+      'modules' : { 'required': false, 'type' : 'textarea', },
+      'analysis_engine_version' : { 'required': false, 'type' : 'text', },
+      'analysis_definition_version' : { 'required': false, 'type' : 'text', },
+      'submitted' : { 'required': false, 'type' : 'text', },
+      'analysis_started' : { 'required': false, 'type' : 'text', },
+      'analysis_ended' : { 'required': false, 'type' : 'text', },
+      'result_name' : { 'required': false, 'type' : 'text', },
+      'result' : { 'required': false, 'type' : 'text', },
+      'analysis_sco_refs' : { 'required': false, 'type' : 'textarea', },
+      'sample_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'malware-analysis',
+  },
+  'Note': {
+    'properties' : {
+      'abstract' : { 'required': false, 'type' : 'text', },
+      'content' : { 'required': true, 'type' : 'text', },
+      'authors' : { 'required': false, 'type' : 'textarea', },
+      'object_refs' : { 'required': true, 'type' : 'textarea', },
+    },
+    'type': 'note',
+  },
+  'Observed Data': {
+    'properties' : {
+      'first_observed' : { 'required': true, 'type' : 'text', },
+      'last_observed' : { 'required': true, 'type' : 'text', },
+      'number_observed' : { 'required': true, 'type' : 'text', },
+      'objects' : { 'required': false, 'type' : 'textarea', },
+      'object_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'observed-data',
+  },
+  'Opinion': {
+    'properties' : {
+      'explanation' : { 'required': false, 'type' : 'text', },
+      'authors' : { 'required': false, 'type' : 'textarea', },
+      'opinion' : { 'required': true, 'type' : 'text', },
+      'object_refs' : { 'required': true, 'type' : 'textarea', },
+    },
+    'type': 'opinion',
+  },
+  'Report': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'report_types' : { 'required': false, 'type' : 'textarea', },
+      'published' : { 'required': true, 'type' : 'text', },
+      'object_refs' : { 'required': true, 'type' : 'textarea', },
+    },
+    'type': 'report',
+  },
+  'Threat Actor': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'threat_actor_types' : { 'required': false, 'type' : 'textarea', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'first_seen' : { 'required': false, 'type' : 'text', },
+      'last_seen' : { 'required': false, 'type' : 'text', },
+      'roles' : { 'required': false, 'type' : 'textarea', },
+      'goals' : { 'required': false, 'type' : 'textarea', },
+      'sophistication' : { 'required': false, 'type' : 'text', },
+      'resource_level' : { 'required': false, 'type' : 'text', },
+      'primary_motivation' : { 'required': false, 'type' : 'text', },
+      'secondary_motivations' : { 'required': false, 'type' : 'textarea', },
+      'personal_motivations' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'threat-actor',
+  },
+  'Tool': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'tool_types' : { 'required': false, 'type' : 'textarea', },
+      'aliases' : { 'required': false, 'type' : 'textarea', },
+      'kill_chain_phases' : { 'required': false, 'type' : 'textarea', },
+      'tool_version' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'tool',
+  },
+  'Vulnerability': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'external_references' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'vulnerability',
+  },
+}
+
+const STIX2_SRO = {
+  'Relationship': {
+    'properties' : {
+      'relationship_type' : { 'required': true, 'type' : 'text', },
+      'description' : { 'required': false, 'type' : 'text', },
+      'source_ref' : { 'required': true, 'type' : 'text', },
+      'target_ref' : { 'required': true, 'type' : 'text', },
+      'start_time' : { 'required': false, 'type' : 'text', },
+      'stop_time' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'relationship',
+  },
+  'Sighting': {
+    'properties' : {
+      'description' : { 'required': false, 'type' : 'text', },
+      'first_seen' : { 'required': true, 'type' : 'text', },
+      'last_seen' : { 'required': true, 'type' : 'text', },
+      'count' : { 'required': false, 'type' : 'text', },
+      'sighting_of_ref' : { 'required': true, 'type' : 'text', },
+      'observed_data_refs' : { 'required': false, 'type' : 'textarea', },
+      'where_sighted_refs' : { 'required': false, 'type' : 'textarea', },
+      'summary' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'sighting',
+  },
+}
+
+const STIX2_SCO = {
+  'Artifact': {
+    'properties' : {
+      'mime_type' : { 'required': false, 'type' : 'text', },
+      'payload_bin' : { 'required': false, 'type' : 'text', },
+      'url' : { 'required': false, 'type' : 'text', },
+      'hashes' : { 'required': false, 'type' : 'textarea', },
+      'encryption_algorithm' : { 'required': false, 'type' : 'textarea', },
+      'decryption_key' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'artifact',
+  },
+  'Autonomous System': {
+    'properties' : {
+      'number' : { 'required': true, 'type' : 'text', },
+      'name' : { 'required': false, 'type' : 'text', },
+      'rir' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'autonomous-system',
+  },
+  'Directory': {
+    'properties' : {
+      'path' : { 'required': true, 'type' : 'text', },
+      'path_enc' : { 'required': false, 'type' : 'text', },
+      'ctime' : { 'required': false, 'type' : 'text', },
+      'mtime' : { 'required': false, 'type' : 'text', },
+      'atime' : { 'required': false, 'type' : 'text', },
+      'contains_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'directory',
+  },
+  'Domain Name': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+      'resolves_to_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'domain-name',
+  },
+  'Email Address': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+      'display_name' : { 'required': false, 'type' : 'text', },
+      'belongs_to_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'email-addr',
+  },
+  'Email Message': {
+    'properties' : {
+      'is_multipart' : { 'required': true, 'type' : 'boolean', },
+      'date' : { 'required': false, 'type' : 'text', },
+      'content_type' : { 'required': false, 'type' : 'text', },
+      'from_ref' : { 'required': false, 'type' : 'text', },
+      'sender_ref' : { 'required': false, 'type' : 'text', },
+      'to_refs' : { 'required': false, 'type' : 'textarea', },
+      'cc_refs' : { 'required': false, 'type' : 'textarea', },
+      'bcc_refs' : { 'required': false, 'type' : 'textarea', },
+      'message_id' : { 'required': false, 'type' : 'text', },
+      'subject' : { 'required': false, 'type' : 'text', },
+      'received_lines' : { 'required': false, 'type' : 'textarea', },
+      'additional_header_fields' : { 'required': false, 'type' : 'textarea', },
+      'body' : { 'required': false, 'type' : 'textarea', },
+      'body_multipart' : { 'required': false, 'type' : 'textarea', },
+      'raw_email_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'email-message',
+  },
+  'File': {
+    'properties' : {
+      'extensions' : { 'required': false, 'type' : 'textarea', },
+      'hashes' : { 'required': false, 'type' : 'textarea', },
+      'size' : { 'required': false, 'type' : 'text', },
+      'name' : { 'required': false, 'type' : 'text', },
+      'name_enc' : { 'required': false, 'type' : 'text', },
+      'magic_number_hex' : { 'required': false, 'type' : 'text', },
+      'mime_type' : { 'required': false, 'type' : 'text', },
+      'ctime' : { 'required': false, 'type' : 'text', },
+      'mtime' : { 'required': false, 'type' : 'text', },
+      'atime' : { 'required': false, 'type' : 'text', },
+      'parent_directory_ref' : { 'required': false, 'type' : 'text', },
+      'contains_refs' : { 'required': false, 'type' : 'textarea', },
+      'content_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'file',
+  },
+  'IPv4 Address': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+      'resolves_to_refs' : { 'required': false, 'type' : 'textarea', },
+      'belongs_to_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'ipv4-addr',
+  },
+  'IPv6 Address': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+      'resolves_to_refs' : { 'required': false, 'type' : 'textarea', },
+      'belongs_to_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'ipv6-addr',
+  },
+  'MAC Address': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+    },
+    'type': 'mac-addr',
+  },
+  'Mutex': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+    },
+    'type': 'mutex',
+  },
+  'Network': {
+    'properties' : {
+      'extensions' : { 'required': false, 'type' : 'textarea', },
+      'start' : { 'required': false, 'type' : 'text', },
+      'end' : { 'required': false, 'type' : 'text', },
+      'is_active' : { 'required': false, 'type' : 'boolean', },
+      'src_ref' : { 'required': false, 'type' : 'text', },
+      'dst_ref' : { 'required': false, 'type' : 'text', },
+      'src_port' : { 'required': false, 'type' : 'text', },
+      'dst_port' : { 'required': false, 'type' : 'text', },
+      'protocols' : { 'required': true, 'type' : 'textarea', },
+      'src_byte_count' : { 'required': false, 'type' : 'text', },
+      'dst_byte_count' : { 'required': false, 'type' : 'text', },
+      'src_packets' : { 'required': false, 'type' : 'text', },
+      'dst_packets' : { 'required': false, 'type' : 'text', },
+      'ipfix' : { 'required': false, 'type' : 'textarea', },
+      'src_payload_ref' : { 'required': false, 'type' : 'text', },
+      'dst_payload_ref' : { 'required': false, 'type' : 'text', },
+      'encapsulates_refs' : { 'required': false, 'type' : 'textarea', },
+      'encapsulated_by_ref' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'network',
+  },
+  'Process': {
+    'properties' : {
+      'extensions' : { 'required': false, 'type' : 'textarea', },
+      'is_hidden' : { 'required': false, 'type' : 'boolean', },
+      'pid' : { 'required': false, 'type' : 'text', },
+      'created_time' : { 'required': false, 'type' : 'text', },
+      'cwd' : { 'required': false, 'type' : 'text', },
+      'command_line' : { 'required': false, 'type' : 'text', },
+      'environment_variables' : { 'required': false, 'type' : 'textarea', },
+      'opened_connection_refs' : { 'required': false, 'type' : 'textarea', },
+      'creator_user_ref' : { 'required': false, 'type' : 'text', },
+      'image_ref' : { 'required': false, 'type' : 'text', },
+      'parent_ref' : { 'required': false, 'type' : 'text', },
+      'child_refs' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'process',
+  },
+  'Software': {
+    'properties' : {
+      'name' : { 'required': true, 'type' : 'text', },
+      'cpe' : { 'required': false, 'type' : 'text', },
+      'swid' : { 'required': false, 'type' : 'text', },
+      'languages' : { 'required': false, 'type' : 'textarea', },
+      'vendor' : { 'required': false, 'type' : 'text', },
+      'version' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'software',
+  },
+  'URL': {
+    'properties' : {
+      'value' : { 'required': true, 'type' : 'text', },
+    },
+    'type': 'url',
+  },
+  'User Account': {
+    'properties' : {
+      'extensions' : { 'required': false, 'type' : 'textarea', },
+      'user_id' : { 'required': false, 'type' : 'text', },
+      'credential' : { 'required': false, 'type' : 'text', },
+      'account_login' : { 'required': false, 'type' : 'text', },
+      'account_type' : { 'required': false, 'type' : 'text', },
+      'display_name' : { 'required': false, 'type' : 'text', },
+      'is_service_account' : { 'required': false, 'type' : 'boolean', },
+      'is_privileged' : { 'required': false, 'type' : 'boolean', },
+      'can_escalate_privs' : { 'required': false, 'type' : 'boolean', },
+      'is_disabled' : { 'required': false, 'type' : 'boolean', },
+      'account_created' : { 'required': false, 'type' : 'text', },
+      'account_expires' : { 'required': false, 'type' : 'text', },
+      'credential_last_changed' : { 'required': false, 'type' : 'text', },
+      'account_first_login' : { 'required': false, 'type' : 'text', },
+      'account_last_login' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'user-account',
+  },
+  'Windows Registry Key': {
+    'properties' : {
+      'key' : { 'required': false, 'type' : 'text', },
+      'values' : { 'required': false, 'type' : 'textarea', },
+      'modified_time' : { 'required': false, 'type' : 'text', },
+      'creator_user_ref' : { 'required': false, 'type' : 'text', },
+      'number_of_subkeys' : { 'required': false, 'type' : 'text', },
+    },
+    'type': 'windows-registry-key',
+  },
+  'X.509 Certificate': {
+    'properties' : {
+      'is_self_signed' : { 'required': false, 'type' : 'boolean', },
+      'hashes' : { 'required': false, 'type' : 'textarea', },
+      'version' : { 'required': false, 'type' : 'text', },
+      'serial_number' : { 'required': false, 'type' : 'text', },
+      'signature_algorithm' : { 'required': false, 'type' : 'text', },
+      'issuer' : { 'required': false, 'type' : 'text', },
+      'validity_not_before' : { 'required': false, 'type' : 'text', },
+      'validity_not_after' : { 'required': false, 'type' : 'text', },
+      'subject' : { 'required': false, 'type' : 'text', },
+      'subject_public_key_algorithm' : { 'required': false, 'type' : 'text', },
+      'subject_public_key_modulus' : { 'required': false, 'type' : 'text', },
+      'subject_public_key_exponent' : { 'required': false, 'type' : 'text', },
+      'x509_v3_extensions' : { 'required': false, 'type' : 'textarea', },
+    },
+    'type': 'x509-certificate',
+  },
+}
+
+const STIX_CATEGORY_TABLE = {
+  'SDO': STIX2_SDO,
+  'SRO': STIX2_SRO,
+  'SCO': STIX2_SCO,
+}
+
+function _get_other_stix_element () {
+  single_other_div = _create_single_other_object_select_div()
+  const div = $('<div>', {
+    'id': `div-${CONFIRM_ITEM_STIX2_ROOT}`
+  })
+  div.append(single_other_div)
+  div.append($('<br>'))
+  return div
+}
+
+function _get_required_label (prop_name) {
+  const label = $('<label>', {
+   'for': prop_name,
+   'class': 'label-stix2-prop-required',
+  })
+  label.text(`${prop_name}/required`)
+  return label
+}
+
+function _get_optional_label (prop_name) {
+  const label = $('<label>', {
+   'for': prop_name,
+   'class': 'label-stix2-prop-optional',
+  })
+  label.text(prop_name)
+  return label
+}
+
+function _get_stix2_prop_input (prop_name, target_id, object_type, prop_info) {
+  const input_id = prop_name
+  if (prop_info['type'] == 'text') {
+    return $('<input>', {
+      'type': 'text',
+      'class': 'form-control other-stix2-input',
+      'id': input_id,
+      'data-object_type': object_type,
+      'data-property': prop_name,
+      'data-target_id': target_id,
+      'aria-describedby': input_id,
+    })
+  }
+  else if (prop_info['type'] == 'textarea') {
+    return $('<textarea>', {
+      'class': 'form-control other-stix2-input',
+      'id': input_id,
+      'data-object_type': object_type,
+      'data-property': prop_name,
+      'data-target_id': target_id,
+      'aria-describedby': input_id,
+    })
+  }
+  else if (prop_info['type'] == 'boolean') {
+   const div = $('<div>' , {
+     'class': 'form-group'
+   })
+   div.append(_get_boolean_radio_div(target_id, object_type, prop_name))
+   return div
+  }
+  return null
+}
+
+function _get_boolean_radio_input(target_id, object_type, prop_name, b){
+  const id = prop_name + '_' + Boolean(b).toString()
+  const input =  $('<input>', {
+    'class': 'form-check-input other-stix2-input',
+    'type':  'radio',
+    'name': prop_name,
+    'value': b,
+    'id': id,
+    'data-object_type': object_type,
+    'data-property': prop_name,
+    'data-target_id': target_id,
+  })
+  input.prop('checked', false)
+  return input
+}
+
+function _get_boolean_radio_input_unspecified(target_id, object_type, prop_name){
+  const id = prop_name + '_unspecified'
+  const input =  $('<input>', {
+    'class': 'form-check-input other-stix2-input',
+    'type':  'radio',
+    'name': prop_name,
+    'value': 'unspecified',
+    'id': id,
+    'data-object_type': object_type,
+    'data-property': prop_name,
+    'data-target_id': target_id,
+  })
+  input.prop('checked', true)
+  return input
+}
+
+function _get_boolean_radio_label(prop_name, b){
+  const id = prop_name + '_' + Boolean(b).toString()
+  return $('<label>', {
+    'class': 'form-check-label',
+    'for' : id,
+    'text': Boolean(b).toString()
+  })
+}
+
+function _get_boolean_radio_label_unspecified(prop_name) {
+  const id = prop_name + '_unspecified'
+  return $('<label>', {
+    'class': 'form-check-label',
+    'for' : id,
+    'text': 'unspecified'
+  })
+}
+
+function _get_boolean_radio_div(target_id, object_type, prop_name){
+  const div = $('<div>' , {
+    'class': 'form-check'
+  })
+  div.append(_get_boolean_radio_input(target_id, object_type, prop_name, true))
+  div.append(_get_boolean_radio_label(prop_name, true))
+  div.append($('<span>').html('&nbsp;'))
+  div.append(_get_boolean_radio_input(target_id, object_type, prop_name, false))
+  div.append(_get_boolean_radio_label(prop_name, false))
+  div.append($('<span>').html('&nbsp;:&nbsp;'))
+  div.append(_get_boolean_radio_input_unspecified(target_id, object_type, prop_name))
+  div.append(_get_boolean_radio_label_unspecified(prop_name))
+  return div
+}
+
+function _get_stix2_prop_row (prop_name, target_id, object_type, prop_info) {
+  var label = null
+  if (prop_info['required'] == true) {
+    label = _get_required_label(prop_name)
+  }else{
+    label = _get_optional_label(prop_name)
+  }
+  const label_col_div = $('<div>', {
+    'class': 'col-sm-4'
+  })
+  label_col_div.append(label)
+
+  const input_col_div = $('<div>', {
+    'class': 'col-sm-8'
+  })
+  const input = _get_stix2_prop_input (prop_name, target_id, object_type, prop_info)
+  input_col_div.append(input)
+
+  const row_div = $('<div>', {
+    'class': 'row'
+  })
+
+  row_div.append(label_col_div)
+  row_div.append(input_col_div)
+  return row_div
+}
+
+function _update_stix2_properties_div (object_name, root_div) {
+  const category = root_div.find('input:radio[name="other_category"]:checked').val()
+  const info = STIX_CATEGORY_TABLE[category][object_name]
+  const properties = info['properties']
+  const object_type = info['type']
+  const confidence = root_div.find('input[name="confidence"]').val()
+
+  const container_div = $('<div>', {
+    'class': `container-fluid btn-group div-${CONFIRM_ITEM_STIX2_PROPERTIES}`
+  })
+  const label_row_div = $('<div>', {
+    'class': 'row'
+  })
+  const label_col_div = $('<div>', {
+    'class': 'col-sm-12'
+  })
+  const label = $('<label>', {
+    'class': 'confirm-item-label',
+    'for': `button-${CONFIRM_ITEM_STIX2_PROPERTIES}`,
+  })
+  label.text(`Add Properties of "${object_name}"`)
+  label_col_div.append(label)
+  label_row_div.append(label_col_div)
+  container_div.append(label_row_div)
+
+  const object_id = root_div.data('object_id')
+  for (const prop_name in properties) {
+    row = _get_stix2_prop_row(prop_name, object_id, object_type, properties[prop_name])
+    container_div.append(row)
+  }
+  const div = root_div.find(DIV_OTHER_STIX_PROPERTIES_SELECTOR)
+  div.empty()
+  div.append(container_div)
+}
+
+const STIX_CATEGORY_LABEL_CLASS = 'stix-category-label'
+
+function _get_stix_type_radio () {
+  const div_fg = $('<div>', {
+    'class': 'form-group'
+  })
+  for (const item in STIX_CATEGORY_TABLE) {
+    const id = `${STIX_CATEGORY_LABEL_CLASS}-${item}`
+
+    const label = $('<label>', {
+      'class': 'form-check-label',
+      'for' : id,
+    })
+    label.text(item)
+    const input =  $('<input>', {
+      'class': `form-check-input ${STIX_CATEGORY_LABEL_CLASS}`,
+      'id':  id,
+      'type':  'radio',
+      'name': 'other_category',
+      'value': item,
+    })
+
+    const each_div = $('<div>', {
+      'class': 'form-check form-check-inline'
+    })
+    each_div.append(input)
+    each_div.append(label)
+    div_fg.append(each_div)
+  }
+
+  const form = $('<form>')
+  form.append(div_fg)
+
+  const div = $('<div>')
+  div.append(form)
+  return div
+}
+
+$(document).on('click', '.other-object-plus-button', function() {
+  const other_div = _create_single_other_object_select_div()
+  const root_div = $(`#div-${CONFIRM_ITEM_STIX2_ROOT}`)
+  root_div.append(other_div)
+  root_div.append($('<br>'))
+})
+
+$(document).on('click', '.other-object-remove-button', function() {
+  $(DIV_OTHER_OBJECT_SELECT_SELECTOR).length
+  const remove_div = $(this).parents(DIV_OTHER_OBJECT_SELECT_SELECTOR)
+  remove_div.remove()
+  if ($(DIV_OTHER_OBJECT_SELECT_SELECTOR).length == 0) {
+    const indicator_modal_body = $('#indicator-modal-body')
+    indicator_modal_body.empty()
+    var div = _get_other_stix_element()
+    indicator_modal_body.append(div)
+  }
+})
+
+function _create_single_other_object_select_div () {
+  const span = $('<span>', {
+    'class': 'caret'
+  })
+  const button = $('<button>', {
+    'class': `btn btn-small dropdown-toggle`,
+    'id': `button-${CONFIRM_ITEM_STIX2_OBJECT}`,
+    'data-toggle': 'dropdown',
+  })
+  button.text('Choose Other Class')
+  button.prop('disabled', true)
+  button.append(span)
+
+  const ul = $('<ul>', {
+    'class': `dropdown-menu ul-${CONFIRM_ITEM_STIX2_OBJECT}`,
+  })
+
+  const span_plus_button = $('<span>', {
+    'class': 'glyphicon glyphicon-plus-sign btn-sm btn-info other-object-plus-button'
+  })
+  const span_remove_button = $('<span>', {
+    'class': 'glyphicon glyphicon-remove-sign btn-sm btn-danger other-object-remove-button'
+  })
+  const label_select = $('<label>', {
+    'class': 'confirm-item-label',
+  })
+  label_select.html('Add More STIX Object&nbsp;')
+  label_select.append(span_plus_button)
+  label_select.append(span_remove_button)
+
+  const radio = _get_stix_type_radio()
+  const col_radio = $('<div>', {
+    'class': 'col-sm-4',
+  })
+  col_radio.append(label_select)
+  col_radio.append($('<br/>'))
+  col_radio.append($('<br/>'))
+  col_radio.append(radio)
+
+  const div_button = $('<div>', {
+    'class': `col-sm-3 btn-group ${DIV_OTHER_STIX_RADIO_CLASS}`,
+  })
+  div_button.append(button)
+  div_button.append(ul)
+
+
+  const col_confidence = $('<div>', {
+    'class': `col-sm-5 ${DIV_OTHER_STIX_CONFIDENCE_CLASS}`,
+  })
+
+  const row_confidence = $('<div>', {
+    'class': 'row'
+  })
+  const col_confidence_label = $('<div>', {
+    'class': 'col-sm-12'
+  })
+  const label_confidence = $('<label>', {
+    'class': 'confirm-item-label',
+    'for': 'input-confidence'
+  })
+  label_confidence.text('Confidence')
+  col_confidence_label.append(label_confidence)
+  row_confidence.append(col_confidence_label)
+  col_confidence.append(row_confidence)
+
+  const row_confidence_slider = $('<div>', {
+    'class': 'row'
+  })
+  const col_confidence_slider = $('<div>', {
+    'class': 'col-sm-6'
+  })
+  const input_slider = $('<input>', {
+    'type': 'range',
+    'min': '0',
+    'max': '100',
+    'class': 'slider confidence-object-slider',
+  })
+  const confidence = $('input[name="confidence"]').val()
+  input_slider.val(confidence)
+  col_confidence_slider.append(input_slider)
+  row_confidence_slider.append(col_confidence_slider)
+
+  const col_confidence_text = $('<div>', {
+    'class': 'col-sm-3'
+  })
+  const input_confidence = $('<input>', {
+    'type': 'text',
+    'class': 'form-control input-confidence',
+    'id': `input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`,
+    'aria-describedby': 'input-confidence',
+  })
+  input_confidence.val(confidence)
+  col_confidence_text.append(input_confidence)
+  row_confidence_slider.append(col_confidence_text)
+
+  const col_confidence_eval_text = $('<div>', {
+    'class': 'col-sm-3'
+  })
+  const input_confidence_eval = $('<input>', {
+    'type': 'text',
+    'class': 'form-control',
+    'disabled': true,
+    'id': `input-confidence-eval-${CONFIRM_ITEM_STIX2_OBJECT}`,
+  })
+  input_confidence_eval.val(get_confidence_eval_string (confidence))
+  col_confidence_eval_text.append(input_confidence_eval)
+  row_confidence_slider.append(col_confidence_eval_text)
+  col_confidence.append(row_confidence_slider)
+
+  const row_1 = $('<div>', {
+    'class': 'row'
+  })
+  row_1.append(col_radio)
+  row_1.append(div_button)
+  row_1.append(col_confidence)
+  div_button.hide()
+  col_confidence.hide()
+
+  const div = $('<div>', {
+    'class': `container-fluid ${DIV_OTHER_OBJECT_SELECT_CLASS}`
+  })
+  const object_id = new Date().getTime().toString();
+  div.data('object_id', object_id)
+  div.append(row_1)
+
+  const row_2 = $('<div>', {
+    'class': 'row'
+  })
+  const col_stix2_properties = $('<div>', {
+    'class': `col-sm-12 ${DIV_OTHER_STIX_PROPERTIES_CLASS}`
+  })
+  row_2.append(col_stix2_properties)
+  div.append(row_2)
+  return div
 }
 
 function _get_file_id_from_file_name (file_name) {
@@ -316,9 +1186,9 @@ function _get_confirm_table (file_name, table_id, items) {
 function _get_confirm_table_tbody (file_id, table_id, items) {
   const tbody = $('<tbody>')
   for (const item of items) {
-    let [type_, value_, title, checked] = item
+    let [type_, value_, title, checked, confidence] = item
     tbody.append(
-      _get_confirm_table_tr(type_, value_, title, file_id, table_id, checked)
+      _get_confirm_table_tr(type_, value_, title, file_id, table_id, checked, confidence)
     )
   }
   return tbody
@@ -345,6 +1215,22 @@ function _get_confirm_table_tr_first_td (title, file_id, table_id, checked) {
   label.append(checkbox)
   div.append(label)
   td.append(div)
+  return td
+}
+
+function _get_confirm_table_tr_confidence_td (confidence) {
+  const td = $('<td>')
+  const span = $('<span>', {
+    style: 'display:none'
+  })
+  span.text(confidence)
+  td.append(span)
+  const input_text = $('<input>', {
+    type: 'text',
+    class: `${CONFIRM_ITEM_CONFIDENCE_CLASS} form-control`,
+    value: confidence
+  })
+  td.append(input_text)
   return td
 }
 
@@ -490,7 +1376,7 @@ function _get_confirm_table_tr_indicator_td_list (type_) {
   return td_list
 }
 
-function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked) {
+function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked, confidence) {
   let td_list = []
 
   const first_td = _get_confirm_table_tr_first_td(title, file_id, table_id, checked)
@@ -504,6 +1390,7 @@ function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked
   else {
     td_list = _get_confirm_table_tr_indicator_td_list(type_)
   }
+  const confidence_td = _get_confirm_table_tr_confidence_td(confidence)
   const last_td = _get_confirm_table_tr_last_td(value_)
 
   const tr = $('<tr>', {
@@ -513,6 +1400,7 @@ function _get_confirm_table_tr (type_, value_, title, file_id, table_id, checked
   for (const td of td_list) {
     tr.append(td)
   }
+  tr.append(confidence_td)
   tr.append(last_td)
   return tr
 }
@@ -544,12 +1432,17 @@ function _get_confirm_table_head_first (file_id, table_id) {
   return th
 }
 
+function _get_confirm_table_head_confidence () {
+  return $('<th>').text('Confidence')
+}
+
 function _get_confirm_table_head_last () {
   return $('<th>').text('Value')
 }
 
 function _get_confirm_table_head (file_id, table_id) {
   const th_first = _get_confirm_table_head_first(file_id, table_id)
+  const th_confidence = _get_confirm_table_head_confidence()
   const th_last = _get_confirm_table_head_last()
 
   const th_list = []
@@ -576,6 +1469,7 @@ function _get_confirm_table_head (file_id, table_id) {
   for (const th of th_list) {
     tr.append(th)
   }
+  tr.append(th_confidence)
   tr.append(th_last)
 
   const thead = $('<thead>')
@@ -588,6 +1482,7 @@ function get_confirm_data () {
   const ttps = []
   const tas = []
   const custom_objects = []
+  var other = {}
   let error_flag = false
   $(CONFIRM_ITEM_TR_SELECTOR).each(function (index, element) {
     const checkbox_elem = $(element).find(CONFIRM_ITEM_CHECKBOX_SELECTOR)
@@ -595,13 +1490,17 @@ function get_confirm_data () {
     if (checkbox_elem.prop('checked') == true) {
       const type_elem = $(element).find(CONFIRM_ITEM_TYPE_SELECTOR)
       const value_elem = $(element).find(CONFIRM_ITEM_VALUE_SELECTOR)
+      const confidence_elem = $(element).find(CONFIRM_ITEM_CONFIDENCE_SELECTOR)
+      const file_id = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TARGET)
       const title = checkbox_elem.attr(CONFIRM_ITEM_CHECKBOX_ATTR_TITLE)
       const type_ = type_elem.attr(LISTBOX_TYPE_ATTR)
+      const confidence = confidence_elem.val()
       const value_ = value_elem.val()
       var stix2_indicator_types = 'malicious-activity'
 
       const item = {}
       item.type = type_
+      item.confidence = confidence
       item.value = value_
       item.title = title
       if (table_id == TABLE_ID_INDICATORS) {
@@ -629,6 +1528,25 @@ function get_confirm_data () {
       }
     }
   })
+
+  $('.other-stix2-input').each(function (index, element) {
+    var item = {}
+    var target_id = $(element).data('target_id')
+    if (target_id in other){
+      item = other[target_id]
+    }else {
+      item.type = $(element).data('object_type')
+      item.confidence = $(element).parents(DIV_OTHER_OBJECT_SELECT_SELECTOR).find(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`).val()
+    }
+    if($(element).prop('type') == 'radio'){
+      if($(element).prop('checked')){
+        item[$(element).data('property')] = $(element).val()
+      }
+    }else{
+      item[$(element).data('property')] = $(element).val()
+    }
+    other[target_id] = item
+  })
   if (error_flag === true){
     return null
   }
@@ -636,7 +1554,8 @@ function get_confirm_data () {
     indicators: indicators,
     ttps: ttps,
     tas: tas,
-    custom_objects: custom_objects
+    custom_objects: custom_objects,
+    other: Object.values(other)
   }
 }
 
@@ -657,6 +1576,45 @@ function get_table_id_from_confirm_item (elem) {
   return elem.attr('table_id')
 }
 
+function on_change_slider(slider, confidence_text, eval_text) {
+  const confidence = Number(slider.val())
+  confidence_text.val(confidence)
+  set_confidence_eval(confidence, eval_text)
+}
+
+function on_change_confidence_text(slider, confidence_text, eval_text) {
+  if ($.isNumeric(confidence_text.val()) == false) {
+    alert('Integer (0-100) only')
+    return false
+  }
+  const confidence = Number(confidence_text.val())
+  if ((confidence < 0) || (100 < confidence)) {
+    alert('Integer (0-100) only')
+    return false
+  }
+  slider.val(confidence)
+  set_confidence_eval(confidence, eval_text)
+  return
+}
+
+function get_confidence_eval_string (confidence) {
+  if (confidence == 0) {
+    eval_string = 'None'
+  } else if (confidence < 30) {
+    eval_string = 'Low'
+  } else if (confidence < 70) {
+    eval_string = 'Middle'
+  } else {
+    eval_string = 'High'
+  }
+  return eval_string
+}
+
+function set_confidence_eval(confidence, eval_elem) {
+  var eval_string = get_confidence_eval_string(confidence)
+  eval_elem.val(eval_string)
+}
+
 $(function () {
   $(document).on('click', '.dropdown-menu-indicator-type li a', function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
@@ -670,30 +1628,58 @@ $(function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
     $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
   })
-
-  $(document).on('click', '.dropdown-menu-custom-object-type li a', function () {
+  $(document).on('click', `.ul-${CONFIRM_ITEM_STIX2_OBJECT} li a`, function () {
     $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
     $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
-    const tr = $(this).parents('.confirm-item-tr')
-    const ul = tr.find('.dropdown-menu-custom-property-type')
+    const root_div = $(this).parents(DIV_OTHER_OBJECT_SELECT_SELECTOR)
+    _update_stix2_properties_div($(this).text(), root_div)
+  })
+
+  $(document).on('change', `.${STIX_CATEGORY_LABEL_CLASS}`, function () {
+    const category = $(this).val()
+
+    const root_div = $(this).parents(DIV_OTHER_OBJECT_SELECT_SELECTOR)
+    const select_div = root_div.find(DIV_OTHER_STIX_RADIO_SELECTOR).show()
+    const confidence_div = root_div.find(DIV_OTHER_STIX_CONFIDENCE_SELECTOR)
+    confidence_div.show()
+
+
+    const button = select_div.find(`#button-${CONFIRM_ITEM_STIX2_OBJECT}`)
+    button.prop('disabled', false)
+
+    const ul = root_div.find(`.ul-${CONFIRM_ITEM_STIX2_OBJECT}`)
     ul.empty()
-    const undefined_text ='-----'
-    const li = $('<li>').append($('<a>').text(undefined_text))
-    ul.append(li)
-    for (const li_name of _get_custom_properties_list($(this).text())) {
-        const li = $('<li>').append($('<a>').text(li_name))
-        ul.append(li)
+
+    for (const class_name in STIX_CATEGORY_TABLE[category]) {
+      var a =$('<a>')
+      a.text(class_name)
+      var li = $('<li>').append(a)
+      ul.append(li)
     }
-    const button = ul.parents('.btn-group').find('.confirm-item-custom-property-type')
-    button.attr(LISTBOX_TYPE_ATTR, null)
-    button.text(undefined_text)
   })
 
-  $(document).on('click', '.dropdown-menu-custom-property-type li a', function () {
-    $(this).parents('.btn-group').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>')
-    $(this).parents('.btn-group').find('.dropdown-toggle').attr(LISTBOX_TYPE_ATTR, $(this).text())
+  function _get_confidence_text(elem) {
+    return elem.parents(DIV_OTHER_STIX_CONFIDENCE_SELECTOR).find(`#input-confidence-${CONFIRM_ITEM_STIX2_OBJECT}`)
+  }
+  function _get_eval_text(elem) {
+    return elem.parents(DIV_OTHER_STIX_CONFIDENCE_SELECTOR).find(`#input-confidence-eval-${CONFIRM_ITEM_STIX2_OBJECT}`)
+  }
+  function _get_confidence_slider(elem) {
+    return elem.parents(DIV_OTHER_STIX_CONFIDENCE_SELECTOR).find('.confidence-object-slider')
+  }
+
+  $(document).on('change', '.confidence-object-slider', function () {
+    const confidence_text = _get_confidence_text($(this))
+    const eval_text = _get_eval_text($(this))
+    on_change_slider($(this), confidence_text, eval_text)
   })
 
+  $(document).on('change', `.input-confidence`, function () {
+    const confidence_slider = _get_confidence_slider($(this))
+    const confidence_text = _get_confidence_text($(this))
+    const eval_text = _get_eval_text($(this))
+    on_change_confidence_text(confidence_slider, confidence_text, eval_text)
+  })
   $(document).on('click', ALL_CHECK_SELECTOR, function () {
     toggle_confirm_table_checkbox(get_target_from_confirm_item($(this)), get_table_id_from_confirm_item($(this)), true)
   })

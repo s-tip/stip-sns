@@ -32,7 +32,56 @@
 
       <div class="panel panel-default panel-feed">
         <div class="panel-heading">
-          <h3 class="panel-title">{% trans 'Latest posts' %}</h3>
+          <h3 class="panel-title">
+            {% trans 'Latest posts' %}
+            <a  data-toggle="collapse" href="#feed_options" role="button" aria-expanded="false" aria-controls="feed_options" id="href-feed-options">
+              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+            </a>
+          </h3>
+
+          <div class="collapse" id="feed_options">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-12">
+                  <br/>
+                </div>
+              </div>
+              <form>
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="text-ingnore-accounts">Ignore Accounts: </label>
+                    </div>
+                  </div>
+                  <div class="col-md-7">
+                    <div class="form-group">
+                      <input type="text" class="form-control" id="text-ignore-accounts" value="{{ignore_accounts}}">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="check-igonore-na">Ignore Posts:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-7">
+                    <div class="input-group">
+                      <input class="form-check-input" type="checkbox" id="check-ignore-na"  {% if ignore_na %}checked{% endif %}/>&nbsp;From Unspecified Users
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-1">
+                    <div class="form-group">
+                      <button type="button" class="btn btn-primary" id="button-submit-ignore-accounts">Submit</button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
         </div> <!-- panel-heading -->
         <div class="panel-body">
           <div class="compose" screen_name="{{user.get_screen_name}}" tlp="{{user.tlp}}">
@@ -76,7 +125,7 @@
                   </div>
                   <div class="compose-title-icon-div col-xs-2">
                     <span class="glyphicon glyphicon-plus-sign btn-sm btn-info compose-title-plus-button"></span>
-                    <span class="glyphicon glyphicon-remove-sign btn-sm btn-danger btn-info compose-title-remove-button"></span>
+                    <span class="glyphicon glyphicon-remove-sign btn-sm btn-danger compose-title-remove-button"></span>
                   </div>
                 </div>
               </div>
@@ -146,17 +195,17 @@
                 <div class="form-group">
                   <label for="sharing-menu">{% trans 'TLP' %} (Traffic Light Protocol): </label><br/>
                   <div class="btn-group" data-toggle="buttons" id="tlp-div">
-                    <label class="btn btn-default btn-sm {%ifequal user.tlp 'RED'%}active{%endifequal%} label-tlp" id="label-tlp-red">
-                      <input type="radio" autocomplate="off" name="TLP" value="RED" class="radio-tlp" id="radio-tlp-red" {%ifequal user.tlp "RED"%}checked{%endifequal%}>RED
+                    <label class="btn btn-default btn-sm {%if user.tlp == 'RED'%}active{%endif%} label-tlp" id="label-tlp-red">
+                      <input type="radio" autocomplate="off" name="TLP" value="RED" class="radio-tlp" id="radio-tlp-red" {%if user.tlp == "RED"%}checked{%endif%}>RED
                     </label>
-                    <label class="btn btn-default btn-sm {%ifequal user.tlp 'AMBER'%}active{%endifequal%} label-tlp" id="label-tlp-amber">
-                      <input type="radio" autocomplate="off" name="TLP" value="AMBER" class="radio-tlp" id="radio-tlp-amber" {%ifequal user.tlp "AMBER"%}checked{%endifequal%}>AMBER
+                    <label class="btn btn-default btn-sm {%if user.tlp == 'AMBER'%}active{%endif%} label-tlp" id="label-tlp-amber">
+                      <input type="radio" autocomplate="off" name="TLP" value="AMBER" class="radio-tlp" id="radio-tlp-amber" {%if user.tlp == "AMBER"%}checked{%endif%}>AMBER
                     </label>
-                    <label class="btn btn-default btn-sm {%ifequal user.tlp 'GREEN'%}active{%endifequal%} label-tlp" id="label-tlp-green">
-                      <input type="radio" autocomplate="off" name="TLP" value="GREEN" class="radio-tlp" id="radio-tlp-green" {%ifequal user.tlp "GREEN"%}checked{%endifequal%}>GREEN
+                    <label class="btn btn-default btn-sm {%if user.tlp == 'GREEN'%}active{%endif%} label-tlp" id="label-tlp-green">
+                      <input type="radio" autocomplate="off" name="TLP" value="GREEN" class="radio-tlp" id="radio-tlp-green" {%if user.tlp == "GREEN"%}checked{%endif%}>GREEN
                     </label>
-                    <label class="btn btn-default btn-sm {%ifequal user.tlp 'WHITE'%}active{%endifequal%} label-tlp" id="label-tlp-white">
-                      <input type="radio" autocomplate="off" name="TLP" value="WHITE" class="radio-tlp" id="radio-tlp-white" {%ifequal user.tlp "WHITE"%}checked{%endifequal%}>WHITE
+                    <label class="btn btn-default btn-sm {%if user.tlp == 'WHITE'%}active{%endif%} label-tlp" id="label-tlp-white">
+                      <input type="radio" autocomplate="off" name="TLP" value="WHITE" class="radio-tlp" id="radio-tlp-white" {%if user.tlp == "WHITE"%}checked{%endif%}>WHITE
                     </label>
                   </div> <!-- btn-group -->
                 </div> <!--  form-group -->
@@ -197,11 +246,11 @@
                       </button>
                       <ul class="dropdown-menu" id="dropdown-sharing-group" aria-labelledby="sharing-menu">
                         {% for group in sharing_groups %}
-                          {% ifequal group.locale user.language %}
+                          {% if group.locale == user.language %}
                           <li><a data-value="{{group.en_name}}">{{group.local_name}}</a></li>
                           {% else %}
                           <li><a data-value="{{group.en_name}}">{{group.en_name}}</a></li>
-                          {% endifequal %}
+                          {% endif %}
                         {% endfor %}
                       </ul>
                       <input type="hidden" name="group" value="">
@@ -211,6 +260,27 @@
                 <div class="radio">
                   <label><input type="radio" name="publication" class="publication-radio" id="publication-all" value="all" checked/>{% trans 'All Users' %}</label>
                 </div>
+              </div> <!-- border-div -->
+
+              <br/>
+
+              <div class="border-div">
+                <div class="form-group">
+                  <label for="confidence">{% trans 'Confidence' %}:</label><br/>
+                  <div class="row">
+                    <div class="col-md-8">
+                      <div class="slidecontainer">
+                        <input type="range" min="0" max="100" class="slider" id="confidence-post-slider" value="{{ user.confidence }}"/>
+                      </div>
+                    </div>
+                    <div class="col-md-2">
+                      <input class="form-control" type="text" id="confidence-post-text" name="confidence" value="{{ user.confidence }}"/>
+                    </div>
+                    <div class="col-md-2">
+                      <input class="form-control" type="text" disabled id="confidence-post-eval-text" name="confidence_eval" value="under"/>
+                    </div>
+                  </div>
+                </div> <!-- form-group -->
               </div> <!-- border-div -->
 
               <br/>
@@ -285,6 +355,7 @@
             <input type="hidden" name="from_feed" value="{{ from_feed }}">
             <input type="hidden" name="last_reload" value="{{ last_reload }}">
             <input type="hidden" name="page" value="{{ page }}">
+            <input type="hidden" name="filter"/>
           </form>
 
         </div>

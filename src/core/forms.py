@@ -1,7 +1,10 @@
 import pytz
 from django import forms
 from ctirs.models import STIPUser as User
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 from ctirs.models import Region, Country, Profile
 from stip.common.const import TLP_CHOICES, CRITICAL_INFRASTRUCTURE_CHOICES, LANGUAGES
 
@@ -143,6 +146,14 @@ class ProfileForm(forms.ModelForm):
         label=_('Splunk Query'),
         widget=forms.Textarea(attrs={'class': 'form-control', 'style': 'resize:none'}),
         required=False)
+    confidence = forms.IntegerField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label=_('Confidence'),
+        required=False)
+    sns_filter = forms.JSONField(
+        label=_('SNS Filter'),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'style': 'resize:none'}),
+        required=True)
 
     class Meta:
         model = User
@@ -151,7 +162,8 @@ class ProfileForm(forms.ModelForm):
                   'ci', 'language', 'scan_csv', 'scan_pdf', 'scan_post', 'scan_txt',
                   'threat_actors', 'indicator_white_list', 'timezone',
                   'phantom_host', 'phantom_source_name', 'phantom_playbook_name', 'phantom_auth_token',
-                  'splunk_host', 'splunk_api_port', 'splunk_web_port', 'splunk_username', 'splunk_password', 'splunk_scheme', 'splunk_query']
+                  'splunk_host', 'splunk_api_port', 'splunk_web_port', 'splunk_username', 'splunk_password', 'splunk_scheme', 'splunk_query',
+                  'confidence', 'sns_filter']
 
 
 class ChangePasswordForm(forms.ModelForm):

@@ -16,11 +16,18 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http.response import HttpResponse
 from django.utils import translation
-from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ugettext
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
+try:
+    from django.utils.translation import ugettext as __ugettext
+except ImportError:
+    from django.utils.translation import gettext as __ugettext
 import stip.common.login as login_views
 from stip.common.login import set_language_setting
 from ctirs.models import STIPUser as User
+from ctirs.models import Profile as SNS_Profile
 from core.forms import ChangePasswordForm, ProfileForm
 from ctirs.models import Region, Feed
 from ctirs.models.rs.models import STIPUser
@@ -120,6 +127,7 @@ def settings(request):
             stip_user.country_code = country_code
             stip_user.ci = form.cleaned_data.get('ci')
             stip_user.language = form.cleaned_data.get('language')
+            stip_user.confidence = form.cleaned_data.get('confidence')
             profile.scan_csv = form.cleaned_data.get('scan_csv')
             profile.scan_pdf = form.cleaned_data.get('scan_pdf')
             profile.scan_post = form.cleaned_data.get('scan_post')
@@ -141,6 +149,7 @@ def settings(request):
                 profile.splunk_password = splunk_password
             profile.splunk_scheme = form.cleaned_data.get('splunk_scheme')
             profile.splunk_query = form.cleaned_data.get('splunk_query')
+            profile.sns_filter = form.cleaned_data.get('sns_filter')
             stip_user.save()
             profile.save()
             messages.add_message(request,
@@ -156,6 +165,12 @@ def settings(request):
         else:
             country = stip_user.region.country_code
             code = stip_user.region.code
+
+        if profile.sns_filter:
+            sns_filter = profile.sns_filter
+        else:
+            sns_filter = SNS_Profile.DEFAULT_SNS_FILTER
+
         form = ProfileForm(instance=profile, initial={
             'screen_name': stip_user.screen_name,
             'affiliation': stip_user.affiliation,
@@ -168,6 +183,7 @@ def settings(request):
             'administrative_area': code,
             'ci': stip_user.ci,
             'language': stip_user.language,
+            'confidence': stip_user.confidence,
             'scan_csv': profile.scan_csv,
             'scan_pdf': profile.scan_pdf,
             'scan_post': profile.scan_post,
@@ -186,6 +202,7 @@ def settings(request):
             'splunk_password': profile.splunk_password,
             'splunk_scheme': profile.splunk_scheme,
             'splunk_query': profile.splunk_query,
+            'sns_filter': sns_filter,
         })
         form.fields['administrative_area'].choices = Region.get_administrative_areas_choices(country)
 
@@ -310,7 +327,7 @@ def get_administrative_area(request):
     dump = []
     for item in Region.get_administrative_areas(country_code):
         d = {}
-        d['administraive_area'] = ugettext(item.administrative_area)
+        d['administraive_area'] = __ugettext(item.administrative_area)
         d['code'] = item.code
         dump.append(d)
     data = json.dumps(dump)

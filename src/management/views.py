@@ -2,8 +2,11 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render
-from django.http.response import HttpResponseForbidden, HttpResponseNotAllowed, HttpResponse, JsonResponse
-from django.utils.translation import ugettext_lazy as _
+from django.http.response import HttpResponseForbidden
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 from ctirs.models import SNSConfig
 from management.forms import SNSConfigForm
 from feeds.mongo import Attck
@@ -143,75 +146,3 @@ def sns_config(request):
         })
 
     return render(request, 'management/sns_config.html', {'form': form})
-
-
-@login_required
-def stix_customizer(request):
-    if not request.user.is_admin:
-        return HttpResponseForbidden('You have no permission.')
-    return render(request, 'management/stix_customizer.html', {})
-
-
-@ajax_required
-def get_stix_customizer_configuration(request):
-    if not request.user.is_admin:
-        return HttpResponseForbidden('You have no permission.')
-    if request.method != 'GET':
-        return HttpResponseNotAllowed(['GET'])
-    stix_customizer = StixCustomizer.get_instance()
-
-    custom_objects = []
-    for o_ in stix_customizer.conf_json['objects']:
-        if ('class' in o_):
-            del(o_['class'])
-        if 'color' not in o_:
-            o_['color'] = '#D2E5FF'
-        if 'properties' in o_:
-            for prop in o_['properties']:
-                if 'pattern' in prop:
-                    del(prop['pattern'])
-        custom_objects.append(o_)
-    return JsonResponse({'custom_objects': custom_objects})
-
-
-@login_required
-@csrf_exempt
-def set_stix_customizer_configuration(request):
-    if not request.user.is_admin:
-        return HttpResponseForbidden('You have no permission.')
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-    conf_json = json.loads(request.body)
-    stix_customizer = StixCustomizer.get_instance()
-    stix_customizer.update_customizer_conf(conf_json)
-    return HttpResponse(status=201)
-
-
-@login_required
-def matching_customizer(request):
-    if not request.user.is_admin:
-        return HttpResponseForbidden('You have no permission.')
-    return render(request, 'management/matching_customizer.html', {})
-
-
-@ajax_required
-def get_matching_customizer_configuration(request):
-    if not request.user.is_admin:
-        return HttpResponseForbidden('You have no permission.')
-    if request.method != 'GET':
-        return HttpResponseNotAllowed(['GET'])
-    matching_customizer = MatchingCustomizer.get_instance()
-    return JsonResponse(matching_customizer.conf_json)
-
-
-@login_required
-@csrf_exempt
-def set_matching_customizer_configuration(request):
-    if not request.user.is_admin:
-        return HttpResponseForbidden('You have no permission.')
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-    conf_json = json.loads(request.body)
-    matching_customizer = MatchingCustomizer.get_instance()
-    matching_customizer.update_customizer_conf(conf_json)
-    return HttpResponse(status=201)

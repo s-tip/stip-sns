@@ -305,37 +305,9 @@ $(function () {
         fd.append('query_string', document.getElementById('query_string').value);
         fd.append('screen_name', document.getElementById('screen_name').value);
       }
-      // table_data があれば modal 表示
-      if (Object.keys(table_datas).length > 0) {
-        make_extract_tables(table_datas);
-        is_post = false
-        $('#confirm_indicators_modal_dialog').modal();
-      } else {
-        //存在しない
-        $.ajax({
-          url: '/feeds/post/',
-          method: 'post',
-          data: fd,
-          processData: false,
-          contentType: false,
-          cache: false,
-          beforeSend: function (xhr, settings) {
-            button.prop('disabled', true);
-          }
-        }).done(function (data) {
-          $("ul.stream").prepend(data);
-          $(".compose").slideUp();
-          $(".compose").removeClass("composing");
-          hide_stream_update();
-          toggle_new_cancel_button();
-        }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
-          var msg = XMLHttpRequest.statusText + ': ' + XMLHttpRequest.responseText;
-          alert(msg);
-        }).always(function () {
-          button.prop('disabled', false);
-          is_post = false
-        });
-      }
+      make_extract_tables(table_datas);
+      is_post = false
+      $('#confirm_indicators_modal_dialog').modal();
 
     }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
       var msg = XMLHttpRequest.statusText + ': ' + XMLHttpRequest.responseText;
@@ -380,7 +352,6 @@ $(function () {
     var append_div = $('<div class="row compose-title-div"><br/></div>');
     append_div.append(compose_title_div.html());
     $('#compose-title-root-div').append(append_div);
-    // stip_ajax.js start_suggset()
     start_suggest(id_name, "suggest-block");
   });
 
@@ -428,8 +399,8 @@ $(function () {
   //確認画面の投稿ボタン押下時
   $('#confirm-compose').click(function () {
     //各々の confirm-item-tr ごとに checkbox がついていたら form の引数に追加する
-    var data = get_confirm_data();
-    if (data == null){
+    var confirm_data = get_confirm_data();
+    if (confirm_data == null){
       return
     }
 
@@ -440,10 +411,7 @@ $(function () {
 
     //フィールドにファイルを追加したのでajax送信方法を追加
     var fd = new FormData($('#compose-form').get(0));
-    fd.append('indicators', JSON.stringify(data['indicators']));
-    fd.append('ttps', JSON.stringify(data['ttps']));
-    fd.append('tas', JSON.stringify(data['tas']));
-    fd.append('custom_objects', JSON.stringify(data['custom_objects']));
+    fd.append('confirm_data', JSON.stringify(confirm_data));
     //複数ある content 情報から言語情報などをまとめる
     fd.append('multi_language', is_multi_language());
     fd.append('stix2_titles', JSON.stringify(get_stix2_title_information()));
@@ -462,6 +430,7 @@ $(function () {
       contentType: false,
       cache: false,
     }).done(function (data) {
+      $('#confirm_indicators_modal_dialog').modal('hide');
       $("ul.stream").prepend(data);
       $(".compose").slideUp();
       $(".compose").removeClass("composing");
@@ -927,11 +896,9 @@ $(function () {
       $(".comments", post).show();
       $(".comments", post).addClass("tracking");
       $(".comments input[name='post']", post).focus();
-      //var feed = $(post).closest("li").attr("feed-id");
       var package_id = $(post).closest("li").attr("package-id");
       $.ajax({
         url: '/feeds/comment/',
-        //data: { 'feed': feed },
         data: { 'package_id': package_id },
         cache: false,
         beforeSend: function () {
@@ -1091,7 +1058,6 @@ $(function () {
 
   $("input,textarea").attr("autocomplete", "off");
 
-  //定期時間ごとに like,comment 情報を更新しているが処理速度低下のため一旦コメントアウトする
   function update_feeds() {
     if (is_post === true){
       window.setTimeout(update_feeds, check_interval);
@@ -1186,6 +1152,51 @@ $(function () {
     var count_span = $(this).parents('.compose-content-div').find('.help-count');
     count_span.text(length);
   });
+
+  $('#confidence-post-slider').on('change', function () {
+    on_change_slider(
+      $('#confidence-post-slider'),
+      $('#confidence-post-text'),
+      $('#confidence-post-eval-text'))
+  });
+
+  $('#confidence-post-text').on('change', function () {
+    on_change_confidence_text(
+      $('#confidence-post-slider'),
+      $('#confidence-post-text'),
+      $('#confidence-post-eval-text'))
+  });
+
+  if ($('#confidence-post-slider').length){
+    on_change_slider(
+      $('#confidence-post-slider'),
+      $('#confidence-post-text'),
+      $('#confidence-post-eval-text'))
+  }
+
+  function _get_filter_option () {
+    var d = {
+      'ignore_accounts': $('#text-ignore-accounts').val(),
+      'ignore_na': $('#check-ignore-na').prop('checked'),
+    }
+    return d
+  }
+
+  $('#button-submit-ignore-accounts').on('click', function () {
+    var filter_option = _get_filter_option()
+    $.ajax({
+      url: '/feeds/modify_sns_filter/',
+      method: 'get',
+      data: filter_option,
+      cache: false,
+      asyc: false,
+    }).done(function (data) {
+      window.location.reload()
+    }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+      alert(XMLHttpRequest.statusText)
+    }).always(function () {
+    });
+  })
 
   //Title Link クリックした時
   $('.title-link').click(function () {

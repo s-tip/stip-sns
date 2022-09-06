@@ -10,7 +10,7 @@ except ImportError:
 from stix2elevator.options import initialize_options, set_option_value
 from stix2elevator.stix_stepper import step_bundle
 from stix2matcher.matcher import match
-from feeds.feed_stix2 import _get_individual_identity
+from stip.common.stip_stix2 import _get_stip_individual_identity
 
 
 def _str2datetime(s):
@@ -23,7 +23,7 @@ def insert_sighting_object(
         count, first_seen, last_seen,
         stip_user):
 
-    identity = _get_individual_identity(stip_user)
+    identity = _get_stip_individual_identity(stip_user)
     observed_data = _get_observed_data_from_value(type_, value_, identity)
     indicator = _get_indicator_from_observed_data(stix2, observed_data)
     if indicator is None:
@@ -40,6 +40,7 @@ def insert_sighting_object(
         first_seen=_str2datetime(first_seen),
         last_seen=_str2datetime(last_seen),
         count=count,
+        confidence=stip_user.confidence,
         external_references=external_references
     )
     stix2.objects.append(identity)

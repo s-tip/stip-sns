@@ -13,6 +13,7 @@ import iocextract
 import urllib
 import pytz
 import string
+import stix2
 try:
     from jira import JIRA
     imported_jira = True
@@ -44,7 +45,7 @@ from django.shortcuts import get_object_or_404, render
 from django.template.context_processors import csrf
 from django.template.loader import render_to_string
 
-from ctirs.models import AttachFile, Feed, Group, SNSConfig, STIPUser, System
+from ctirs.models import AttachFile, Feed, Group, SNSConfig, STIPUser, System, Profile
 from feeds.adapter.phantom import call_run_phantom_playbook
 from feeds.adapter.splunk import get_sightings
 import feeds.extractor.base as cee
@@ -59,8 +60,6 @@ import stix2.v21.sdo as sdo_21
 import stix2.v20.sdo as sdo_20
 
 
-
-
 FEEDS_NUM_PAGES = 10
 
 KEY_USERNAME = 'username'
@@ -72,16 +71,19 @@ KEY_PUBLICATION = 'publication'
 KEY_REFERRED_URL = 'referred_url'
 KEY_GROUP = 'group'
 KEY_PEOPLE = 'people'
+KEY_CONFIRM_DATA = 'confirm_data'
 KEY_INDICATORS = 'indicators'
 KEY_TTPS = 'ttps'
 KEY_TAS = 'tas'
 KEY_CUSTOM_OBJECTS = 'custom_objects'
+KEY_OTHER = 'other'
 KEY_CUSTOM_OBJECT_DICT = 'custom_object_dict'
 KEY_MULTI_LANGUAGE = 'multi_language'
 KEY_STIX2_TITLES = 'stix2_titles'
 KEY_STIX2_CONTENTS = 'stix2_contents'
 KEY_ATTACH_CONFIRM = 'attach_confirm'
 KEY_SCREEN_NAME = 'screen_name'
+KEY_CONFIDENCE = 'confidence'
 
 PUBLICATION_VALUE_GROUP = 'group'
 PUBLICATION_VALUE_PEOPLE = 'people'
@@ -96,11 +98,54 @@ sharp_underbar_reg = re.compile('^#_+$')
 sharp_underbar_numeric_reg = re.compile('^#[_0-9０-９]+$')
 
 
+def _get_filter(request):
+    user = request.user
+    sns_profile = user.sns_profile
+    sns_filter = sns_profile.sns_filter
+    if sns_filter is None:
+        sns_filter = Profile.DEFAULT_SNS_FILTER
+        sns_profile.sns_filter = sns_filter
+        sns_profile.save()
+        user.sns_profile = sns_profile
+        user.save()
+    return sns_filter
+
+
+@ajax_required
+def modify_sns_filter(request):
+    ignore_accounts = request.GET.get('ignore_accounts')
+    ignore_na = request.GET.get('ignore_na')
+    user = request.user
+    sns_profile = user.sns_profile
+    sns_filter = sns_profile.sns_filter
+    if sns_filter is None:
+        sns_filter = Profile.DEFAULT_SNS_FILTER
+    temp_list = list(set(ignore_accounts.split(' ')))
+    if len(temp_list):
+        try:
+            temp_list.remove('')
+        except ValueError:
+            pass
+        sns_filter['ignore_accounts'] = temp_list
+    else:
+        sns_filter['ignore_accounts'] = []
+    if ignore_na.lower() == 'true':
+        sns_filter['ignore_na'] = True
+    else:
+        sns_filter['ignore_na'] = False
+    sns_profile.sns_filter = sns_filter
+    sns_profile.save()
+    user.sns_profile = sns_profile
+    user.save()
+    return JsonResponse(sns_filter)
+
+
 @login_required
 def feeds(request):
     feeds = Feed.get_feeds(
         api_user=request.user,
         index=0,
+        filter=_get_filter(request),
         size=FEEDS_NUM_PAGES)
     # 最終更新時間
     last_reload = str(datetime.datetime.now())
@@ -112,6 +157,18 @@ def feeds(request):
         from_feed = feeds[0].package_id
     else:
         from_feed = None
+    ignore_accounts_str = ''
+    if 'ignore_accounts' in request.user.sns_profile.sns_filter:
+        ignore_accounts = request.user.sns_profile.sns_filter['ignore_accounts']
+        if ignore_accounts is not None:
+            for ignore_account in ignore_accounts:
+                ignore_accounts_str += ignore_account
+                ignore_accounts_str += ' '
+    try:
+        ignore_na = request.user.sns_profile.sns_filter['ignore_na']
+    except KeyError:
+        ignore_na = True
+
     r = render(request, 'feeds/feeds.html', {
         'feeds': feeds,
         'jira': imported_jira,
@@ -120,6 +177,9 @@ def feeds(request):
         'page': 1,
         'users': users_list,
         'sharing_groups': Group.objects.all(),
+        'ignore_accounts': ignore_accounts_str,
+        'ignore_na': ignore_na,
+        'user': request.user,
     })
     # r.set_cookie(key='username', value=str(request.user))
     return r
@@ -139,6 +199,7 @@ def load(request):
     from_feed = request.GET.get('from_feed')
     page = int(request.GET.get('page'))
     feed_source = request.GET.get('feed_source')
+    filter = _get_filter(request)
     user_id = None
     query_string = request.GET.get(key='query_string', default=None)
     if feed_source is not None:
@@ -161,6 +222,7 @@ def load(request):
             user_id=user_id,
             index=index,
             query_string=query_string,
+            filter=filter,
             size=FEEDS_NUM_PAGES)
     else:
         # from_feed が設定されていない場合 (投稿がない場合)
@@ -183,11 +245,15 @@ def load(request):
     return HttpResponse(html)
 
 
-def _html_feeds(last_feed_datetime, user, csrf_token, feed_source='all'):
+def _html_feeds(last_feed_datetime, user, csrf_token, filter=None, feed_source='all'):
     user_id = None
     if feed_source != 'all':
         user_id = feed_source
-    feeds = Feed.get_feeds_after(last_feed_datetime=last_feed_datetime, api_user=user, user_id=user_id)
+    feeds = Feed.get_feeds_after(
+        last_feed_datetime=last_feed_datetime,
+        api_user=user,
+        filter=filter,
+        user_id=user_id)
     html = ''
     for feed in feeds:
         html = '{0}{1}'.format(
@@ -222,13 +288,15 @@ def load_new(request):
     last_feed_datetime = get_datetime_from_string(request.GET.get('last_feed'))
     user = request.user
     csrf_token = (csrf(request)['csrf_token'])
-    html = _html_feeds(last_feed_datetime, user, csrf_token)
+    filter = _get_filter(request)
+    html = _html_feeds(last_feed_datetime, user, csrf_token, filter=filter)
     return HttpResponse(html)
 
 
 @ajax_required
 def check(request):
     last_feed_datetime = get_datetime_from_string(request.GET.get('last_feed'))
+    filter = _get_filter(request)
     # feed_source は 全員のフィード取得の際は ALL,それ以外は STIPUserのid数値文字列
     feed_source = request.GET.get('feed_source')
     user = None
@@ -238,6 +306,7 @@ def check(request):
     feeds = Feed.get_feeds_after(
         last_feed_datetime=last_feed_datetime,
         api_user=request.user,
+        filter=filter,
         user_id=user)
     count = len(feeds)
     return HttpResponse(count)
@@ -289,6 +358,7 @@ def post_common(request, user):
     if KEY_TLP not in request.POST:
         raise Exception('No TLP.')
     feed.tlp = request.POST[KEY_TLP]
+    feed.confidence = request.POST[KEY_CONFIDENCE]
 
     # multi language 投稿か？
     stix2_titles = []
@@ -363,23 +433,10 @@ def post_common(request, user):
     elif publication == PUBLICATION_VALUE_ALL:
         feed.sharing_range_type = const.SHARING_RANGE_TYPE_KEY_ALL
 
-    # indicators があるか
-    if KEY_INDICATORS in request.POST:
-        indicators = json.loads(request.POST[KEY_INDICATORS])
+    if KEY_CONFIRM_DATA in request.POST:
+        confirm_data = json.loads(request.POST[KEY_CONFIRM_DATA])
     else:
-        indicators = []
-
-    # ttps があるか
-    if KEY_TTPS in request.POST:
-        ttps = json.loads(request.POST[KEY_TTPS])
-    else:
-        ttps = []
-
-    # threat_actors があるか
-    if KEY_TAS in request.POST:
-        tas = json.loads(request.POST[KEY_TAS])
-    else:
-        tas = []
+        confirm_data = None
 
     if KEY_CUSTOM_OBJECTS in request.POST:
         custom_objects = json.loads(request.POST[KEY_CUSTOM_OBJECTS])
@@ -390,10 +447,7 @@ def post_common(request, user):
     save_post(
         request,
         feed, post,
-        indicators,
-        ttps,
-        tas,
-        custom_objects,
+        confirm_data,
         request.FILES.values(),
         stix2_titles,
         stix2_contents)
@@ -461,6 +515,7 @@ def confirm_indicator(request):
             referred_url = None
     else:
         referred_url = None
+    confidence = request.POST['confidence']
 
     if attach_confirm:
         account_param = cee.CTIElementExtractorAccountParam(
@@ -492,10 +547,10 @@ def confirm_indicator(request):
         except BaseException:
             pass
     data = {}
-    data[KEY_INDICATORS] = get_json_from_extractor(eeb.get_indicators())
-    data[KEY_TTPS] = get_json_from_extractor(eeb.get_ttps())
-    data[KEY_TAS] = get_json_from_extractor(eeb.get_tas())
-    data[KEY_CUSTOM_OBJECTS] = get_json_from_extractor(eeb.get_custom_objects())
+    data[KEY_INDICATORS] = get_json_from_extractor(eeb.get_indicators(), confidence)
+    data[KEY_TTPS] = get_json_from_extractor(eeb.get_ttps(), confidence)
+    data[KEY_TAS] = get_json_from_extractor(eeb.get_tas(), confidence)
+    data[KEY_CUSTOM_OBJECTS] = get_json_from_extractor(eeb.get_custom_objects(), confidence)
     customizer = StixCustomizer.get_instance()
     data[KEY_CUSTOM_OBJECT_DICT] = customizer.get_custom_object_dict()
     return JsonResponse(data)
@@ -529,7 +584,7 @@ def get_threat_actors_list(request):
 
 
 # 抽出した indicators/TTPs/threat_actors から返却データを作成する
-def get_json_from_extractor(datas):
+def get_json_from_extractor(datas, confidence):
     d = {}
     for data in datas:
         type_ = data[0]
@@ -538,9 +593,9 @@ def get_json_from_extractor(datas):
         file_name = data[3]
         checked = data[4]
         if file_name not in d:
-            d[file_name] = [(type_, value_, title, checked)]
+            d[file_name] = [(type_, value_, title, checked, confidence)]
         else:
-            d[file_name].append((type_, value_, title, checked))
+            d[file_name].append((type_, value_, title, checked, confidence))
     return d
 
 
@@ -579,11 +634,26 @@ def like(request):
     like = myliker in likers
     # Like/Unlike 用の STIX イメージ作成
     x_stip_sns_bundle_version = '2.1'
-    bundle = get_like_stix2_bundle(
+
+    origin_stix_file = rs.get_package_info_from_package_id(
+        stip_user, package_id
+    )
+    report_id = _get_report_object(origin_stix_file['content'])
+    origin_opinion = None
+    if like:
+        from ctirs.models import Notification
+        try:
+            notification = Notification.objects.filter(notification_type='L').get(package_id=package_id)
+            origin_opinion = stix2.parse(notification.opinion)
+        except Exception:
+            pass
+    bundle, opinion = get_like_stix2_bundle(
         package_id,
+        report_id,
         x_stip_sns_bundle_version,
         like,
         feed.tlp,
+        origin_opinion,
         stip_user
     )
     _regist_bundle(stip_user, bundle)
@@ -593,7 +663,7 @@ def like(request):
         stip_user.unotify_liked(package_id, feed.user)
     else:
         # notify の like処理
-        stip_user.notify_liked(package_id, feed.user)
+        stip_user.notify_liked(package_id, feed.user, opinion.serialize(sort_keys=True))
     # 現在の Like 情報を取得する
     likers = rs.get_likers_from_rs(stip_user, package_id)
     return HttpResponse(len(likers))
@@ -640,6 +710,14 @@ def comment(request):
                       {'feeds': feeds})
 
 
+def _get_report_object(content):
+    bundle = json.loads(content)
+    for o_ in bundle['objects']:
+        if o_['type'] == 'report':
+            return o_['id']
+    return None
+
+
 # comment postする(共通)
 def post_comment(api_user, original_package_id, post, comment_user):
     # Feed 情報作成
@@ -653,8 +731,10 @@ def post_comment(api_user, original_package_id, post, comment_user):
         api_user, original_package_id
     )
     origin_stix_version = origin_stix_file['version']
+    report_id = _get_report_object(origin_stix_file['content'])
     bundle = get_comment_stix2_bundle(
         original_package_id,
+        report_id,
         origin_stix_version,
         post,
         origin_feed.tlp,
@@ -1419,10 +1499,7 @@ def get_produced_str(bundle):
 def save_post(request,
               feed,
               post,
-              json_indicators=[],
-              ttps=[],
-              tas=[],
-              custom_objects=[],
+              confirm_data,
               request_files=[],
               stix2_titles=[],
               stix2_contents=[]):
@@ -1438,6 +1515,7 @@ def save_post(request,
         x_stip_sns_attachment_bundle, x_stip_sns_attachment_id = get_attach_stix2_bundle(
             feed.tlp,
             feed.referred_url,
+            feed.confidence,
             sharing_range,
             feed_file,
             request.user)
@@ -1462,14 +1540,12 @@ def save_post(request,
     tags = list(set(post_tags))
 
     bundle = get_post_stix2_bundle(
-        json_indicators,
-        ttps,
-        tas,
-        custom_objects,
+        confirm_data,
         feed.title,
         feed.post_org,
         feed.tlp,
         feed.referred_url,
+        feed.confidence,
         sharing_range,
         stix2_titles,
         stix2_contents,
@@ -1563,7 +1639,7 @@ def save_post(request,
                 except Exception:
                     pass
 
-    if len(json_indicators) > 0:
+    if len(confirm_data[KEY_INDICATORS]) > 0:
         run_gv_concierge_bot(request, bundle)
         # run_falcon_concierge_bot(request, bundle)
         # run_falcon_concierge_bot(bundle, json_indicators)
