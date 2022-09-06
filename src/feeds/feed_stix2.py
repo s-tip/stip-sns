@@ -769,8 +769,6 @@ def _get_custom_object(custom_object, stip_identity, tlp_marking_object):
 
     custom_o = None
     cos = StixCustomizer.get_instance().get_custom_objects()
-    print('>>>1')
-    print(cos)
     if cos is not None:
         for co in cos:
             if custom_object_name != co['name']:

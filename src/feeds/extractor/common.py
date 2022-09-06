@@ -92,7 +92,7 @@ class CTIElementExtractorBean(object):
         self.ttps.extend(eeb.ttps)
         self.tas.extend(eeb.tas)
         self.custom_objects.extend(eeb.custom_objects)
-        
+
     def append_indicator(self, indicator):
         self.indicators.append(indicator)
 
@@ -239,8 +239,8 @@ class BaseExtractor(object):
         if custom_objects is None:
             return eeb
 
-        contents = contents.replace('\r', ' ') 
-        contents = contents.replace('\n', ' ') 
+        contents = contents.replace('\r', ' ')
+        contents = contents.replace('\n', ' ')
         custom_object_index = 1
         for custom_object in custom_objects:
             for custom_property in custom_object['properties']:

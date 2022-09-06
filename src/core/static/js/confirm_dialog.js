@@ -916,7 +916,7 @@ function _create_single_other_object_select_div () {
   input_slider.val(confidence)
   col_confidence_slider.append(input_slider)
   row_confidence_slider.append(col_confidence_slider)
- 
+
   const col_confidence_text = $('<div>', {
     'class': 'col-sm-3'
   })
@@ -943,7 +943,7 @@ function _create_single_other_object_select_div () {
   col_confidence_eval_text.append(input_confidence_eval)
   row_confidence_slider.append(col_confidence_eval_text)
   col_confidence.append(row_confidence_slider)
- 
+
   const row_1 = $('<div>', {
     'class': 'row'
   })
@@ -1547,7 +1547,6 @@ function get_confirm_data () {
     }
     other[target_id] = item
   })
-
   if (error_flag === true){
     return null
   }
@@ -1610,11 +1609,11 @@ function get_confidence_eval_string (confidence) {
   }
   return eval_string
 }
- 
+
 function set_confidence_eval(confidence, eval_elem) {
   var eval_string = get_confidence_eval_string(confidence)
   eval_elem.val(eval_string)
-} 
+}
 
 $(function () {
   $(document).on('click', '.dropdown-menu-indicator-type li a', function () {

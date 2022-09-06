@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render
@@ -11,6 +12,10 @@ from management.forms import SNSConfigForm
 from feeds.mongo import Attck
 from boot_sns import StipSnsBoot
 from daemon.slack.receive import restart_receive_slack_thread
+from decorators import ajax_required
+from django.views.decorators.csrf import csrf_exempt
+from stip.common.stix_customizer import StixCustomizer
+from stip.common.matching_customizer import MatchingCustomizer
 
 
 def group(request):
@@ -141,6 +146,3 @@ def sns_config(request):
         })
 
     return render(request, 'management/sns_config.html', {'form': form})
-
-
-

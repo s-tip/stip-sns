@@ -438,6 +438,11 @@ def post_common(request, user):
     else:
         confirm_data = None
 
+    if KEY_CUSTOM_OBJECTS in request.POST:
+        custom_objects = json.loads(request.POST[KEY_CUSTOM_OBJECTS])
+    else:
+        custom_objects = []
+
     # POSTする
     save_post(
         request,
