@@ -48,6 +48,8 @@ def reboot_slack_thread(request):
         return HttpResponseForbidden('You have no permission.')
     # thread 再起動
     slack_web_client, slack_rtm_client, th = restart_receive_slack_thread()
+    if th is None:
+        return sns_config(request)
     StipSnsBoot.slack_web_client = slack_web_client
     StipSnsBoot.slack_rtm_client = slack_rtm_client
     StipSnsBoot.th = th

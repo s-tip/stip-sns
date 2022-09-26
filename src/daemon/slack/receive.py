@@ -6,7 +6,6 @@ import pytz
 import re
 import tempfile
 import asyncio
-import nest_asyncio
 import slack_sdk
 from slack_sdk.rtm import RTMClient
 import threading
@@ -55,6 +54,9 @@ USER_ID_PATTERN = re.compile(
 TLP_LIST = []
 for choice in TLP_CHOICES:
     TLP_LIST.append(choice[0])
+
+DEFAULT_TLP = 'WHITE'
+DEFAULT_CONFIDENCE = 50
 
 
 class SlackThread(threading.Thread):
@@ -120,6 +122,8 @@ def restart_receive_slack_thread():
     slack_rtm_client = StipSnsBoot.get_slack_rtm_client()
     slack_web_client = StipSnsBoot.get_slack_web_client()
     slack_token = SNSConfig.get_slack_bot_token()
+    if slack_token is None or len(slack_token) == 0:
+        return None, None, None
 
     if th:
         th.end()
@@ -390,7 +394,6 @@ def get_command_stix_id(post):
 
 
 def get_stip_params(slack_post, username):
-    DEFAULT_TLP = 'WHITE'
 
     stip_params = {}
 
@@ -411,8 +414,10 @@ def get_stip_params(slack_post, username):
         # 指定がない
         if stip_user is not None:
             stip_params[STIP_PARAMS_INDEX_TLP] = stip_user.tlp
+            stip_params[STIP_PARAMS_INDEX_CONFIDENCE] = stip_user.confidence
         else:
             stip_params[STIP_PARAMS_INDEX_TLP] = DEFAULT_TLP
+            stip_params[STIP_PARAMS_INDEX_CONFIDENCE] = DEFAULT_CONFIDENCE
 
     # Referred URL 抽出
     referred_url = get_referred_url(slack_post)
@@ -420,7 +425,6 @@ def get_stip_params(slack_post, username):
 
     # post はすべて
     stip_params[STIP_PARAMS_INDEX_POST] = slack_post
-    stip_params[STIP_PARAMS_INDEX_CONFIDENCE] = stip_user.confidence
     return stip_params
 
 
@@ -456,7 +460,10 @@ def set_extractor_info(stip_params, attached_files, username):
 
     eeb = cee.Extractor.get_stix_element(param)
     from feeds.views import get_json_from_extractor
-    confidence = stip_user.confidence
+    if stip_user:
+        confidence = stip_user.confidence
+    else:
+        confidence = DEFAULT_CONFIDENCE
     confirm_data = {}
     confirm_data[STIP_PARAMS_INDEX_INDICATORS] = []
     confirm_data[STIP_PARAMS_INDEX_TAS] = []
