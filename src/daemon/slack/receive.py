@@ -7,7 +7,8 @@ import re
 import tempfile
 import asyncio
 import nest_asyncio
-import slack
+import slack_sdk
+from slack_sdk.rtm import RTMClient
 import threading
 
 from django.http.request import HttpRequest
@@ -24,9 +25,12 @@ from feeds.views import KEY_TITLE as STIP_PARAMS_INDEX_TITLE
 from feeds.views import KEY_INDICATORS as STIP_PARAMS_INDEX_INDICATORS
 from feeds.views import KEY_TTPS as STIP_PARAMS_INDEX_TTPS
 from feeds.views import KEY_TAS as STIP_PARAMS_INDEX_TAS
+from feeds.views import KEY_CUSTOM_OBJECTS as STIP_PARAMS_INDEX_CUSTOM_OBJECTS
+from feeds.views import KEY_OTHER as STIP_PARAMS_INDEX_OTHER
 from feeds.views import KEY_USERNAME as STIP_PARAMS_INDEX_USER_NAME
+from feeds.views import KEY_CONFIDENCE as STIP_PARAMS_INDEX_CONFIDENCE
+from feeds.views import KEY_CONFIRM_DATA as STIP_PARAMS_INDEX_CONFIRM_DATA
 
-nest_asyncio.apply()
 
 TLP_REGEX_PATTERN_STR = r'^.*{TLP:\s*([a-zA-Z]+)}.*$'
 TLP_REGEX_PATTERN = re.compile(
@@ -98,11 +102,13 @@ def start_receive_slack_thread():
     if proxies:
         if 'https' in proxies:
             proxy_str = proxies['https']
-    slack_web_client = slack.WebClient(
+    slack_web_client = slack_sdk.WebClient(
         token=slack_token,
         proxy=proxy_str)
-    slack_rtm_client = slack.RTMClient(
+    loop = asyncio.new_event_loop()
+    slack_rtm_client = RTMClient(
         token=slack_token,
+        loop=loop,
         proxy=proxy_str)
     th = SlackThread(slack_rtm_client)
     return slack_web_client, slack_rtm_client, th
@@ -126,12 +132,12 @@ def restart_receive_slack_thread():
             proxy_str = proxies['https']
     if not slack_rtm_client:
         loop = asyncio.new_event_loop()
-        slack_rtm_client = slack.RTMClient(
+        slack_rtm_client = RTMClient(
             token=slack_token,
             loop=loop,
             proxy=proxy_str)
     else:
-        slack_rtm_client = slack.RTMClient(
+        slack_rtm_client = RTMClient(
             token=slack_token,
             loop=slack_rtm_client._event_loop,
             proxy=proxy_str)
@@ -297,7 +303,7 @@ def post_stip_from_slack(receive_data, slack_bot_channel_name, slack_user):
     return
 
 
-@slack.RTMClient.run_on(event='message')
+@RTMClient.run_on(event='message')
 def receive_slack(**payload):
     # channel 名から先頭の # を外す
     slack_bot_channel_name = SNSConfig.get_slack_bot_chnnel()[1:]
@@ -414,6 +420,7 @@ def get_stip_params(slack_post, username):
 
     # post はすべて
     stip_params[STIP_PARAMS_INDEX_POST] = slack_post
+    stip_params[STIP_PARAMS_INDEX_CONFIDENCE] = stip_user.confidence
     return stip_params
 
 
@@ -448,22 +455,42 @@ def set_extractor_info(stip_params, attached_files, username):
         post_param )
 
     eeb = cee.Extractor.get_stix_element(param)
-    stip_params[STIP_PARAMS_INDEX_INDICATORS] = json.dumps(
-        get_extractor_items(eeb.get_indicators()))
-    stip_params[STIP_PARAMS_INDEX_TTPS] = json.dumps(
-        get_extractor_items(eeb.get_ttps()))
-    stip_params[STIP_PARAMS_INDEX_TAS] = json.dumps(
-        get_extractor_items(eeb.get_tas()))
+    from feeds.views import get_json_from_extractor
+    confidence = stip_user.confidence
+    confirm_data = {}
+    confirm_data[STIP_PARAMS_INDEX_INDICATORS] = []
+    confirm_data[STIP_PARAMS_INDEX_TAS] = []
+    confirm_data[STIP_PARAMS_INDEX_TTPS] = []
+    confirm_data[STIP_PARAMS_INDEX_CUSTOM_OBJECTS] = []
+    indicators = get_json_from_extractor(eeb.get_indicators(), confidence)
+    for extractor_list in indicators.values():
+        confirm_data[STIP_PARAMS_INDEX_INDICATORS].extend(get_extractor_items(extractor_list))
+    tas = get_json_from_extractor(eeb.get_tas(), confidence)
+    for extractor_list in tas.values():
+        confirm_data[STIP_PARAMS_INDEX_TAS].extend(get_extractor_items(extractor_list))
+    ttps = get_json_from_extractor(eeb.get_ttps(), confidence)
+    for extractor_list in ttps.values():
+        confirm_data[STIP_PARAMS_INDEX_TTPS].extend(get_extractor_items(extractor_list))
+    custom_objects = get_json_from_extractor(eeb.get_custom_objects(), confidence)
+    for extractor_list in custom_objects.values():
+        confirm_data[STIP_PARAMS_INDEX_CUSTOM_OBJECTS].extend(get_extractor_items(extractor_list, is_custom_object=True))
+    confirm_data[STIP_PARAMS_INDEX_OTHER] = {}
+    stip_params[STIP_PARAMS_INDEX_CONFIRM_DATA] = json.dumps(confirm_data)
     return stip_params
 
 
-def get_extractor_items(extractor_list):
+CUSTOM_OBJECT_PREFIX = 'CUSTOM_OBJECT:'
+def get_extractor_items(extractor_list, is_custom_object=False):
     items = []
     for item in extractor_list:
-        if item[4]:
+        if item[3]:
             format_data = {}
             format_data['type'] = item[0]
+            if is_custom_object:
+                if item[0].startswith(CUSTOM_OBJECT_PREFIX):
+                    format_data['type'] = item[0][len(CUSTOM_OBJECT_PREFIX):]
             format_data['value'] = item[1]
             format_data['title'] = item[2]
+            format_data['confidence'] = item[4]
             items.append(format_data)
     return items
