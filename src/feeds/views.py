@@ -358,7 +358,12 @@ def post_common(request, user):
     if KEY_TLP not in request.POST:
         raise Exception('No TLP.')
     feed.tlp = request.POST[KEY_TLP]
-    feed.confidence = request.POST[KEY_CONFIDENCE]
+
+    if KEY_CONFIDENCE in request.POST:
+        feed.confidence = request.POST[KEY_CONFIDENCE]
+    else:
+        feed.confidence = '100'
+
 
     # multi language 投稿か？
     stix2_titles = []
