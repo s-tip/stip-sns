@@ -1,4 +1,5 @@
 import os
+import json
 from decouple import Csv, config, UndefinedValueError
 from unipath import Path
 import stip.common.const as const
@@ -42,6 +43,11 @@ try:
     cookie_domain_name = config('COOKIE_DOMAIN_NAME')
 except UndefinedValueError:
     cookie_domain_name = None
+
+try:
+    CSRF_TRUSTED_ORIGINS = json.loads(config('CSRF_TRUSTED_ORIGINS_SNS'))
+except Exception:
+    CSRF_TRUSTED_ORIGINS = []
 
 stix_customizer = StixCustomizer.get_instance()
 try:
