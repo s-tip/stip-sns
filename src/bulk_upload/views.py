@@ -1,4 +1,5 @@
 import json
+import traceback
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http.response import HttpResponse, HttpResponseServerError
@@ -35,10 +36,9 @@ def post(request):
 
         upload(request, stix_title, stix_description, tlp, confirm_data)
         return HttpResponse()
-    except Exception as e:
-        import traceback
+    except Exception:
         traceback.print_exc()
-        return HttpResponseServerError(reason=str(e))
+        return HttpResponseServerError()
 
 
 def upload(request, title, post, tlp, confirm_data):

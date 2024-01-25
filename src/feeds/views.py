@@ -604,6 +604,12 @@ def get_json_from_extractor(datas, confidence):
     return d
 
 
+def internal_server_error_resp():
+    traceback.print_exc()
+    msg = 'A system error has occurred. Please check the system log.'
+    return HttpResponseServerError(msg)
+
+
 @ajax_required
 def post(request):
     try:
@@ -617,9 +623,8 @@ def post(request):
             return HttpResponse(html)
         else:
             return HttpResponse('')
-    except Exception as e:
-        traceback.print_exc()
-        return HttpResponseServerError(str(e))
+    except Exception:
+        return internal_server_error_resp()
 
 
 @ajax_required
@@ -834,7 +839,7 @@ def remove(request):
         headers=headers,
         verify=False)
     if r.status_code != requests.codes.ok:
-        return HttpResponseServerError(r)
+        return internal_server_error_resp()
 
     # cache original 削除
     if r.text:
@@ -877,8 +882,8 @@ def get_ctim_gv_url(request):
         package_id = request.GET['package_id']
         url = '%s?package_id=%s' % (_get_ctim_gv_url(request), package_id)
         return HttpResponse(url)
-    except Exception as e:
-        return HttpResponseServerError(str(e))
+    except Exception:
+        return internal_server_error_resp()
 
 
 @ajax_required
@@ -890,8 +895,8 @@ def share_misp(request):
         # RS に misp 共有要求
         resp = rs.share_misp(stip_user, package_id)
         return HttpResponse(resp['url'])
-    except Exception as e:
-        return HttpResponseServerError(str(e))
+    except Exception:
+        return internal_server_error_resp()
 
 
 def _get_indicators_from_feed_id(feed_id):
@@ -912,9 +917,8 @@ def sighting_splunk(request):
         stip_user = request.user
         sightings = get_sightings(stip_user, indicators)
         return HttpResponse(json.dumps(sightings))
-    except Exception as e:
-        traceback.print_exc()
-        return HttpResponseServerError(str(e))
+    except Exception:
+        return internal_server_error_resp()
 
 
 @login_required
@@ -963,9 +967,8 @@ def create_sighting_object(request):
         response = HttpResponse(output.getvalue(), content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename=%s' % (file_name)
         return response
-    except Exception as e:
-        traceback.print_exc()
-        return HttpResponseServerError(str(e))
+    except Exception:
+        return internal_server_error_resp()
 
 
 @ajax_required
@@ -981,9 +984,8 @@ def run_phantom_playbook(request):
             'url': url,
         }
         return JsonResponse(rsp)
-    except Exception as e:
-        traceback.print_exc()
-        return HttpResponseServerError(str(e))
+    except Exception:
+        return internal_server_error_resp()
 
 
 @ajax_required
@@ -1017,7 +1019,7 @@ def call_jira(request):
         elif feed.stix_version.startswith('2.'):
             j = _set_jira_param_v2(feed, feed_file_name_id, j, issue)
         else:
-            return HttpResponseServerError('Invalid Stix Version')
+            return internal_server_error_resp()
 
         # isssue番号返却
         url = SNSConfig.get_jira_host() + '/browse/' + str(issue)
@@ -1026,9 +1028,8 @@ def call_jira(request):
             'url': url,
         }
         return JsonResponse(rsp)
-    except Exception as e:
-        traceback.print_exc()
-        return HttpResponseServerError(str(e))
+    except Exception:
+        return internal_server_error_resp()
 
 
 def _set_jira_param_v2(feed, feed_file_name_id, j, issue):
@@ -1784,6 +1785,5 @@ def tags(request):
             verify=False)
         res = r.json()
         return JsonResponse(res, safe=False)
-    except Exception as e:
-        traceback.print_exc()
-        return HttpResponseServerError(str(e))
+    except Exception:
+        return internal_server_error_resp()
