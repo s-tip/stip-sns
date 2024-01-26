@@ -439,14 +439,15 @@ def post_common(request, user):
         feed.sharing_range_type = const.SHARING_RANGE_TYPE_KEY_ALL
 
     if KEY_CONFIRM_DATA in request.POST:
-        confirm_data = json.loads(request.POST[KEY_CONFIRM_DATA])
+        if isinstance(request.POST[KEY_CONFIRM_DATA], dict):
+            confirm_data = request.POST[KEY_CONFIRM_DATA]
+        elif isinstance(request.POST[KEY_CONFIRM_DATA], str):
+            confirm_data = json.loads(request.POST[KEY_CONFIRM_DATA])
+        else:
+            confirm_data = None
     else:
         confirm_data = None
 
-    if KEY_CUSTOM_OBJECTS in request.POST:
-        custom_objects = json.loads(request.POST[KEY_CUSTOM_OBJECTS])
-    else:
-        custom_objects = []
 
     # POSTする
     save_post(
@@ -520,7 +521,10 @@ def confirm_indicator(request):
             referred_url = None
     else:
         referred_url = None
-    confidence = request.POST['confidence']
+    if 'confidence' in request.POST:
+        confidence = request.POST['confidence']
+    else:
+        confidence = request.user.confidence
 
     if attach_confirm:
         account_param = cee.CTIElementExtractorAccountParam(

@@ -173,6 +173,10 @@ $(function () {
         return dz.getQueuedFiles()
     }
 
+    function get_csrf_token() {
+        return  $('input[name="csrfmiddlewaretoken"]').val()
+    }
+
     function _post (confirm_data, files) {
         var fd = new FormData()
         var post_data = _get_params()
@@ -193,7 +197,6 @@ $(function () {
 
        var index = 0;
        for (const file_ of files){
-           console.log(file_)
            fd.append(`attach_${index}`, file_, file_.name)
            index += 1
        }
@@ -208,7 +211,7 @@ $(function () {
             processData: false,
             contentType: false,
             beforeSend: function (xhr, settings) {
-                xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'))
+                xhr.setRequestHeader('X-CSRFToken', get_csrf_token())
             }
         }).done(function (data) {
         }).fail(function (XMLHttpRequest, textStatus, errorThrown) {

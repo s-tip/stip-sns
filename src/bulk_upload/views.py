@@ -7,6 +7,7 @@ from django.utils.datastructures import MultiValueDict
 from feeds.views import post_common
 from api.v1.views import get_request_via_confirm_indicator
 from ctirs.models import Group, STIPUser
+from decorators import ajax_required
 
 
 @login_required
@@ -19,6 +20,7 @@ def entry(request):
 
 
 @login_required
+@ajax_required
 def post(request):
     try:
         stix_title = request.POST['stix_title']
@@ -52,14 +54,11 @@ def upload(request, title, post, tlp, confirm_data):
     new_post['post'] = post
     new_post['TLP'] = tlp
     new_post['publication'] = publication
+    new_post['confirm_data'] = confirm_data
     request.POST = new_post
 
     if not confirm_data:
         request = get_request_via_confirm_indicator(request)
-    else:
-        request.POST['indicators'] = json.dumps(confirm_data['indicators'])
-        request.POST['tas'] = json.dumps(confirm_data['tas'])
-        request.POST['ttps'] = json.dumps(confirm_data['ttps'])
 
     if publication == 'group':
         request.POST['group'] = group
