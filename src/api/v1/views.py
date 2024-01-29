@@ -59,24 +59,23 @@ def get_request_via_confirm_indicator(request):
     json_response = confirm_indicator(request)
     j = json.loads(json_response.content)
     # confirm_indicators から再度 post するデータを取得する
-    request.POST = get_post_common_post(request.POST.copy(), j)
+    request.POST = get_post_common_post(
+        request.POST.copy(), j, request.user.confidence)
     return request
 
 
-def get_post_common_post(temp_post, j):
-    indicators_json = get_indicators(j)
-    if indicators_json is not None:
-        temp_post['indicators'] = indicators_json
-    tas_json = get_tas(j)
-    if tas_json is not None:
-        temp_post['tas'] = tas_json
-    ttps_json = get_ttps(j)
-    if ttps_json is not None:
-        temp_post['ttps'] = ttps_json
+def get_post_common_post(temp_post, j, confidence):
+    d = {}
+    d['indicators'] = _get_indicators(j, confidence)
+    d['tas'] = _get_tas(j, confidence)
+    d['ttps'] = _get_ttps(j, confidence)
+    d['custom_objects'] = []
+    d['other'] = []
+    temp_post['confirm_data'] = d
     return temp_post
 
 
-def get_indicators(json_response):
+def _get_indicators(json_response, confidence):
     temp_indicators = []
     for title in json_response['indicators'].keys():
         indicators = json_response['indicators'][title]
@@ -85,13 +84,12 @@ def get_indicators(json_response):
             item['type'] = indicator[0]
             item['value'] = indicator[1]
             item['title'] = indicator[2]
+            item['confidence'] = confidence
             temp_indicators.append(item)
-    if len(temp_indicators) == 0:
-        return None
-    return json.dumps(temp_indicators)
+    return temp_indicators
 
 
-def get_tas(json_response):
+def _get_tas(json_response, confidence):
     temp_tas = []
     for title in json_response['tas'].keys():
         tas = json_response['tas'][title]
@@ -99,13 +97,12 @@ def get_tas(json_response):
             item = {}
             item['value'] = ta[1]
             item['title'] = ta[2]
+            item['confidence'] = confidence
             temp_tas.append(item)
-    if len(temp_tas) == 0:
-        return None
-    return json.dumps(temp_tas)
+    return temp_tas
 
 
-def get_ttps(json_response):
+def _get_ttps(json_response, confidence):
     temp_ttps = []
     for title in json_response['ttps'].keys():
         ttps = json_response['ttps'][title]
@@ -113,7 +110,6 @@ def get_ttps(json_response):
             item = {}
             item['value'] = ttp[1]
             item['title'] = ttp[2]
+            item['confidence'] = confidence
             temp_ttps.append(item)
-    if len(temp_ttps) == 0:
-        return None
-    return json.dumps(temp_ttps)
+    return temp_ttps

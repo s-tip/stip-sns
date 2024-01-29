@@ -81,7 +81,7 @@ function display_confirm_dialog (data) {
       if (!(file_name in table_datas)) {
         table_datas[file_name] = []
       }
-      table_datas[file_name][TABLE_ID_CUSTOM_OBJECTS] = data.tas[file_name]
+      table_datas[file_name][TABLE_ID_CUSTOM_OBJECTS] = data.custom_objects[file_name]
     }
   }
 
